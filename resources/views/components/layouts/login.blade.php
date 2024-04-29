@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ $title ?? 'Baratão Convenio' }}</title>
+    <title>{{ $title ?? 'Baratão Convênio' }}</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,9 +16,9 @@
     <div class="cover"></div>
 </section>
 <section class="login-content">
-    <div class="logo">
+    {{--<div class="logo">
         <h1>Vali</h1>
-    </div>
+    </div>--}}
    {{ $slot }}
 </section>
 <!-- Essential javascripts for application to work-->
@@ -35,5 +35,8 @@
         return false;
     });
 </script>
+{{-- Livewire-Alert --}}
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<x-livewire-alert::scripts />
 </body>
 </html>

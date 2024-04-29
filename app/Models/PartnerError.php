@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PartnerError extends Model
 {
-    use HasFactory;
+    protected $fillable = ['nome','cpf','matricula','limcred','bloqueado','erros'];
 }

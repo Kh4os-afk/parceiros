@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{ $title ?? 'Baratão Convenio' }}</title>
+    <title>{{ $title ?? 'Baratão Convênio' }}</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,17 +19,17 @@
 <body class="app sidebar-mini rtl pace-done sidenav-toggled">
 <!-- Navbar-->
 <header class="app-header">
+    <a class="app-header__logo" wire:navigate href="{{ route('convenio.index') }}">Convênio Baratão</a>
     <!-- Sidebar toggle button-->
     <a class="app-sidebar__toggle" href="#" data-toggle="sidebar" aria-label="Hide Sidebar"></a>
-    <a class="app-header__logo" wire:navigate href="{{ route('convenio.index') }}">Convenio Baratão</a>
     <!-- Navbar Right Menu-->
     <ul class="app-nav">
         <!-- User Menu-->
         <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown" aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"></i></a>
             <ul class="dropdown-menu settings-menu dropdown-menu-right">
-                <li><a class="dropdown-item" href="#"><i class="fa fa-cog fa-lg"></i> Settings</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fa fa-user fa-lg"></i> Profile</a></li>
-                <li><a class="dropdown-item" href="{{ route('logout') }}"><i class="fa fa-sign-out fa-lg"></i> Logout</a></li>
+                {{--<li><a class="dropdown-item" href="#"><i class="fa fa-cog fa-lg"></i> Settings</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fa fa-user fa-lg"></i> Profile</a></li>--}}
+                <li><a class="dropdown-item" href="{{ route('logout') }}"><i class="fa fa-sign-out fa-lg"></i> Sair</a></li>
             </ul>
         </li>
     </ul>
@@ -46,7 +46,7 @@
     <ul class="app-menu">
         <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-plus-circle"></i><span class="app-menu__label">Cadastrar</span><i class="treeview-indicator fa fa-angle-right"></i></a>
             <ul class="treeview-menu">
-                <li><a class="treeview-item" wire:navigate href="{{ route('funcionario.index')  }}"><i class="icon fa fa-user"></i> Funcionario</a></li>
+                <li><a class="treeview-item" wire:navigate href="{{ route('funcionario.index')  }}"><i class="icon fa fa-user"></i> Funcionário</a></li>
                 <li><a class="treeview-item" wire:navigate href="{{ route('importar-csv.index')  }}"><i class="icon fa fa-cloud-upload"></i> Importar CSV</a></li>
             </ul>
         </li>
@@ -56,7 +56,7 @@
 <main class="app-content">
     <div class="app-title">
         <div>
-            <h1><i class="fa fa-gg"></i> Baratão da Carne Convenio</h1>
+            <h1><i class="fa fa-gg"></i> Baratão da Carne Convênio</h1>
             {{--<p>Start a beautiful journey here</p>--}}
         </div>
        {{-- <ul class="app-breadcrumb breadcrumb">
@@ -95,6 +95,8 @@
         ga('send', 'pageview');
     }
 </script>
-
+{{-- Livewire-Alert --}}
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<x-livewire-alert::scripts />
 </body>
 </html>

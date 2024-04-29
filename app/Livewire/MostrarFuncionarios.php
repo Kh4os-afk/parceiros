@@ -3,12 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\Partner;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class MostrarFuncionarios extends Component
 {
     use WithPagination;
+    use LivewireAlert;
 
     public $query = '';
     public $filter = 'nome';

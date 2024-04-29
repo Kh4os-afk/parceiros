@@ -2,23 +2,26 @@
 
 namespace App\Livewire;
 
+use App\Models\ChangeLog;
 use App\Models\Partner;
+use Illuminate\Support\Facades\DB;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 class CadastrarFuncionario extends Component
 {
+    use LivewireAlert;
+
     #[Rule('string|min:3|max:60|regex:/^[\pL\s\-]+$/|required')]
     public $nome;
     #[Rule('numeric|digits:11|required|unique:partners,cpf')]
     public $cpf;
-    #[Rule('integer|min:1|max:9999|unique:partners,matricula|required')]
+    #[Rule('integer|min:1|max:99999|unique:partners,matricula|required')]
     public $matricula;
     #[Rule('numeric|min:0|max:999|required')]
-
     public $limcred;
     #[Rule('integer|min:0|max:1|required')]
-
     public $bloqueado = 1;
 
     public function update()
@@ -30,25 +33,43 @@ class CadastrarFuncionario extends Component
     {
         $this->validate();
 
-        Partner::create([
-            'nome' => strtoupper($this->nome),
-            'cpf' => $this->cpf,
-            'matricula' => $this->matricula,
-            'limcred' => $this->limcred,
-            'bloqueado' => $this->bloqueado,
-        ]);
+        DB::beginTransaction();
 
-        $this->reset();
+        try {
+            /* Cadastrar Funcionario */
+            $partner = Partner::create([
+                'nome' => strtoupper($this->nome),
+                'cpf' => $this->cpf,
+                'matricula' => $this->matricula,
+                'limcred' => $this->limcred,
+                'bloqueado' => $this->bloqueado,
+            ]);
 
-        session()->flash('success', 'Funcionario(a) Cadastrado(a) com Sucesso!');
+            /* Inserir Log */
+            ChangeLog::create([
+                'data' => now(),
+                'usuario' => auth()->user()->id,
+                'operacao' => 'Insert',
+                'descricao' => 'Cadastrou o Usuario: ' . $partner->id . ' - ' . $partner->nome . ' CPF: ' . $partner->cpf . '.'
+            ]);
 
-        /*$this->js("alert('Funcionario(a) Cadastrado(a) com Sucesso!')");*/
+            DB::commit();
 
+            $this->reset();
+            $this->alert('success', 'Funcionario(a) Cadastrado(a) com Sucesso',[
+                'timerProgressBar' => true,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            $this->alert('error', 'Ocorreu um Erro ao Cadastrar o Funcionário. Por favor, Tente Novamente',[
+                'timerProgressBar' => true,
+            ]);
+        }
     }
 
     public function render()
     {
         return view('livewire.cadastrar-funcionario')
-            ->title('Cadastrar Funcionario');
+            ->title('Cadastrar Funcionário');
     }
 }

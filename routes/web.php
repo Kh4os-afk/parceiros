@@ -24,11 +24,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/funcionarios', \App\Livewire\MostrarFuncionarios::class)->name('mostrar-funcionarios.index');
     Route::get('/editar/{partner}', \App\Livewire\EditarFuncionario::class)->name('editar-funcionario.index');
 
+    Route::get('/editar/error/{partner}', \App\Livewire\EditarFuncionarioErro::class)->name('editar-funcionario-erro.index');
+
     Route::get('/importar/csv',\App\Livewire\ImportarCSV::class)->name('importar-csv.index');
 
-    Route::get('/teste',function (){
+    Route::get('/importar/erros',\App\Livewire\ImportacaoErros::class)->name('importacao-erros.index');
+
+    /*Route::get('/teste',function (){
        return view('teste');
-    });
+    });*/
 });
 
 Route::fallback(function (){

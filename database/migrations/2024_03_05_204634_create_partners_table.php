@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('matricula');
             $table->integer('limcred');
             $table->boolean('bloqueado')->default(true);
+            $table->boolean('alterado')->default(false);
             $table->timestamps();
         });
     }

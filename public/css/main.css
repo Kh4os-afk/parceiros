@@ -13478,24 +13478,15 @@ be a descendant of the grid when it is being dragged.
 }
 
 @media (max-width: 767px) {
-  .app {
-    overflow-x: hidden;
-  }
-  .app .app-sidebar {
-    left: -230px;
-  }
-  .app .app-sidebar__overlay {
-    visibility: hidden;
-  }
-  .app.sidenav-toggled .app-content {
-    margin-left: 0;
-  }
-  .app.sidenav-toggled .app-sidebar {
-    left: 0;
-  }
-  .app.sidenav-toggled .app-sidebar__overlay {
-    visibility: visible;
-  }
+    .app.sidenav-toggled .app-content {
+        margin-left: 0;
+    }
+    .app.sidenav-toggled .app-sidebar {
+        left: -230px;
+    }
+    .app.sidenav-toggled .app-sidebar__overlay {
+        visibility: hidden;
+    }
 }
 
 .app-content {
@@ -13558,7 +13549,8 @@ be a descendant of the grid when it is being dragged.
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  background-color: #e2192e;
+  /*background-color: #e2192e;*/
+    background-color: #009688;
   z-index: 1030;
   padding-right: 15px;
 }
@@ -13595,7 +13587,8 @@ be a descendant of the grid when it is being dragged.
     flex: 0 0 auto;
     display: block;
     width: 230px;
-    background-color: #c10013;
+    /*background-color: #c10013;*/
+      background-color:  #00635a;
   }
 }
 
@@ -13629,7 +13622,8 @@ be a descendant of the grid when it is being dragged.
 
 .app-sidebar__toggle:focus, .app-sidebar__toggle:hover {
   color: #fff;
-  background-color:#c10013;
+  /*background-color:#c10013;*/
+    background-color:#00635a;
   text-decoration: none;
 }
 

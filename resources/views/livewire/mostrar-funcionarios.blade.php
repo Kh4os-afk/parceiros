@@ -1,7 +1,21 @@
 <div class="row">
     <div class="col-md-12">
+        @include('alerts.alerts')
         <div class="tile">
-            <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="tile-title mb-0">Funcionários Cadastrados</h3>
+                <form wire:submit="search">
+                    <div>
+                        <label class="visually-hidden" for="search">Buscar</label>
+                        <div class="input-group">
+                            <div class="input-group-text"><i class="fa fa-search"></i></div>
+                            <input type="text" class="form-control" id="search" placeholder="Nome..." wire:model.live="query">
+                            <button class="btn btn-success" type="submit">Buscar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {{--<div>
                 <form wire:submit="search" class="row row-cols-lg-auto g-3 align-items-center justify-content-end">
                     <div class="col-12 pb-4">
                         <label class="visually-hidden" for="search">Buscar</label>
@@ -12,9 +26,9 @@
                         </div>
                     </div>
                 </form>
-            </div>
+            </div>--}}
             <div class="tile-body">
-                <table class="table" style="width:100%">
+                <table class="table table-bordered table-striped table-sm table-hover">
                     <thead>
                     <tr>
                         <th wire:click="filtrar('matricula')">Matricula</th>
@@ -33,7 +47,7 @@
                             <td>{{ $funcionario->cpf }}</td>
                             <td>R$ {{ number_format($funcionario->limcred,2,',','.') }}</td>
                             <td>{{ $funcionario->bloqueado == 1 ? 'Sim' : 'Não'}}</td>
-                            <td class="text-center" wire:click="editarFuncionario({{$funcionario->id}})"><i class="fa fa-edit fa-lg" style="color:green"></i></td>
+                            <td class="text-center"><button class="btn btn-success" wire:click="editarFuncionario({{$funcionario->id}})"><i class="mr-0 fa fa-edit fa-lg"></i></button></td>
                         </tr>
                     @empty
                         <tr>

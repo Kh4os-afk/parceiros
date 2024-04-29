@@ -3,11 +3,14 @@
 namespace App\Livewire\Auth;
 
 use Illuminate\Support\Facades\Auth;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 class Login extends Component
 {
+    use LivewireAlert;
+
     #[Rule('required|email')]
     public $email;
     #[Rule('required')]
@@ -25,7 +28,9 @@ class Login extends Component
             return redirect()->intended('/convenio');
         }
 
-        return session()->flash('error','Usuario ou Senha Invalida!');
+        $this->alert('error', 'Usuario ou Senha Invalida!',[
+            'timerProgressBar' => true,
+        ]);
     }
 
     public function logout()

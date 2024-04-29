@@ -1,12 +1,8 @@
 <div>
-    @session('succes')
-    <div class="alert alert-success text-center">
-        {{ session('succes') }}
-    </div>
-    @endsession
+    @include('alerts.alerts')
     <div class="tile">
         <form wire:submit="editar">
-            <h3 class="tile-title">Editar Funcionario - {{ ucwords(strtolower($nome)) }}</h3>
+            <h3 class="tile-title">Editar Funcionário - {{ ucwords(strtolower($nome)) }}</h3>
             <div class="title-body">
                 <div class="row g-3">
                     <div class="col-md-7">
@@ -53,12 +49,12 @@
                     </div>
                     <div class="col-12">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="gridCheck">
+                            <input class="form-check-input" type="checkbox" id="gridCheck" required>
                             <label class="form-check-label" for="gridCheck"> Confirmo os Dados Informados! </label>
                         </div>
                     </div>
                     <div class="tile-footer">
-                        <button type="submit" class="btn btn-warning">Editar Funcionario</button>
+                        <button type="submit" class="btn btn-warning">Editar Funcionário</button>
                     </div>
                 </div>
             </div>
