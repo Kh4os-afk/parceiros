@@ -1,9 +1,4 @@
 <div>
-    @session('succes')
-    <div class="alert alert-success text-center">
-        {{ session('succes') }}
-    </div>
-    @endsession
     <div class="tile">
         <form wire:submit="editar">
             <h3 class="tile-title">Editar Funcionário Com Erro - {{ ucwords(strtolower($nome)) }}</h3>

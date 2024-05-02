@@ -19,11 +19,11 @@ class EditarFuncionarioErro extends Component
     public $id;
     #[Rule('string|min:3|max:60|regex:/^[\pL\s\-]+$/|required')]
     public $nome;
-    #[Rule('numeric|digits:11|required|unique:partners,cpf')]
+    #[Rule('numeric|digits:11|required|unique:partners,cpf|cpf')]
     public $cpf;
     #[Rule('integer|min:1|max:99999|unique:partners,matricula|required')]
     public $matricula;
-    #[Rule('numeric|min:0|max:999|required')]
+    #[Rule('numeric|min:0|max:999|required',as: 'limite de credito')]
     public $limcred;
     #[Rule('integer|min:0|max:1|required')]
     public $bloqueado = 1;
