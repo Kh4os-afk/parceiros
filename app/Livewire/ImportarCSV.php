@@ -49,6 +49,9 @@ class ImportarCSV extends Component
                 $values[4] = $values[4] == 'S' ? 1 : 0;
             }
 
+            /* Formatar CPF Removendo Espaços e Carcteres Especiais*/
+            $values[1] = trim(preg_replace('/\D/', '', $values[1]));
+
             $rules = [
                 0 => ['integer', 'min:1', 'max:99999', 'unique:partners,matricula', 'required'], // Matrícula
                 1 => ['numeric', 'digits:11', 'required', 'unique:partners,cpf', 'cpf'], // CPF
@@ -69,7 +72,7 @@ class ImportarCSV extends Component
 
                     $partnerError = PartnerError::create([
                         'matricula' => $values[0],
-                        'cpf' => trim(preg_replace('/\D/', '', $values[1])),
+                        'cpf' => $values[1],
                         'nome' => strtoupper(preg_replace('/[^\p{L}\p{N}\s]/u', '', $values[2])),
                         'limcred' => $values[3],
                         'bloqueado' => $values[4],
@@ -107,7 +110,7 @@ class ImportarCSV extends Component
                     // Lógica para lidar com dados válidos, como salvar no banco de dados
                     $insert = Partner::create([
                         'matricula' => $values[0],
-                        'cpf' => trim(preg_replace('/\D/', '', $values[1])),
+                        'cpf' => $values[1],
                         'nome' => strtoupper(preg_replace('/[^\p{L}\p{N}\s]/u', '', $values[2])),
                         'limcred' => $values[3],
                         'bloqueado' => $values[4],
@@ -136,6 +139,7 @@ class ImportarCSV extends Component
         if ($this->erros <> 0) {
             $this->redirectRoute('importacao-erros.index');
         }
+        return 1;
     }
 
     public function resetar()
