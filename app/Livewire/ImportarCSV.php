@@ -69,7 +69,7 @@ class ImportarCSV extends Component
 
                     $partnerError = PartnerError::create([
                         'matricula' => $values[0],
-                        'cpf' => $values[1],
+                        'cpf' => trim(preg_replace('/\D/', '', $values[1])),
                         'nome' => strtoupper(preg_replace('/[^\p{L}\p{N}\s]/u', '', $values[2])),
                         'limcred' => $values[3],
                         'bloqueado' => $values[4],
@@ -107,7 +107,7 @@ class ImportarCSV extends Component
                     // Lógica para lidar com dados válidos, como salvar no banco de dados
                     $insert = Partner::create([
                         'matricula' => $values[0],
-                        'cpf' => $values[1],
+                        'cpf' => trim(preg_replace('/\D/', '', $values[1])),
                         'nome' => strtoupper(preg_replace('/[^\p{L}\p{N}\s]/u', '', $values[2])),
                         'limcred' => $values[3],
                         'bloqueado' => $values[4],
