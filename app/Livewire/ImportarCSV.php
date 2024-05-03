@@ -28,6 +28,10 @@ class ImportarCSV extends Component
     {
         $this->validate();
 
+        /* Aumenta a Quantidade de Tempo para Processar */
+        ini_set('max_execution_time', 600); // 600 seconds = 60 minutes
+        set_time_limit(600);
+
         /*Abre o CSV Seta o Delimitador e o Cabeçalho*/
         $csv = Reader::createFromPath($this->csv->getRealPath(), 'r');
         $csv->setDelimiter(';');
@@ -36,11 +40,12 @@ class ImportarCSV extends Component
         $records = $csv->getRecords();
         foreach ($records as $key => $record) {
 
+            /* Verifica se o primeiro campo do csv possui 4 colunas */
             if (count($record) < 5) {
                 $this->alert('error', 'O Arquivo CSV Deve Conter Pelo Menos 5 Campos', [
                     'timerProgressBar' => true,
                 ]);
-                return redirect()->route('importar-csv.index');
+                break;
             }
 
             $values = array_values($record);
@@ -95,15 +100,13 @@ class ImportarCSV extends Component
                     DB::rollBack();
                     /* Cria a Mensagem de Erro */
                     $mensagem = urlencode($e->getMessage());
-                    $this->alert('error', 'Erro ao Importar Funcionário' . '<br><button type="button" class="swal2-confirm swal2-styled" style="padding: 0.225em 1.1em; margin-top: 0.8250em"><a style="color: white" target="_blank" href="https://api.whatsapp.com/send?phone=+5592992309115&text=%20%F0%9F%98%A2%20Oi!%20Tive%20Problemas%20%20%F0%9F%98%A2%0A%0A```' . $mensagem . '```">Reportar Erro</a></button>', [
+                    $this->alert('error', 'Erro ao Importar Funcionário ' . $values[2] . '<br><button type="button" class="swal2-confirm swal2-styled" style="padding: 0.225em 1.1em; margin-top: 0.8250em"><a style="color: white" target="_blank" href="https://api.whatsapp.com/send?phone=+5592992309115&text=%20%F0%9F%98%A2%20Oi!%20Tive%20Problemas%20%20%F0%9F%98%A2%0A%0A```' . $mensagem . '```">Reportar Erro</a></button>', [
                         'position' => 'center',
                         'timer' => '',
                         'toast' => false,
                     ]);
                     break;
                 }
-
-
             } else {
                 DB::beginTransaction();
                 try {
@@ -128,7 +131,9 @@ class ImportarCSV extends Component
 
                 } catch (\Exception $e) {
                     DB::rollBack();
-                    $this->alert('error', 'Erro ao Importar Funcionário', [
+                    /* Cria a Mensagem de Erro */
+                    $mensagem = urlencode($e->getMessage());
+                    $this->alert('error', 'Erro ao Importar Funcionário ' . $values[2] . '<br><button type="button" class="swal2-confirm swal2-styled" style="padding: 0.225em 1.1em; margin-top: 0.8250em"><a style="color: white" target="_blank" href="https://api.whatsapp.com/send?phone=+5592992309115&text=%20%F0%9F%98%A2%20Oi!%20Tive%20Problemas%20%20%F0%9F%98%A2%0A%0A```' . $mensagem . '```">Reportar Erro</a></button>', [
                         'timerProgressBar' => true,
                         'position' => 'center',
                         'toast' => false,

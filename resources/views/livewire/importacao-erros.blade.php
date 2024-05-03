@@ -4,9 +4,14 @@
         <div class="tile">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="tile-title mb-0">Erros Durante a Importação: {{ $erros ?? 0 }}</h3>
-                <button class="btn btn-danger" wire:click="deleteAll" wire:confirm="Deseja Deletar Todos os Registros Com Erro ? \nEsta Operação Não Pode Ser Revertida" wire:loading.attr="disabled">
-                    <i class="fa fa-fw fa-lg fa-trash"></i>Excluir Todos os Registros com Erro
-                </button>
+                <div>
+                    <button class="btn btn-warning" wire:click="deleteAllDuplicates" wire:loading.attr="disabled">
+                        <i class="fa fa-fw fa-lg fa-trash"></i>Excluir Registros Duplicados
+                    </button>
+                    <button class="btn btn-danger" wire:click="deleteAll" wire:loading.attr="disabled">
+                        <i class="fa fa-fw fa-lg fa-trash"></i>Excluir Todos os Registros com Erro
+                    </button>
+                </div>
             </div>
             <div class="tile-body">
                 <table class="table table-bordered table-striped table-sm table-hover">

@@ -12,7 +12,7 @@
                     </ul>
                 </div>
                 <div class="row">
-                    <img src="{{ asset('imagens/importacaoexemplo.png') }}" alt="" srcset="">
+                    <img src="{{ asset('imagens/importacaoexemplo.png') }}" alt="Exemplo de Importação">
                 </div>
             </div>
             <div class="tile-footer"></div>
@@ -32,10 +32,12 @@
                     </div>
                 </div>
                 <div class="tile-footer">
-                    <button class="btn btn-success" type="submit" wire:loading.attr="disabled" style="min-width: 120px; min-height: 40px;">
+                    <button class="btn btn-success" type="submit" style="min-width: 120px; min-height: 40px;">
                         <div wire:loading.remove><i class="fa fa-fw fa-lg fa-check-circle"></i>Importar</div>
-                        <span class="spinner-border spinner-border-sm" aria-hidden="true" wire:loading></span>
-                        <span role="status" wire:loading>Carregando...</span>
+                        <div wire:loading>
+                            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            <span role="status">Carregando...</span>
+                        </div>
                     </button>
                     <a href="{{ route('importacao-erros.index') }}" class="btn btn-warning" style="min-height: 40px;"><i class="fa fa-fw fa-lg fa-exclamation-triangle"></i>Erros de Importação</a>
                 </div>
