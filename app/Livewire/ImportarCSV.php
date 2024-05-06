@@ -60,7 +60,7 @@ class ImportarCSV extends Component
             $rules = [
                 0 => ['integer', 'min:1', 'max:99999', 'unique:partners,matricula', 'required'], // Matrícula
                 1 => ['numeric', 'digits:11', 'required', 'unique:partners,cpf', 'cpf'], // CPF
-                2 => ['string', 'min:3', 'max:60', 'regex:/^[\pL\s\-]+$/', 'required'], // Nome
+                2 => ['string', 'min:3', 'max:60', 'regex:/^[\pL\s\-áéíóúâêîôûàèìòùãẽĩõũäëïöüçÁÉÍÓÚÂÊÎÔÛÀÈÌÒÙÃẼĨÕŨÄËÏÖÜÇ]+$/u', 'required'], // Nome
                 3 => ['numeric', 'min:0', 'max:999', 'required'], // Limite de Crédito
                 4 => ['integer', 'min:0', 'max:1', 'required'], // Bloqueado
             ];

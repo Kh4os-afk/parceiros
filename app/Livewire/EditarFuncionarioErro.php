@@ -17,7 +17,7 @@ class EditarFuncionarioErro extends Component
 
     #[Locked]
     public $id;
-    #[Rule('string|min:3|max:60|regex:/^[\pL\s\-]+$/|required')]
+    #[Rule('string|min:3|max:60|regex:/^[\pL\s\-áéíóúâêîôûàèìòùãẽĩõũäëïöüçÁÉÍÓÚÂÊÎÔÛÀÈÌÒÙÃẼĨÕŨÄËÏÖÜÇ]+$/u|required')]
     public $nome;
     #[Rule('numeric|digits:11|required|unique:partners,cpf|cpf')]
     public $cpf;

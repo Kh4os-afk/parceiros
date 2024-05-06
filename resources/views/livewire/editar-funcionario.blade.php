@@ -39,13 +39,16 @@
 
                     <div class="col-4">
                         <label for="bloqueado" class="form-label">Bloqueado</label>
-                        <select id="bloqueado" class="form-select @error('bloqueado') is-invalid @enderror" name="bloqueado" wire:model.blur="bloqueado">
+                        <select id="bloqueado" class="form-select @error('bloqueado') is-invalid @enderror @if($bloqueado) is-invalid @endif" name="bloqueado" wire:model.blur="bloqueado">
                             <option value="1">S</option>
                             <option value="0">N</option>
                         </select>
                         @error('bloqueado')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        @if($bloqueado)
+                            <div class="invalid-feedback">Atenção - Funcionário Bloqueado!</div>
+                        @endif
                     </div>
                     <div class="col-12">
                         <div class="form-check">
