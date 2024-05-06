@@ -78,7 +78,7 @@ class ImportarCSV extends Component
                     $partnerError = PartnerError::create([
                         'matricula' => $values[0],
                         'cpf' => $values[1],
-                        'nome' => strtoupper(mb_convert_encoding($values[2], 'UTF-8', 'UTF-8')),
+                        'nome' => mb_strtoupper(mb_convert_encoding($values[2], 'UTF-8', 'UTF-8')),
                         'limcred' => $values[3],
                         'bloqueado' => $values[4],
                         'erros' => $erros,
@@ -114,7 +114,7 @@ class ImportarCSV extends Component
                     $insert = Partner::create([
                         'matricula' => $values[0],
                         'cpf' => $values[1],
-                        'nome' => strtoupper(mb_convert_encoding($values[2], 'UTF-8', 'UTF-8')),
+                        'nome' => mb_strtoupper(mb_convert_encoding($values[2], 'UTF-8', 'UTF-8')),
                         'limcred' => $values[3],
                         'bloqueado' => $values[4],
                     ]);

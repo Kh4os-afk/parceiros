@@ -30,7 +30,7 @@ class EditarFuncionario extends Component
     public function mount(Partner $partner)
     {
         $this->id = $partner->id;
-        $this->nome = ucwords(strtolower($partner->nome));
+        $this->nome = ucwords(mb_strtolower($partner->nome));
         $this->cpf = $partner->cpf;
         $this->matricula = $partner->matricula;
         $this->limcred = $partner->limcred;
@@ -52,7 +52,7 @@ class EditarFuncionario extends Component
         DB::beginTransaction();
         try {
             $funcionario->update([
-                'nome' => strtoupper($this->nome),
+                'nome' => mb_strtoupper($this->nome),
                 'matricula' => $this->matricula,
                 'limcred' => $this->limcred,
                 'bloqueado' => $this->bloqueado,

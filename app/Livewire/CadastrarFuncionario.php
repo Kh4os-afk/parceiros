@@ -38,7 +38,7 @@ class CadastrarFuncionario extends Component
         try {
             /* Cadastrar Funcionario */
             $partner = Partner::create([
-                'nome' => strtoupper($this->nome),
+                'nome' => mb_strtoupper($this->nome),
                 'cpf' => $this->cpf,
                 'matricula' => $this->matricula,
                 'limcred' => $this->limcred,

@@ -43,7 +43,7 @@
                     @forelse($funcionarios as $funcionario)
                         <tr>
                             <td>{{ $funcionario->matricula }}</td>
-                            <td>{{ ucwords(strtolower($funcionario->nome)) }}</td>
+                            <td>{{ ucwords(mb_strtolower($funcionario->nome)) }}</td>
                             <td>{{ $funcionario->cpf }}</td>
                             <td>R$ {{ number_format($funcionario->limcred,2,',','.') }}</td>
                             <td>{{ $funcionario->bloqueado == 1 ? 'Sim' : 'Não'}}</td>

@@ -1,7 +1,7 @@
 <div>
     <div class="tile">
         <form wire:submit="editar">
-            <h3 class="tile-title">Editar Funcionário Com Erro - {{ ucwords(strtolower($nome)) }}</h3>
+            <h3 class="tile-title">Editar Funcionário Com Erro - {{ ucwords(mb_strtolower($nome)) }}</h3>
             <div class="title-body">
                 <div class="row g-3">
                     <div class="col-md-7">

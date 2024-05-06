@@ -31,7 +31,7 @@ class EditarFuncionarioErro extends Component
     public function mount(PartnerError $partner)
     {
         $this->id = $partner->id;
-        $this->nome = ucwords(strtolower($partner->nome));
+        $this->nome = ucwords(mb_strtolower($partner->nome));
         $this->cpf = $partner->cpf;
         $this->matricula = $partner->matricula;
         $this->limcred = $partner->limcred;
@@ -50,7 +50,7 @@ class EditarFuncionarioErro extends Component
         DB::beginTransaction();
         try {
             $funcionario = Partner::create([
-                'nome' => strtoupper($this->nome),
+                'nome' => mb_strtoupper($this->nome),
                 'cpf' => $this->cpf,
                 'matricula' => $this->matricula,
                 'limcred' => $this->limcred,
