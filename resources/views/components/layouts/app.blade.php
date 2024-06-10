@@ -13,8 +13,8 @@
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    {{-- Data Tables CSS --}}
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css">
+    {{-- Data Tables --}}
+    <link href="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.0.7/b-3.0.2/b-colvis-3.0.2/b-html5-3.0.2/b-print-3.0.2/cr-2.0.2/r-3.0.2/sb-1.7.1/datatables.min.css" rel="stylesheet">
 </head>
 <body class="app sidebar-mini rtl pace-done sidenav-toggled">
 <!-- Navbar-->
@@ -51,6 +51,12 @@
             </ul>
         </li>
         <li><a class="app-menu__item" wire:navigate href="{{ route('mostrar-funcionarios.index') }}"><i class="app-menu__icon fa fa-users"></i><span class="app-menu__label">Funcionarios</span></a></li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-list"></i><span class="app-menu__label">Relatorios</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item" wire:navigate href="{{ route('compras-funcionario') }}"><i class="icon fa fa-shopping-cart"></i> Compras Func..</a></li>
+                <li><a class="treeview-item" wire:navigate href="{{ route('compras-mes') }}"><i class="icon fa fa-file-excel-o"></i> Extrato Mensal</a></li>
+            </ul>
+        </li>
     </ul>
 </aside>
 <main class="app-content">
@@ -73,13 +79,15 @@
     </div>--}}
     {{ $slot }}
 </main>
-{{--Data Tables--}}
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
+{{--DataTables--}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.0.7/b-3.0.2/b-colvis-3.0.2/b-html5-3.0.2/b-print-3.0.2/cr-2.0.2/r-3.0.2/sb-1.7.1/datatables.min.js"></script>
+
 <!-- Essential javascripts for application to work-->
 {{--<script src="{{  asset('js/jquery-3.2.1.min.js') }}"></script>--}}
 <script src="{{  asset('js/popper.min.js') }}"></script>
-<script src="{{  asset('js/bootstrap.min.js') }}"></script>
+<script data-navigate-once src="{{  asset('js/bootstrap.min.js') }}"></script>
 <script src="{{  asset('js/main.js') }}"></script>
 <!-- The javascript plugin to display page loading on top-->
 <script src="{{  asset('js/plugins/pace.min.js') }}"></script>
