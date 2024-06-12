@@ -17,4 +17,8 @@ class Sale extends Model
         'dtcancel',
         'dtdevol',
     ];
+    public function funcionario()
+    {
+        return $this->hasOne(Partner::class,'cpf','cpf');
+    }
 }

@@ -6,12 +6,13 @@
             <div class="tile-body">
                 <div class="alert alert-warning">
                     <ul>
-                        <li>O arquivo deve estar no formato .CSV, separado por ponto e vírgula (;).</li>
+                        <li>O arquivo deve estar no formato .CSV UTF-8 (Delimitado por vírgulas).</li>
                         <li>As colunas devem seguir a ordem Matrícula, CPF, Nome, Limite, Bloqueado.</li>
-                        <li> O arquivo deve conter cabeçalho independente do nome das colunas.</li>
+                        <li>O arquivo deve conter cabeçalho independente do nome das colunas.</li>
                     </ul>
                 </div>
                 <div class="row">
+                    <img src="{{ asset('imagens/excel.png') }}" alt="Exemplo de Importação" class="mb-1">
                     <img src="{{ asset('imagens/importacaoexemplo.png') }}" alt="Exemplo de Importação">
                 </div>
             </div>

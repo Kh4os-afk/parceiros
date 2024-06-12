@@ -1,4 +1,7 @@
 <div class="row justify-content-center">
+    @if ($errors->any())
+        {{ $this->alert('error',$errors->first()) }}
+    @endif
     @if($show)
         <div class="col-md-8">
             <div class="tile">
@@ -7,7 +10,7 @@
                     <div class="tile-body">
                         <div class="form-group">
                             <label for="funcionario" class="form-label">Funcionario</label>
-                            <select class="form-select" id="funcionario" wire:model="idfuncionario">
+                            <select class="form-select select2" id="funcionario" wire:model="idfuncionario">
                                 <option value="0" selected></option>
                                 @forelse(\App\Models\Partner::all() as $partner)
                                     <option value="{{ $partner->id }}">{{ $partner->nome }}</option>
@@ -29,7 +32,8 @@
     @else
         <div class="col-md-12">
             <div class="tile">
-                <h3 class="tile-title">Compras Por Funcionario</h3>
+                <h3 class="tile-title mb-0">Compras Por Funcionario</h3>
+                <h3 class="tile-title mt-0">{{ ucwords(mb_strtolower($funcionario?->nome)) }}</h3>
                 <div class="tile-body">
                     <table id="table" class="display compact" style="width: 100%">
                         <thead>
@@ -56,15 +60,6 @@
                                     <a href="{{ $compra->qrcodenfce }}" target="_blank">Link Nota</a></td>
                             </tr>
                         @empty
-                            <tr>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                            </tr>
                         @endforelse
                         </tbody>
                     </table>
@@ -136,3 +131,20 @@
         @endscript
     @endif
 </div>
+
+@script
+<script data-navigate-once>
+    $(document).ready(function () {
+        $('.select2').select2({
+            placeholder: "Buscar",
+            theme: 'bootstrap4',
+        });
+        $('.select2').on('change', function (e) {
+            @this.
+            set('idfuncionario', e.target.value);
+        });
+    });
+</script>
+
+@endscript
+

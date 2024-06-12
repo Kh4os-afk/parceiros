@@ -15,18 +15,16 @@ class MostrarFuncionarios extends Component
     public $query = '';
     public $filter = 'nome';
     public $order = 'asc';
+
+    public function updatingQuery()
+    {
+        $this->resetPage();
+    }
+
     public function filtrar($filter)
     {
         $this->filter = $filter;
-        if ($this->order == 'asc') {
-            $this->order = 'desc';
-        } else {
-            $this->order = 'asc';
-        }
-    }
-
-    public function search()
-    {
+        $this->order = $this->order == 'asc' ? 'desc' : 'asc';
         $this->resetPage();
     }
 
@@ -42,9 +40,11 @@ class MostrarFuncionarios extends Component
             'funcionarios' => Partner::where('nome', 'like', '%' . $this->query . '%')
                 ->orWhere('matricula', 'like', $this->query)
                 ->orWhere('cpf', 'like', '%' . $this->query . '%')
-                ->orderBy($this->filter,$this->order)
+                ->orderBy($this->filter, $this->order)
                 ->paginate(10),
+
         ])
+            ->with(['filter' => $this->filter, 'order' => $this->order])
             ->title('Funcionários');
     }
 }

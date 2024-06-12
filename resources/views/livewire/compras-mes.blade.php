@@ -7,7 +7,7 @@
                     <div class="tile-body">
                         <div class="form-group">
                             <label for="mes" class="form-label">Mes</label>
-                            <select class="form-select" id="mes" wire:model="mes">
+                            <select class="form-select select2" id="mes" wire:model="mes">
                                 <option value="" selected></option>
                                 @foreach($meses as $mes)
                                     <option value="{{ $mes }}">{{ $mes }}</option>
@@ -24,42 +24,25 @@
     @else
         <div class="col-md-12">
             <div class="tile">
-                <h3 class="tile-title">Compras Por Funcionario</h3>
+                <h3 class="tile-title mb-0">Compras Por Funcionario</h3>
+                <h3 class="tile-title mt-0">Mes {{ $mes }}</h3>
                 <div class="tile-body">
                     <table id="table" class="display compact" style="width: 100%">
                         <thead>
                         <tr>
                             <th>CPF</th>
-                            <th>Filial</th>
-                            <th>Caixa</th>
-                            <th>Nota</th>
-                            <th>Data</th>
+                            <th>Nome</th>
                             <th>Valor</th>
-                            <th class="text-center">Link Sefaz</th>
                         </tr>
                         </thead>
                         <tbody>
                         @forelse($vendas as $venda)
                             <tr>
                                 <td>{{ $venda->cpf }}</td>
-                                <td>{{ $venda->codfilial }}</td>
-                                <td>{{ $venda->caixa }}</td>
-                                <td>{{ $venda->numnota }}</td>
-                                <td>{{ \Carbon\Carbon::parse($venda->dtsaida)->format('d/m/Y') }}</td>
-                                <td>{{ $venda->vltotal }}</td>
-                                <td class="text-center">
-                                    <a href="{{ $venda->qrcodenfce }}" target="_blank">Link Nota</a></td>
+                                <td>{{ $venda->funcionario->nome ?? 'FUNCIONÁRIO NÃO CADASTRADO'}}</td>
+                                <td>{{ number_format($venda->total_valor,2,',','.') }}</td>
                             </tr>
                         @empty
-                            <tr>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                                <td class="text-center">Sem Compras!</td>
-                            </tr>
                         @endforelse
                         </tbody>
                     </table>
@@ -131,3 +114,19 @@
         @endscript
     @endif
 </div>
+
+@script
+<script data-navigate-once>
+    $(document).ready(function () {
+        $('.select2').select2({
+            placeholder: "Buscar",
+            theme: 'bootstrap4',
+        });
+        $('.select2').on('change', function (e) {
+            @this.
+            set('mes', e.target.value);
+        });
+    });
+</script>
+
+@endscript

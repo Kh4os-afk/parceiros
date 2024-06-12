@@ -13,13 +13,28 @@ class ComprasFuncionario extends Component
 
     #[Rule('numeric')]
     public $idfuncionario = 0;
-    #[Rule('cpf')]
+    #[Rule(['cpf','exists:partners,cpf'])]
     public $cpf;
     public $funcionario;
     public $show = true;
 
+
+    public function messages()
+    {
+        return [
+            'cpf.exists' => 'CPF não cadastrado'
+        ];
+    }
+
     public function submit()
     {
+        try {
+            $cpfOriginal = $this->cpf;
+            $this->cpf = str_replace(['.', '-', '/'], '', $this->cpf);
+            $this->validate();
+        } catch (\Exception $e) {
+            $this->cpf = $cpfOriginal;
+        }
         if ($this->idfuncionario == 0 and $this->cpf == null) {
             $this->alert('error', 'Preencha ao menos um dos campos');
         } else {

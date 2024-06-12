@@ -44,9 +44,12 @@ class ComprasMes extends Component
         // Extrai mês e ano da string selecionada
         [$mes, $ano] = explode('/', $this->mes);
 
-        // Filtra as vendas pelo mês e ano selecionados
-        $this->vendas = Sale::whereMonth('dtsaida', $mes)
+        // Filtra as vendas pelo mês e ano selecionados e agrupa por cpf e nome
+        $this->vendas = Sale::selectRaw('cpf, SUM(vltotal) as total_valor')
+            ->whereMonth('dtsaida', $mes)
             ->whereYear('dtsaida', $ano)
+            ->groupBy('cpf')
+            ->with('funcionario')
             ->get();
 
         $this->show = false;

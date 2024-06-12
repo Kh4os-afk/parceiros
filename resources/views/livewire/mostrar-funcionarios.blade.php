@@ -58,7 +58,7 @@
                 </table>
             </div>
             <div class="tile-footer">
-                {{ $funcionarios->links('pagination::bootstrap-5') }}
+                {{ $funcionarios->appends(['filter' => $filter, 'order' => $order])->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>
