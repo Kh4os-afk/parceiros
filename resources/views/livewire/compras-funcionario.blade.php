@@ -38,7 +38,6 @@
                     <table id="table" class="display compact" style="width: 100%">
                         <thead>
                         <tr>
-                            <th>CPF</th>
                             <th>Filial</th>
                             <th>Caixa</th>
                             <th>Nota</th>
@@ -50,12 +49,11 @@
                         <tbody>
                         @forelse($funcionario->compras as $compra)
                             <tr>
-                                <td>{{ $compra->cpf }}</td>
-                                <td>{{ $compra->codfilial }}</td>
+                                <td>{{ $compra->filial?->filial }}</td>
                                 <td>{{ $compra->caixa }}</td>
                                 <td>{{ $compra->numnota }}</td>
                                 <td>{{ \Carbon\Carbon::parse($compra->dtsaida)->format('d/m/Y') }}</td>
-                                <td>{{ $compra->vltotal }}</td>
+                                <td>{{ number_format($compra->vltotal,2,',','.') }}</td>
                                 <td class="text-center">
                                     <a href="{{ $compra->qrcodenfce }}" target="_blank">Link Nota</a></td>
                             </tr>

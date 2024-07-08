@@ -66,20 +66,9 @@
     <div class="app-title">
         <div>
             <h1><i class="fa fa-gg"></i> Baratão da Carne Convênio</h1>
-            {{--<p>Start a beautiful journey here</p>--}}
+            <i class="fa fa-user ml-2"> {{ auth()->user()->name }}</i>
         </div>
-       {{-- <ul class="app-breadcrumb breadcrumb">
-            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
-            <li class="breadcrumb-item"><a href="#">Blank Page</a></li>
-        </ul>--}}
     </div>
-    {{--<div class="row">
-        <div class="col-md-12">
-            <div class="tile">
-                <div class="tile-body">Create a beautiful dashboard</div>
-            </div>
-        </div>
-    </div>--}}
     {{ $slot }}
 </main>
 {{--DataTables--}}
@@ -90,25 +79,12 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
-<!-- Essential javascripts for application to work-->
-{{--<script src="{{  asset('js/jquery-3.2.1.min.js') }}"></script>--}}
 <script src="{{  asset('js/popper.min.js') }}"></script>
 <script data-navigate-once src="{{  asset('js/bootstrap.min.js') }}"></script>
 <script data-navigate-once src="{{  asset('js/main.js') }}"></script>
 <!-- The javascript plugin to display page loading on top-->
 <script src="{{  asset('js/plugins/pace.min.js') }}"></script>
 <!-- Page specific javascripts-->
-<!-- Google analytics script-->
-<script type="text/javascript">
-    if(document.location.hostname == 'pratikborsadiya.in') {
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-        ga('create', 'UA-72504830-1', 'auto');
-        ga('send', 'pageview');
-    }
-</script>
 {{-- Livewire-Alert --}}
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <x-livewire-alert::scripts />

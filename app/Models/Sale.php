@@ -21,4 +21,8 @@ class Sale extends Model
     {
         return $this->hasOne(Partner::class,'cpf','cpf');
     }
+    public function filial()
+    {
+        return $this->hasOne(Filial::class,'id','codfilial');
+    }
 }
