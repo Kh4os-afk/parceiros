@@ -53,11 +53,11 @@
                 <li><a class="treeview-item" wire:navigate href="{{ route('importar-csv.index')  }}"><i class="icon fa fa-cloud-upload"></i> Importar CSV</a></li>
             </ul>
         </li>
-        <li><a class="app-menu__item" wire:navigate href="{{ route('mostrar-funcionarios.index') }}"><i class="app-menu__icon fa fa-users"></i><span class="app-menu__label">Funcionarios</span></a></li>
+        <li><a class="app-menu__item" wire:navigate href="{{ route('mostrar-funcionarios.index') }}"><i class="app-menu__icon fa fa-users"></i><span class="app-menu__label">Funcionários</span></a></li>
         <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-list"></i><span class="app-menu__label">Relatorios</span><i class="treeview-indicator fa fa-angle-right"></i></a>
             <ul class="treeview-menu">
                 <li><a class="treeview-item" wire:navigate href="{{ route('compras-funcionario') }}"><i class="icon fa fa-shopping-cart"></i> Compras Func..</a></li>
-                <li><a class="treeview-item" wire:navigate href="{{ route('compras-mes') }}"><i class="icon fa fa-file-excel-o"></i> Extrato Mensal</a></li>
+                <li><a class="treeview-item" wire:navigate href="{{ route('compras-mes') }}"><i class="icon fa fa-file-excel-o"></i> Extrato Por Periodo</a></li>
             </ul>
         </li>
     </ul>

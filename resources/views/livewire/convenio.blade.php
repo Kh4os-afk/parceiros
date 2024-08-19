@@ -3,7 +3,7 @@
         <div class="col-md-6 col-lg-6" wire:click="funcionarios">
             <div class="widget-small primary coloured-icon"><i class="icon fa fa-users fa-3x"></i>
                 <div class="info">
-                    <h4>Funcionarios</h4>
+                    <h4>Funcionários</h4>
                     <p><b>{{ \App\Models\Partner::count() }}</b></p>
                 </div>
             </div>

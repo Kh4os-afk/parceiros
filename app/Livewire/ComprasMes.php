@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Sale;
+use Carbon\Carbon;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -12,42 +13,23 @@ class ComprasMes extends Component
     use LivewireAlert;
 
     public $show = true;
-    public $mes;
-    public $meses = [];
+
+    public $dtinicial, $dtfinal;
     public $vendas;
-
-
-    public function mount()
-    {
-        $this->gerarMeses();
-    }
-
-    public function gerarMeses()
-    {
-        $currentMonth = now()->startOfMonth();
-        $startMonth = $currentMonth->copy()->subMonths(6);
-        $endMonth = $currentMonth->copy()->addMonths(6);
-
-        while ($startMonth <= $endMonth) {
-            $this->meses[] = $startMonth->format('m/Y');
-            $startMonth->addMonth();
-        }
-    }
 
     public function submit()
     {
-        if (empty($this->mes)) {
-            $this->alert('error', 'Por favor, selecione um mês válido.');
+        if (empty($this->dtinicial) or empty($this->dtfinal)) {
+            $this->alert('error', 'Por favor, selecione uma data válida.');
             return;
         }
 
-        // Extrai mês e ano da string selecionada
-        [$mes, $ano] = explode('/', $this->mes);
+        $dtinicial = Carbon::parse($this->dtinicial);
+        $dtfinal = Carbon::parse($this->dtfinal);
 
         // Filtra as vendas pelo mês e ano selecionados e agrupa por cpf e nome
         $this->vendas = Sale::selectRaw('cpf, SUM(vltotal) as total_valor')
-            ->whereMonth('dtsaida', $mes)
-            ->whereYear('dtsaida', $ano)
+            ->whereBetween('dtsaida', [$dtinicial, $dtfinal])
             ->groupBy('cpf')
             ->with('funcionario')
             ->get();

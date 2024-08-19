@@ -2,17 +2,16 @@
     @if($show)
         <div class="col-md-8">
             <div class="tile">
-                <h3 class="tile-title">Extrato Mensal</h3>
+                <h3 class="tile-title">Extrato Por Periodo</h3>
                 <form wire:submit.prevent="submit">
                     <div class="tile-body">
                         <div class="form-group">
-                            <label for="mes" class="form-label">Mes</label>
-                            <select class="form-select select2" id="mes" wire:model="mes">
-                                <option value="" selected></option>
-                                @foreach($meses as $mes)
-                                    <option value="{{ $mes }}">{{ $mes }}</option>
-                                @endforeach
-                            </select>
+                            <label for="dtinicial" class="form-label">Data Inicial</label>
+                            <input type="text" class="form-control" wire:model="dtinicial" x-mask="99/99/9999">
+                        </div>
+                        <div class="form-group">
+                            <label for="dtfinal" class="form-label">Data Final</label>
+                            <input type="text" class="form-control" wire:model="dtfinal" x-mask="99/99/9999">
                         </div>
                     </div>
                     <div class="tile-footer">
@@ -24,8 +23,8 @@
     @else
         <div class="col-md-12">
             <div class="tile">
-                <h3 class="tile-title mb-0">Compras Por Funcionario</h3>
-                <h3 class="tile-title mt-0">Mes {{ $mes }}</h3>
+                <h3 class="tile-title mb-0">Extrato Por Funcionario</h3>
+                <h3 class="tile-title mt-0">Periodo {{ \Carbon\Carbon::parse($dtinicial)->format('d/m/Y') ?? '' }} a {{ \Carbon\Carbon::parse($dtfinal)->format('d/m/Y') ?? '' }}</h3>
                 <div class="tile-body">
                     <table id="table" class="display compact" style="width: 100%">
                         <thead>
