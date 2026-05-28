@@ -22,6 +22,7 @@ const routeMap: Record<string, { section: string; label: string }> = {
     '/importar/erros':      { section: 'Importação',      label: 'Erros de Importação' },
     '/compras/funcionario': { section: 'Relatórios',      label: 'Compras por Funcionário' },
     '/compras/periodo':     { section: 'Relatórios',      label: 'Extrato por Período' },
+    '/consulta':            { section: 'Relatórios',      label: 'Consulta de Saldo'   },
     '/admin/empresas':      { section: 'Administração',   label: 'Empresas' },
     '/admin/usuarios':      { section: 'Administração',   label: 'Usuários' },
 }

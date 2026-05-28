@@ -29,6 +29,26 @@ class SaleController extends Controller
         return response()->json($partner);
     }
 
+    public function saldoPublico(Request $request): JsonResponse
+    {
+        $cpf = preg_replace('/\D/', '', $request->get('cpf', ''));
+
+        if (strlen($cpf) !== 11) {
+            return response()->json(['message' => 'CPF inválido.'], 422);
+        }
+
+        $partner = Partner::withoutGlobalScopes()
+            ->where('cpf', $cpf)
+            ->with(['compras' => fn ($q) => $q->with('filial')->orderByDesc('dtsaida')])
+            ->first();
+
+        if (! $partner) {
+            return response()->json(['message' => 'CPF não encontrado.'], 404);
+        }
+
+        return response()->json($partner);
+    }
+
     public function byFilialPeriod(PeriodRequest $request): JsonResponse
     {
         $start = Carbon::createFromFormat('d/m/Y', $request->start_date)->startOfDay();

@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import {
     LayoutDashboard, Users, Upload, AlertCircle,
     CalendarRange, LogOut, ChevronsUpDown,
-    Building2, UserCog,
+    Building2, UserCog, Search,
 } from 'lucide-react'
 import {
     Sidebar,
@@ -43,6 +43,7 @@ const navGroups = [
         label: 'Relatórios',
         items: [
             { to: '/compras/periodo', icon: CalendarRange, label: 'Extrato por Período' },
+            { to: '/consulta',        icon: Search,        label: 'Consulta de Saldo'   },
         ],
     },
 ]

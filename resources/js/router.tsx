@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@/components/layouts/AppLayout'
 import AuthLayout from '@/components/layouts/AuthLayout'
+import SaldoLayout from '@/components/layouts/SaldoLayout'
 import ProtectedRoute from '@/components/layouts/ProtectedRoute'
 import AdminRoute from '@/components/layouts/AdminRoute'
 
@@ -15,6 +16,8 @@ import ErrorsPage from '@/pages/import/ErrorsPage'
 import EditErrorPage from '@/pages/errors/EditErrorPage'
 import SalesByPartnerPage from '@/pages/reports/SalesByPartnerPage'
 import SalesByPeriodPage from '@/pages/reports/SalesByPeriodPage'
+import ConsultaPage from '@/pages/consulta/ConsultaPage'
+import SaldoPage from '@/pages/saldo/SaldoPage'
 import EmpresasPage from '@/pages/admin/EmpresasPage'
 import UsuariosPage from '@/pages/admin/UsuariosPage'
 
@@ -23,6 +26,12 @@ export const router = createBrowserRouter([
         element: <AuthLayout />,
         children: [
             { path: '/login', element: <LoginPage /> },
+        ],
+    },
+    {
+        element: <SaldoLayout />,
+        children: [
+            { path: '/saldo', element: <SaldoPage /> },
         ],
     },
     {
@@ -43,6 +52,7 @@ export const router = createBrowserRouter([
             { path: '/importar/erros/:id/editar', element: <EditErrorPage /> },
             { path: '/compras/funcionario', element: <SalesByPartnerPage /> },
             { path: '/compras/periodo', element: <SalesByPeriodPage /> },
+            { path: '/consulta', element: <ConsultaPage /> },
             // Rotas exclusivas de admin
             { path: '/admin/empresas', element: <AdminRoute><EmpresasPage /></AdminRoute> },
             { path: '/admin/usuarios', element: <AdminRoute><UsuariosPage /></AdminRoute> },

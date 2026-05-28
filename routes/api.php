@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 // Autenticação (público)
 Route::post('/login', [AuthController::class, 'login']);
 
+// Consulta pública de saldo — funcionários (sem autenticação)
+Route::get('/saldo', [SaleController::class, 'saldoPublico']); // ?cpf=
+
 // Rotas protegidas por Sanctum (Bearer token ou sessão SPA)
 Route::middleware('auth:sanctum')->group(function () {
 
