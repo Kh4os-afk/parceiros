@@ -32,12 +32,12 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
             <div className="bg-white border border-(--border) shadow-sm p-8">
                 <div className="mb-8 text-center">
-                    <p className="text-[0.58rem] tracking-[0.2em] uppercase text-(--muted-foreground) mb-1">
+                    <p className="text-[0.98rem] tracking-[0.2em] uppercase text-(--muted-foreground) mb-1">
                         Sistema de Convênio
                     </p>
-                    <h1 className="text-2xl font-black tracking-widest uppercase text-(--primary)">
+                    {/* <h1 className="text-2xl font-black tracking-widest uppercase text-(--primary)">
                         Baratão
-                    </h1>
+                    </h1> */}
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4" autoComplete="off">
