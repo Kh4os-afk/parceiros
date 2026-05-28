@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-    ArrowLeft, Pencil, ShoppingBag, TrendingUp, CreditCard,
-    Ban, ExternalLink, Store,
+    ArrowLeft, Pencil, ShoppingBag, TrendingUp, TrendingDown,
+    CreditCard, Ban, ExternalLink, Store,
 } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatCPF, formatMoney, toTitleCase } from '@/lib/utils'
+import { CountingNumber } from '@/components/animate-ui/primitives/texts/counting-number'
 
 interface Partner {
     id: number
@@ -47,10 +48,6 @@ function compactMoney(v: number) {
     return `R$ ${Math.round(v)}`
 }
 
-function barColor(index: number, isCurrentMonth: boolean) {
-    if (isCurrentMonth) return 'var(--primary)'
-    return `hsl(${185 + index * 2}, 55%, ${52 - index}%)`
-}
 
 export default function PartnerDetailPage() {
     const { id } = useParams<{ id: string }>()
@@ -120,6 +117,36 @@ export default function PartnerDetailPage() {
     }, [activeSales])
 
     const maxFilialTotal = topFiliais[0]?.total ?? 1
+    const ultimaCompra   = sales[0]?.dtsaida ?? null
+
+    // Stats do gráfico mensal
+    const total12m   = useMemo(() => months.reduce((s, m) => s + (monthlyData[m.key]?.total ?? 0), 0), [months, monthlyData])
+    const mediaMensal = useMemo(() => {
+        const mesesComDados = months.filter(m => (monthlyData[m.key]?.total ?? 0) > 0).length
+        return mesesComDados > 0 ? total12m / mesesComDados : 0
+    }, [total12m, months, monthlyData])
+    const melhorMes  = useMemo(() => {
+        return months.reduce<{ label: string; total: number } | null>((best, m) => {
+            const t = monthlyData[m.key]?.total ?? 0
+            return (!best || t > best.total) ? { label: m.label, total: t } : best
+        }, null)
+    }, [months, monthlyData])
+
+    // Tendência: mês atual vs mês anterior
+    const currentMonthTotal = monthlyData[months[11]?.key]?.total ?? 0
+    const prevMonthTotal    = monthlyData[months[10]?.key]?.total ?? 0
+    const trend = prevMonthTotal > 0
+        ? ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100
+        : null
+
+    // Mini sparkline — últimos 6 meses
+    const spark6 = months.slice(6).map(m => monthlyData[m.key]?.total ?? 0)
+    const sparkMax = Math.max(...spark6, 1)
+
+    // Dias desde a última compra
+    const daysSinceLast = ultimaCompra
+        ? Math.floor((Date.now() - new Date(ultimaCompra).getTime()) / 86_400_000)
+        : null
 
     const totalSalesPages = Math.max(1, Math.ceil(sales.length / PER_PAGE))
     const pagedSales      = useMemo(
@@ -155,79 +182,172 @@ export default function PartnerDetailPage() {
         <div className="flex flex-col gap-5 animate-[fade-in_0.2s_ease-out]">
 
             {/* ── Header ────────────────────────────────────────────────────── */}
-            <div className="bg-card border border-(--border) border-l-[3px] border-l-(--primary)">
+            <div className="relative bg-card border border-(--border) overflow-hidden">
 
-                {/* Identidade */}
-                <div className="flex items-center gap-4 px-6 py-5">
-                    <div className="shrink-0 w-12 h-12 bg-(--primary)/10 border border-(--primary)/25 flex items-center justify-center">
-                        <span className="text-base font-black text-(--primary) tracking-widest">{initials}</span>
+                {/* Gradiente lateral ciano */}
+                <div className="absolute inset-y-0 left-0 w-1/3 pointer-events-none"
+                    style={{ background: 'linear-gradient(to right, color-mix(in oklch, var(--primary) 6%, transparent), transparent)' }} />
+
+                {/* Dot grid decorativo */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
+                    style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
+
+                {/* Cantos decorativos */}
+                {[
+                    'top-0 left-0 border-t-2 border-l-2',
+                    'top-0 right-0 border-t-2 border-r-2',
+                    'bottom-0 left-0 border-b-2 border-l-2',
+                    'bottom-0 right-0 border-b-2 border-r-2',
+                ].map((cls, i) => (
+                    <div key={i} className={`absolute w-4 h-4 border-(--primary)/40 ${cls}`} />
+                ))}
+
+                {/* ── Identidade ── */}
+                <div className="relative flex items-start gap-5 px-7 pt-6 pb-5">
+
+                    {/* Avatar */}
+                    <div className="shrink-0 relative">
+                        <div className="w-14 h-14 bg-(--primary)/10 border-2 border-(--primary)/30 flex items-center justify-center">
+                            <span className="text-lg font-black text-(--primary) tracking-widest">{initials}</span>
+                        </div>
+                        {/* Pulse status */}
+                        {!partner.bloqueado && (
+                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full bg-(--primary) opacity-50" />
+                                <span className="relative inline-flex h-3 w-3 bg-(--primary)" />
+                            </span>
+                        )}
                     </div>
 
+                    {/* Info */}
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                            <p className="text-[0.5rem] uppercase tracking-[0.25em] text-(--muted-foreground)">Funcionário</p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <p className="text-[0.48rem] uppercase tracking-[0.3em] text-(--muted-foreground)">Funcionário</p>
                             {partner.bloqueado
-                                ? <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/20 text-red-500 text-[0.48rem] font-bold uppercase tracking-widest flex items-center gap-0.5">
+                                ? <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/25 text-red-500 text-[0.47rem] font-bold uppercase tracking-widest flex items-center gap-0.5">
                                     <Ban size={7} /> Bloqueado
                                   </span>
-                                : <span className="px-1.5 py-0.5 bg-(--primary)/10 border border-(--primary)/20 text-(--primary) text-[0.48rem] font-bold uppercase tracking-widest">
+                                : <span className="px-1.5 py-0.5 bg-(--primary)/10 border border-(--primary)/25 text-(--primary) text-[0.47rem] font-bold uppercase tracking-widest">
                                     Ativo
                                   </span>
                             }
                         </div>
-                        <h1 className="text-(--foreground) font-black uppercase tracking-wide text-[1.25rem] leading-tight truncate">
+                        <h1 className="text-(--foreground) font-black uppercase tracking-wide text-[1.3rem] leading-tight">
                             {toTitleCase(partner.nome)}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
-                            <span className="text-(--muted-foreground) text-[0.62rem] tracking-widest">{formatCPF(partner.cpf)}</span>
-                            {partner.matricula && <span className="text-(--muted-foreground) text-[0.62rem]">Mat. {partner.matricula}</span>}
-                            {partner.empresa && <span className="text-(--muted-foreground) text-[0.62rem]">{partner.empresa.nome}</span>}
+                        <div className="flex flex-wrap items-center gap-x-3 mt-1.5">
+                            <span className="text-(--muted-foreground) text-[0.6rem] tracking-widest font-mono">{formatCPF(partner.cpf)}</span>
+                            {partner.matricula && (
+                                <span className="text-(--muted-foreground) text-[0.6rem]">
+                                    <span className="opacity-40 mr-1">|</span>Mat. {partner.matricula}
+                                </span>
+                            )}
+                            {partner.empresa && (
+                                <span className="text-(--muted-foreground) text-[0.6rem]">
+                                    <span className="opacity-40 mr-1">|</span>{partner.empresa.nome}
+                                </span>
+                            )}
+                            {daysSinceLast !== null && (
+                                <span className="text-(--muted-foreground) text-[0.6rem]">
+                                    <span className="opacity-40 mr-1">|</span>
+                                    Última compra há <strong className="text-(--foreground)">{daysSinceLast}d</strong>
+                                </span>
+                            )}
                         </div>
                     </div>
 
-                    <button
-                        onClick={() => navigate(`/funcionarios/${id}/editar`)}
-                        className="shrink-0 flex items-center gap-1.5 border border-(--border) px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-wider text-(--muted-foreground) hover:text-(--primary) hover:border-(--primary) transition-colors"
-                    >
-                        <Pencil size={10} /> Editar
-                    </button>
+                    {/* Mini sparkline — últimos 6 meses */}
+                    <div className="shrink-0 flex flex-col items-end gap-1.5">
+                        <p className="text-[0.47rem] uppercase tracking-[0.2em] text-(--muted-foreground)">6 meses</p>
+                        <div className="flex items-end gap-[3px]" style={{ height: 32 }}>
+                            {spark6.map((v, i) => (
+                                <div
+                                    key={i}
+                                    className="w-[6px] transition-all duration-500"
+                                    style={{
+                                        height: v > 0 ? `${Math.max((v / sparkMax) * 100, 8)}%` : '4%',
+                                        background: v > 0
+                                            ? i === 5 ? 'var(--primary)' : 'color-mix(in oklch, var(--primary) 55%, transparent)'
+                                            : 'var(--border)',
+                                    }}
+                                    title={compactMoney(v)}
+                                />
+                            ))}
+                        </div>
+                        {trend !== null && (
+                            <div className={`flex items-center gap-0.5 text-[0.52rem] font-bold ${trend >= 0 ? 'text-(--primary)' : 'text-red-500'}`}>
+                                {trend >= 0
+                                    ? <TrendingUp size={10} />
+                                    : <TrendingDown size={10} />
+                                }
+                                {trend >= 0 ? '+' : ''}{trend.toFixed(1)}% vs mês ant.
+                            </div>
+                        )}
+                    </div>
 
-                    <button
-                        onClick={() => navigate('/funcionarios')}
-                        className="shrink-0 flex items-center gap-1.5 border border-(--border) px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-wider text-(--muted-foreground) hover:text-(--foreground) transition-colors"
-                    >
-                        <ArrowLeft size={10} /> Voltar
-                    </button>
+                    {/* Ações */}
+                    <div className="shrink-0 flex flex-col gap-1.5 self-start">
+                        <button
+                            onClick={() => navigate(`/funcionarios/${id}/editar`)}
+                            className="flex items-center gap-1.5 border border-(--border) px-3 py-1.5 text-[0.58rem] font-bold uppercase tracking-wider text-(--muted-foreground) hover:text-(--primary) hover:border-(--primary) transition-colors"
+                        >
+                            <Pencil size={10} /> Editar
+                        </button>
+                        <button
+                            onClick={() => navigate('/funcionarios')}
+                            className="flex items-center gap-1.5 border border-(--border) px-3 py-1.5 text-[0.58rem] font-bold uppercase tracking-wider text-(--muted-foreground) hover:text-(--foreground) transition-colors"
+                        >
+                            <ArrowLeft size={10} /> Voltar
+                        </button>
+                    </div>
                 </div>
 
-                {/* KPIs */}
-                <div className="grid grid-cols-5 border-t border-(--border)">
+                {/* ── KPIs ── */}
+                <div className="relative grid grid-cols-5 border-t border-(--border)">
                     {[
-                        { label: 'Compras Ativas',  value: String(activeSales.length),  icon: ShoppingBag },
-                        { label: 'Total Gasto',     value: formatMoney(totalGasto),      icon: TrendingUp  },
-                        { label: 'Ticket Médio',    value: formatMoney(avgTicket),       icon: TrendingUp  },
-                        { label: 'Lim. Crédito',    value: formatMoney(partner.limcred), icon: CreditCard  },
-                        { label: 'Cancelamentos',   value: String(canceledSales.length), icon: Ban         },
-                    ].map(({ label, value, icon: Icon }) => (
+                        { label: 'Compras Ativas',  number: activeSales.length,   icon: ShoppingBag, decimals: 0 },
+                        { label: 'Total Gasto',     number: totalGasto,            icon: TrendingUp,  decimals: 2 },
+                        { label: 'Ticket Médio',    number: avgTicket,             icon: TrendingUp,  decimals: 2 },
+                        { label: 'Lim. Crédito',    number: partner.limcred,       icon: CreditCard,  decimals: 2 },
+                        { label: 'Cancelamentos',   number: canceledSales.length,  icon: Ban,         decimals: 0 },
+                    ].map(({ label, number, icon: Icon, decimals }) => (
                         <div key={label} className="px-5 py-3 border-r border-(--border) last:border-r-0 bg-muted">
                             <div className="flex items-center gap-1.5 mb-1">
-                                <Icon size={9} className="text-(--muted-foreground)" />
-                                <p className="text-[0.48rem] uppercase tracking-[0.18em] text-(--muted-foreground)">{label}</p>
+                                <Icon size={9} className="text-(--primary) opacity-60" />
+                                <p className="text-[0.47rem] uppercase tracking-[0.18em] text-(--muted-foreground)">{label}</p>
                             </div>
-                            <p className="text-(--foreground) text-[0.88rem] font-bold">{value}</p>
+                            <p className="text-(--foreground) text-xl font-black tabular-nums leading-none mt-0.5">
+                                {decimals > 0 && <span className="text-[0.55em] font-bold opacity-40 mr-0.5">R$</span>}
+                                <CountingNumber
+                                    number={number}
+                                    decimalPlaces={decimals}
+                                    decimalSeparator=","
+                                    inView
+                                    transition={{ duration: 80, bounce: 30 }}
+                                    delay={100}
+                                />
+                            </p>
                         </div>
                     ))}
                 </div>
 
-                {/* Barra de utilização */}
+                {/* ── Barra de utilização ── */}
                 {partner.limcred > 0 && (
-                    <div className="px-6 py-3 border-t border-(--border)">
+                    <div className="relative px-7 py-3 border-t border-(--border)">
                         <div className="flex justify-between mb-1.5">
-                            <span className="text-(--muted-foreground) text-[0.48rem] uppercase tracking-[0.18em]">Utilização do limite</span>
-                            <span className="text-(--muted-foreground) text-[0.48rem]">{Math.round(pct)}%</span>
+                            <span className="text-(--muted-foreground) text-[0.47rem] uppercase tracking-[0.2em]">Utilização do limite</span>
+                            <span className={`text-[0.47rem] font-bold ${pct > 85 ? 'text-red-500' : pct > 60 ? 'text-amber-500' : 'text-(--primary)'}`}>
+                                {Math.round(pct)}%
+                            </span>
                         </div>
                         <div className="h-0.5 bg-(--border) w-full">
-                            <div className="h-full bg-(--primary) transition-all duration-700" style={{ width: `${pct}%` }} />
+                            <div
+                                className="h-full transition-all duration-700"
+                                style={{
+                                    width: `${pct}%`,
+                                    background: pct > 85 ? 'var(--destructive)' : pct > 60 ? '#f59e0b' : 'var(--primary)',
+                                }}
+                            />
                         </div>
                     </div>
                 )}
