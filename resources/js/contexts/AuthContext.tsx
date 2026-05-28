@@ -38,7 +38,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         api.get('/user')
             .then(res => setUser(res.data.user))
-            .catch(() => setAuthToken(null))
+            .catch(err => {
+                if (err.response?.status === 401) setAuthToken(null)
+            })
             .finally(() => setLoading(false))
     }, [])
 
