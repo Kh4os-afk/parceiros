@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Route;
 
 // Autenticação (público)
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/user',   [AuthController::class, 'user']); // retorna null se não autenticado — sem 401
 
-// Rotas protegidas por Sanctum SPA
+// Rotas protegidas por Sanctum (Bearer token ou sessão SPA)
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
+    Route::get('/user',    [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Funcionários (Partners)
