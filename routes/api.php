@@ -1,19 +1,42 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FilialController;
+use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\PartnerErrorController;
+use App\Http\Controllers\Api\SaleController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+// Autenticação (público)
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Rotas protegidas por Sanctum SPA
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Auth
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user',    [AuthController::class, 'user']);
+
+    // Funcionários (Partners)
+    Route::get('/partners',              [PartnerController::class, 'index']);   // ?search=&sort_by=&order=&page=
+    Route::post('/partners',             [PartnerController::class, 'store']);
+    Route::post('/partners/import',      [PartnerController::class, 'import']);
+    Route::get('/partners/{partner}',    [PartnerController::class, 'show']);
+    Route::put('/partners/{partner}',    [PartnerController::class, 'update']);
+    Route::get('/partners/{partner}/sales', [SaleController::class, 'byPartner']);
+
+    // Erros de importação
+    Route::get('/partner-errors',                       [PartnerErrorController::class, 'index']);
+    Route::get('/partner-errors/{error}',             [PartnerErrorController::class, 'show']);
+    Route::delete('/partner-errors/all',                [PartnerErrorController::class, 'destroyAll']);
+    Route::delete('/partner-errors/duplicates',         [PartnerErrorController::class, 'destroyDuplicates']);
+    Route::delete('/partner-errors/{error}',            [PartnerErrorController::class, 'destroy']);
+    Route::post('/partner-errors/{error}/approve',      [PartnerErrorController::class, 'approve']);
+
+    // Relatórios de vendas
+    Route::get('/sales/by-cpf',  [SaleController::class, 'byPartnerCpf']); // ?cpf=
+    Route::get('/sales/period',  [SaleController::class, 'byPeriod']);     // ?start_date=&end_date=
+
+    // Filiais
+    Route::get('/filiais', [FilialController::class, 'index']);
 });

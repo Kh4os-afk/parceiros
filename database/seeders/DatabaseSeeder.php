@@ -44,9 +44,19 @@ class DatabaseSeeder extends Seeder
             'remember_token' => Str::random(10),
         ]);
 
-        $filiais = [['id' => 3, 'filial' => 'Betânia'], ['id' => 4, 'filial' => 'Barreira'], ['id' => 5, 'filial' => 'Grande Vitoria'], ['id' => 6, 'filial' => 'Cidade de Deus'],
-            ['id' => 7, 'filial' => 'Torquato Flores'], ['id' => 8, 'filial' => 'Japiim'], ['id' => 9, 'filial' => 'Parque Dez'], ['id' => 10, 'filial' => 'Bola do Produtos'],
-            ['id' => 11, 'filial' => 'Alvorada'], ['id' => 12, 'filial' => 'Torres'], ['id' => 14, 'filial' => 'Shopping Cidade Leste']];
+        $filiais = array(
+            array('id' => 3, 'filial' => 'Betânia'),
+            array('id' => 4, 'filial' => 'Barreira'),
+            array('id' => 5, 'filial' => 'Grande Vitoria'),
+            array('id' => 6, 'filial' => 'Cidade de Deus'),
+            array('id' => 7, 'filial' => 'Torquato Flores'),
+            array('id' => 8, 'filial' => 'Japiim'),
+            array('id' => 9, 'filial' => 'Parque Dez'),
+            array('id' => 10, 'filial' => 'Bola do Produtos'),
+            array('id' => 12, 'filial' => 'Torres'),
+            array('id' => 13, 'filial' => 'Alvorada'),
+            array('id' => 14, 'filial' => 'Shopping Cidade Leste')
+        );
         foreach ($filiais as $filial) {
             Filial::firstOrCreate(['id' => $filial['id']], ['filial' => $filial['filial']]);
         }
