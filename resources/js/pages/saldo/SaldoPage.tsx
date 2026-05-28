@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Search, ExternalLink, Ban, ShoppingBag, ChevronRight, Loader2 } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatMoney, stripCPF, toTitleCase } from '@/lib/utils'
+import { vh } from 'motion/react'
 
 interface Sale {
     id: number
@@ -116,7 +117,7 @@ export default function SaldoPage() {
         :                'var(--primary)'
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col" style={{ height: "100vhd" }}>
 
             {/* ══════════ HERO / BUSCA ══════════ */}
             <div className="relative flex flex-col flex-1"
