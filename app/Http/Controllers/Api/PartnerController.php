@@ -120,12 +120,13 @@ class PartnerController extends Controller
         foreach ($csv->getRecords() as $record) {
             $nome      = trim($record['NOME']      ?? '');
             $cpf       = trim(preg_replace('/\D/', '', $record['CPF'] ?? ''));
-            $matricula = trim($record['MATRICULA'] ?? '');
+            $matriculaRaw = trim($record['MATRICULA'] ?? '');
+            $matricula    = $matriculaRaw !== '' ? $matriculaRaw : null;
             $limcred   = trim($record['LIMCRED']   ?? '');
             $bloqueado = (int) ($record['BLOQUEADO'] ?? 0);
 
             // ignora linhas completamente vazias
-            if ($nome === '' && $cpf === '' && $matricula === '') {
+            if ($nome === '' && $cpf === '') {
                 continue;
             }
 
@@ -138,8 +139,8 @@ class PartnerController extends Controller
                 'limcred'   => $limcred,
                 'bloqueado' => $bloqueado,
             ], [
-                'matricula' => ['required', 'integer', 'min:1', 'max:99999',
-                    \Illuminate\Validation\Rule::unique('partners', 'matricula')->where('empresa_id', $empresaId)],
+                'matricula' => ['nullable', 'integer', 'min:1', 'max:99999',
+                    \Illuminate\Validation\Rule::unique('partners', 'matricula')->where('empresa_id', $empresaId)->whereNotNull('matricula')],
                 'cpf'       => ['required', 'numeric', 'digits:11', 'cpf',
                     \Illuminate\Validation\Rule::unique('partners', 'cpf')->where('empresa_id', $empresaId)],
                 'nome'      => ['required', 'string', 'min:3', 'max:60', 'regex:/^[\pL\s\-]+$/u'],

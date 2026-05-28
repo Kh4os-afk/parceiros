@@ -166,15 +166,20 @@ export default function UsuariosPage() {
                         <h2 className="text-[0.78rem] font-bold uppercase tracking-widest text-(--foreground)">
                             {modal === 'create' ? 'Novo Usuário' : 'Editar Usuário'}
                         </h2>
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-3" autoComplete="off">
+                            {/* Campos isca invisíveis — impedem o Chrome de preencher os campos reais */}
+                            <input type="text" style={{ display: 'none' }} autoComplete="username" tabIndex={-1} readOnly />
+                            <input type="password" style={{ display: 'none' }} autoComplete="current-password" tabIndex={-1} readOnly />
+
                             {(['name', 'email'] as const).map(field => (
                                 <div key={field} className="flex flex-col gap-1.5">
                                     <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">
                                         {field === 'name' ? 'Nome' : 'E-mail'}
                                     </label>
                                     <input
-                                        type={field === 'email' ? 'email' : 'text'}
+                                        type="text"
                                         value={form[field]}
+                                        autoComplete="new-password"
                                         onChange={e => set(field, e.target.value)}
                                         className={`border px-3 py-2 text-sm bg-[oklch(0.97_0_0)] text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors[field] ? 'border-(--destructive)' : 'border-(--border)'}`}
                                     />
@@ -189,6 +194,7 @@ export default function UsuariosPage() {
                                 <input
                                     type="password"
                                     value={form.password}
+                                    autoComplete='off'
                                     onChange={e => set('password', e.target.value)}
                                     className={`border px-3 py-2 text-sm bg-[oklch(0.97_0_0)] text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors.password ? 'border-(--destructive)' : 'border-(--border)'}`}
                                 />

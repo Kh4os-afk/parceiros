@@ -20,8 +20,8 @@ class ApprovePartnerErrorRequest extends FormRequest
             'nome'      => ['required', 'string', 'min:3', 'max:60', 'regex:/^[\pL\s\-]+$/u'],
             'cpf'       => ['required', 'numeric', 'digits:11', 'cpf',
                 Rule::unique('partners', 'cpf')->where('empresa_id', auth()->user()->empresa_id)],
-            'matricula' => ['required', 'integer', 'min:1', 'max:99999',
-                Rule::unique('partners', 'matricula')->where('empresa_id', auth()->user()->empresa_id)],
+            'matricula' => ['nullable', 'integer', 'min:1', 'max:99999',
+                Rule::unique('partners', 'matricula')->where('empresa_id', auth()->user()->empresa_id)->whereNotNull('matricula')],
             'limcred'   => ['required', 'numeric', 'min:0', 'max:999'],
             'bloqueado' => ['required', 'integer', 'in:0,1'],
         ];
