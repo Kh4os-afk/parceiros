@@ -11,7 +11,7 @@ interface PartnerError {
     matricula: string
     limcred: number | string
     bloqueado: number
-    motivo: string
+    erros: string
 }
 
 interface Meta {
@@ -154,7 +154,7 @@ export default function ErrorsPage() {
                                     <td className="px-4 py-2.5 text-[0.75rem] font-medium text-[var(--muted-foreground)]">{err.matricula}</td>
                                     <td className="px-4 py-2.5 text-sm font-medium text-[var(--foreground)]">{toTitleCase(err.nome)}</td>
                                     <td className="px-4 py-2.5 text-[0.75rem] text-[var(--muted-foreground)] tracking-wider">{formatCPF(err.cpf)}</td>
-                                    <td className="px-4 py-2.5 text-[0.72rem] text-amber-700 max-w-xs">{err.motivo}</td>
+                                    <td className="px-4 py-2.5 text-[0.72rem] text-amber-700 max-w-xs">{err.erros}</td>
                                     <td className="px-4 py-2.5 text-right">
                                         <div className="inline-flex gap-1">
                                             <button

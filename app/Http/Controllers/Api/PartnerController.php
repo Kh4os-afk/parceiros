@@ -109,24 +109,24 @@ class PartnerController extends Controller
         ini_set('max_execution_time', 600);
         set_time_limit(600);
 
-        $errors = 0;
+        $imported = 0;
+        $errors   = 0;
 
         $csv = Reader::createFromPath($request->file('csv')->getRealPath(), 'r');
         $csv->setDelimiter(';');
         $csv->setHeaderOffset(0);
 
         foreach ($csv->getRecords() as $record) {
-            $values = array_values($record);
+            $nome      = trim($record['NOME']      ?? '');
+            $cpf       = trim(preg_replace('/\D/', '', $record['CPF'] ?? ''));
+            $matricula = trim($record['MATRICULA'] ?? '');
+            $limcred   = trim($record['LIMCRED']   ?? '');
+            $bloqueado = (int) ($record['BLOQUEADO'] ?? 0);
 
-            if (count($values) < 5) {
+            // ignora linhas completamente vazias
+            if ($nome === '' && $cpf === '' && $matricula === '') {
                 continue;
             }
-
-            $matricula = $values[0];
-            $cpf       = trim(preg_replace('/\D/', '', $values[1]));
-            $nome      = $values[2];
-            $limcred   = $values[3];
-            $bloqueado = strtoupper(trim($values[4])) === 'S' ? 1 : 0;
 
             $validator = validator([
                 'matricula' => $matricula,
@@ -176,9 +176,11 @@ class PartnerController extends Controller
                     ChangeLog::create([
                         'data'      => now(),
                         'usuario'   => auth()->id(),
-                        'operacao'  => 'Update',
+                        'operacao'  => 'Insert',
                         'descricao' => "Funcionario Importado Via CSV {$partner->id} - {$nome} CPF: {$cpf}",
                     ]);
+
+                    $imported++;
                 }
 
                 DB::commit();
@@ -188,10 +190,8 @@ class PartnerController extends Controller
         }
 
         return response()->json([
-            'message' => $errors > 0
-                ? "Importação concluída com {$errors} erro(s)."
-                : 'Importação concluída com sucesso.',
-            'errors' => $errors,
+            'imported' => $imported,
+            'errors'   => $errors,
         ]);
     }
 }

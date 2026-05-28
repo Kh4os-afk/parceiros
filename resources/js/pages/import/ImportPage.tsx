@@ -1,7 +1,19 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Upload, FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { Upload, FileText, AlertCircle, CheckCircle2, Loader2, Download } from 'lucide-react'
 import api from '@/lib/axios'
+
+const MODELO_CSV = 'NOME;CPF;MATRICULA;LIMCRED;BLOQUEADO\r\n'
+
+function downloadModelo() {
+    const blob = new Blob(['﻿' + MODELO_CSV], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'modelo_importacao.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+}
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -32,11 +44,9 @@ export default function ImportPage() {
         setStatus('loading')
         setMessage('')
         const data = new FormData()
-        data.append('file', file)
+        data.append('csv', file)
         try {
-            const res = await api.post('/partners/import', data, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            })
+            const res = await api.post('/partners/import', data)
             const { imported, errors } = res.data
             if (errors > 0) {
                 setStatus('error')
@@ -133,24 +143,26 @@ export default function ImportPage() {
                 </form>
             </div>
 
-            {/* Instructions */}
+            {/* Modelo */}
             <div className="bg-white border border-[var(--border)]">
                 <div className="px-5 py-3 border-b border-[var(--border)] bg-[oklch(0.97_0_0)]">
-                    <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-[var(--foreground)]">Formato do Arquivo</span>
+                    <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-[var(--foreground)]">Modelo de Importação</span>
                 </div>
-                <div className="p-5 flex flex-col gap-3">
-                    <p className="text-[0.78rem] text-[var(--muted-foreground)]">O arquivo CSV deve usar <strong className="text-[var(--foreground)]">ponto-e-vírgula (;)</strong> como separador, com a seguinte estrutura:</p>
-                    <div className="bg-[oklch(0.97_0_0)] border border-[var(--border)] px-4 py-3 font-mono text-[0.72rem] text-[var(--foreground)]">
-                        NOME;CPF;MATRICULA;LIMCRED;BLOQUEADO<br />
-                        ANTONIO DA SILVA;12345678901;00142;350;0<br />
-                        MARIA SOUZA;98765432100;00143;500;0
+                <div className="p-5 flex items-center justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                        <p className="text-sm font-medium text-(--foreground)">modelo_importacao.csv</p>
+                        <p className="text-[0.72rem] text-(--muted-foreground)">
+                            Baixe o modelo, preencha no Excel e importe aqui. Separador: ponto-e-vírgula (<code className="font-mono">;</code>). CPF sem pontuação, 11 dígitos. BLOQUEADO: 0 = ativo, 1 = bloqueado.
+                        </p>
                     </div>
-                    <ul className="flex flex-col gap-1.5 text-[0.72rem] text-[var(--muted-foreground)]">
-                        <li>• <strong className="text-[var(--foreground)]">CPF:</strong> apenas números, 11 dígitos</li>
-                        <li>• <strong className="text-[var(--foreground)]">MATRICULA:</strong> valor único por funcionário</li>
-                        <li>• <strong className="text-[var(--foreground)]">LIMCRED:</strong> limite de crédito em reais (ex: 350)</li>
-                        <li>• <strong className="text-[var(--foreground)]">BLOQUEADO:</strong> 0 para ativo, 1 para bloqueado</li>
-                    </ul>
+                    <button
+                        type="button"
+                        onClick={downloadModelo}
+                        className="flex items-center gap-2 border border-(--primary) text-(--primary) px-4 py-2 text-[0.68rem] font-bold uppercase tracking-wider hover:bg-(--primary) hover:text-white transition-colors shrink-0"
+                    >
+                        <Download size={13} />
+                        Baixar Modelo
+                    </button>
                 </div>
             </div>
         </div>

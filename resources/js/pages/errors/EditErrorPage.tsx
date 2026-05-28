@@ -10,7 +10,7 @@ export default function EditErrorPage() {
     const { id } = useParams()
     const navigate = useNavigate()
     const [form, setForm] = useState({ nome: '', cpf: '', matricula: '', limcred: '', bloqueado: '0' })
-    const [motivo, setMotivo] = useState('')
+    const [motivo, setMotivo] = useState('')  // campo "erros" no banco
     const [errors, setErrors] = useState<Errors>({})
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
@@ -19,7 +19,7 @@ export default function EditErrorPage() {
         api.get(`/partner-errors/${id}`)
             .then(res => {
                 const p = res.data
-                setMotivo(p.motivo ?? '')
+                setMotivo(p.erros ?? '')
                 setForm({
                     nome: toTitleCase(p.nome),
                     cpf: formatCPF(p.cpf),
