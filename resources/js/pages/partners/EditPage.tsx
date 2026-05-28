@@ -65,7 +65,7 @@ export default function EditPage() {
                 </h1>
             </div>
 
-            <div className="bg-white border border-(--border)">
+            <div className="bg-card border border-(--border)">
                 <div className="px-5 py-3 border-b border-(--border) bg-muted">
                     <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-(--foreground)">Dados do Funcionário</span>
                 </div>
@@ -116,7 +116,7 @@ export default function EditPage() {
                             <select
                                 value={form.bloqueado}
                                 onChange={e => set('bloqueado', e.target.value)}
-                                className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) cursor-pointer h-9 ${form.bloqueado === '1' ? 'text-red-600 border-red-300' : 'border-(--border)'}`}
+                                className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) cursor-pointer h-9 ${form.bloqueado === '1' ? 'text-(--destructive) border-(--destructive)/50' : 'border-(--border)'}`}
                             >
                                 <option value="0">Ativo</option>
                                 <option value="1">Bloqueado</option>

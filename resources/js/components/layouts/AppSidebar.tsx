@@ -2,7 +2,7 @@ import { useLocation, NavLink } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import {
     LayoutDashboard, Users, Upload, AlertCircle,
-    DollarSign, CalendarRange, LogOut, ChevronsUpDown,
+    CalendarRange, LogOut, ChevronsUpDown,
     Building2, UserCog,
 } from 'lucide-react'
 import {
@@ -42,7 +42,6 @@ const navGroups = [
     {
         label: 'Relatórios',
         items: [
-            { to: '/compras/funcionario', icon: DollarSign, label: 'Compras por Funcionário' },
             { to: '/compras/periodo', icon: CalendarRange, label: 'Extrato por Período' },
         ],
     },
@@ -94,11 +93,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     BDC
                                 </div>
                                 <div className="flex flex-col leading-tight">
-                                    <span className="text-[0.58rem] font-medium tracking-[0.16em] uppercase text-sidebar-foreground/50">
+                                    <span className="text-[0.68rem] font-medium tracking-[0.16em] uppercase text-sidebar-foreground/50">
                                         Sistema de Convênio
-                                    </span>
-                                    <span className="text-[0.8rem] font-black tracking-widest uppercase text-sidebar-primary">
-                                        Baratão
                                     </span>
                                 </div>
                             </NavLink>

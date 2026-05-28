@@ -14,7 +14,7 @@ interface User {
 }
 interface Errors { [key: string]: string[] }
 
-const emptyForm = { name: '', email: '', password: '', role: 'user' as 'admin' | 'user', empresa_id: '' }
+const emptyForm = { name: '', email: '', password: '', role: 'user' as 'admin' | 'user', empresa_id: '' as string }
 
 export default function UsuariosPage() {
     const { user: me } = useAuth()
@@ -109,11 +109,11 @@ export default function UsuariosPage() {
                 </button>
             </div>
 
-            <div className="bg-white border border-(--border)">
+            <div className="bg-card border border-(--border)">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
-                            <tr className="bg-[oklch(0.97_0_0)] border-b border-(--border)">
+                            <tr className="bg-muted border-b border-(--border)">
                                 {['Nome', 'E-mail', 'Empresa', 'Perfil'].map(h => (
                                     <th key={h} className="px-4 py-2.5 text-left text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">{h}</th>
                                 ))}
@@ -124,14 +124,14 @@ export default function UsuariosPage() {
                             {loading ? (
                                 <tr><td colSpan={5} className="text-center py-10 text-sm text-(--muted-foreground)">Carregando…</td></tr>
                             ) : users.map(u => (
-                                <tr key={u.id} className="border-b border-(--border) last:border-0 hover:bg-[oklch(0.97_0_0)] transition-colors">
+                                <tr key={u.id} className="border-b border-(--border) last:border-0 hover:bg-muted transition-colors">
                                     <td className="px-4 py-2.5 text-sm font-medium text-(--foreground)">{u.name}</td>
                                     <td className="px-4 py-2.5 text-[0.75rem] text-(--muted-foreground)">{u.email}</td>
                                     <td className="px-4 py-2.5 text-[0.75rem] text-(--muted-foreground)">{u.empresa?.nome ?? <span className="italic opacity-50">—</span>}</td>
                                     <td className="px-4 py-2.5">
                                         {u.role === 'admin'
-                                            ? <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">Admin</span>
-                                            : <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-[oklch(0.97_0_0)] text-(--muted-foreground) border border-(--border)">Usuário</span>
+                                            ? <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-500 border border-blue-500/20">Admin</span>
+                                            : <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-muted text-(--muted-foreground) border border-(--border)">Usuário</span>
                                         }
                                     </td>
                                     <td className="px-4 py-2.5 text-right">
@@ -162,7 +162,7 @@ export default function UsuariosPage() {
             {/* Modal criar/editar */}
             {modal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="bg-white border border-(--border) shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
+                    <div className="bg-card border border-(--border) shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
                         <h2 className="text-[0.78rem] font-bold uppercase tracking-widest text-(--foreground)">
                             {modal === 'create' ? 'Novo Usuário' : 'Editar Usuário'}
                         </h2>
@@ -181,7 +181,7 @@ export default function UsuariosPage() {
                                         value={form[field]}
                                         autoComplete="new-password"
                                         onChange={e => set(field, e.target.value)}
-                                        className={`border px-3 py-2 text-sm bg-[oklch(0.97_0_0)] text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors[field] ? 'border-(--destructive)' : 'border-(--border)'}`}
+                                        className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors[field] ? 'border-(--destructive)' : 'border-(--border)'}`}
                                     />
                                     {errors[field]?.[0] && <p className="text-[0.68rem] text-(--destructive)">{errors[field][0]}</p>}
                                 </div>
@@ -196,7 +196,7 @@ export default function UsuariosPage() {
                                     value={form.password}
                                     autoComplete='off'
                                     onChange={e => set('password', e.target.value)}
-                                    className={`border px-3 py-2 text-sm bg-[oklch(0.97_0_0)] text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors.password ? 'border-(--destructive)' : 'border-(--border)'}`}
+                                    className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors.password ? 'border-(--destructive)' : 'border-(--border)'}`}
                                 />
                                 {errors.password?.[0] && <p className="text-[0.68rem] text-(--destructive)">{errors.password[0]}</p>}
                             </div>
@@ -207,24 +207,28 @@ export default function UsuariosPage() {
                                     <select
                                         value={form.role}
                                         onChange={e => set('role', e.target.value)}
-                                        className="border border-(--border) px-3 py-2 text-sm bg-[oklch(0.97_0_0)] text-(--foreground) outline-none focus:border-(--primary)"
+                                        className="border border-(--border) px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary)"
                                     >
                                         <option value="user">Usuário</option>
                                         <option value="admin">Admin</option>
                                     </select>
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Empresa</label>
+                                    <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">
+                                        Empresa <span className="text-(--destructive)">*</span>
+                                    </label>
                                     <select
                                         value={form.empresa_id}
+                                        required
                                         onChange={e => set('empresa_id', e.target.value)}
-                                        className="border border-(--border) px-3 py-2 text-sm bg-[oklch(0.97_0_0)] text-(--foreground) outline-none focus:border-(--primary)"
+                                        className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors.empresa_id ? 'border-(--destructive)' : 'border-(--border)'}`}
                                     >
-                                        <option value="">— Nenhuma —</option>
+                                        <option value="" disabled>Selecione…</option>
                                         {empresas.map(e => (
                                             <option key={e.id} value={e.id}>{e.nome}</option>
                                         ))}
                                     </select>
+                                    {errors.empresa_id?.[0] && <p className="text-[0.68rem] text-(--destructive)">{errors.empresa_id[0]}</p>}
                                 </div>
                             </div>
 
@@ -245,7 +249,7 @@ export default function UsuariosPage() {
             {/* Confirm delete */}
             {confirmDelete && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="bg-white border border-(--border) shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
+                    <div className="bg-card border border-(--border) shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
                         <div className="flex items-start gap-3">
                             <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
                             <div>

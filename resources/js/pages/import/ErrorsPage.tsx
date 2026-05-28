@@ -55,7 +55,7 @@ export default function ErrorsPage() {
                 setMeta(null)
             } else if (confirm === 'duplicates') {
                 await api.delete('/partner-errors/duplicates')
-                fetchErrors(true) // não sabe quais foram removidos — re-fetch silencioso
+                fetchErrors(true)
             } else {
                 await api.delete(`/partner-errors/${confirm.id}`)
                 setErrors(prev => prev.filter(e => e.id !== confirm.id))
@@ -73,20 +73,20 @@ export default function ErrorsPage() {
         <div className="flex flex-col gap-4 animate-[fade-in_0.2s_ease-out]">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-[0.6rem] uppercase tracking-[0.15em] text-[var(--muted-foreground)] mb-0.5">Importação</p>
-                    <h1 className="text-xl font-black uppercase tracking-widest text-[var(--foreground)]">Erros de Importação</h1>
+                    <p className="text-[0.6rem] uppercase tracking-[0.15em] text-(--muted-foreground) mb-0.5">Importação</p>
+                    <h1 className="text-xl font-black uppercase tracking-widest text-(--foreground)">Erros de Importação</h1>
                 </div>
                 {meta && meta.total > 0 && (
                     <div className="flex gap-2">
                         <button
                             onClick={() => setConfirm('duplicates')}
-                            className="border border-amber-300 bg-amber-50 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-wider text-amber-700 hover:bg-amber-100 transition-colors"
+                            className="border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-wider text-amber-500 hover:bg-amber-500/20 transition-colors"
                         >
                             Remover Duplicatas
                         </button>
                         <button
                             onClick={() => setConfirm('all')}
-                            className="border border-red-200 bg-red-50 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-wider text-red-600 hover:bg-red-100 transition-colors"
+                            className="border border-red-500/25 bg-red-500/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/20 transition-colors"
                         >
                             <Trash2 size={12} className="inline mr-1.5" />
                             Limpar Todos
@@ -98,12 +98,12 @@ export default function ErrorsPage() {
             {/* Confirm dialog */}
             {confirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="bg-white border border-[var(--border)] shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
+                    <div className="bg-card border border-(--border) shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
                         <div className="flex items-start gap-3">
                             <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-sm font-bold text-[var(--foreground)]">Confirmar exclusão</p>
-                                <p className="text-[0.78rem] text-[var(--muted-foreground)] mt-1">
+                                <p className="text-sm font-bold text-(--foreground)">Confirmar exclusão</p>
+                                <p className="text-[0.78rem] text-(--muted-foreground) mt-1">
                                     {confirm === 'all'
                                         ? 'Todos os registros de erro serão removidos permanentemente.'
                                         : confirm === 'duplicates'
@@ -116,7 +116,7 @@ export default function ErrorsPage() {
                             <button
                                 onClick={() => setConfirm(null)}
                                 disabled={deleting}
-                                className="border border-[var(--border)] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-wider text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                                className="border border-(--border) px-4 py-2 text-[0.68rem] font-bold uppercase tracking-wider text-(--muted-foreground) hover:text-(--foreground) transition-colors"
                             >
                                 Cancelar
                             </button>
@@ -133,47 +133,47 @@ export default function ErrorsPage() {
                 </div>
             )}
 
-            <div className="bg-white border border-[var(--border)]">
+            <div className="bg-card border border-(--border)">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
-                            <tr className="bg-[oklch(0.97_0_0)] border-b border-[var(--border)]">
+                            <tr className="bg-muted border-b border-(--border)">
                                 {['Matrícula', 'Nome', 'CPF', 'Motivo'].map(h => (
-                                    <th key={h} className="px-4 py-2.5 text-left text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted-foreground)] whitespace-nowrap">
+                                    <th key={h} className="px-4 py-2.5 text-left text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground) whitespace-nowrap">
                                         {h}
                                     </th>
                                 ))}
-                                <th className="px-4 py-2.5 text-right text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">Ações</th>
+                                <th className="px-4 py-2.5 text-right text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan={5} className="text-center py-10 text-sm text-[var(--muted-foreground)]">Carregando…</td></tr>
+                                <tr><td colSpan={5} className="text-center py-10 text-sm text-(--muted-foreground)">Carregando…</td></tr>
                             ) : errors.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="text-center py-14">
-                                        <p className="text-sm font-medium text-[var(--foreground)]">Nenhum erro de importação</p>
-                                        <p className="text-[0.72rem] text-[var(--muted-foreground)] mt-1">Todos os registros foram processados com sucesso.</p>
+                                        <p className="text-sm font-medium text-(--foreground)">Nenhum erro de importação</p>
+                                        <p className="text-[0.72rem] text-(--muted-foreground) mt-1">Todos os registros foram processados com sucesso.</p>
                                     </td>
                                 </tr>
                             ) : errors.map(err => (
-                                <tr key={err.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[oklch(0.97_0_0)] transition-colors">
-                                    <td className="px-4 py-2.5 text-[0.75rem] font-medium text-[var(--muted-foreground)]">{err.matricula}</td>
-                                    <td className="px-4 py-2.5 text-sm font-medium text-[var(--foreground)]">{toTitleCase(err.nome)}</td>
-                                    <td className="px-4 py-2.5 text-[0.75rem] text-[var(--muted-foreground)] tracking-wider">{formatCPF(err.cpf)}</td>
-                                    <td className="px-4 py-2.5 text-[0.72rem] text-amber-700 max-w-xs">{err.erros}</td>
+                                <tr key={err.id} className="border-b border-(--border) last:border-0 hover:bg-muted transition-colors">
+                                    <td className="px-4 py-2.5 text-[0.75rem] font-medium text-(--muted-foreground)">{err.matricula}</td>
+                                    <td className="px-4 py-2.5 text-sm font-medium text-(--foreground)">{toTitleCase(err.nome)}</td>
+                                    <td className="px-4 py-2.5 text-[0.75rem] text-(--muted-foreground) tracking-wider">{formatCPF(err.cpf)}</td>
+                                    <td className="px-4 py-2.5 text-[0.72rem] text-amber-500 max-w-xs">{err.erros}</td>
                                     <td className="px-4 py-2.5 text-right">
                                         <div className="inline-flex gap-1">
                                             <button
                                                 onClick={() => navigate(`/importar/erros/${err.id}/editar`)}
-                                                className="inline-flex items-center justify-center w-7 h-7 border border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors"
+                                                className="inline-flex items-center justify-center w-7 h-7 border border-(--border) text-(--muted-foreground) hover:text-(--primary) hover:border-(--primary) transition-colors"
                                                 title="Editar e aprovar"
                                             >
                                                 <Pencil size={11} />
                                             </button>
                                             <button
                                                 onClick={() => setConfirm({ id: err.id })}
-                                                className="inline-flex items-center justify-center w-7 h-7 border border-[var(--border)] text-[var(--muted-foreground)] hover:text-red-600 hover:border-red-300 transition-colors"
+                                                className="inline-flex items-center justify-center w-7 h-7 border border-(--border) text-(--muted-foreground) hover:text-red-500 hover:border-red-500/40 transition-colors"
                                                 title="Remover erro"
                                             >
                                                 <Trash2 size={11} />
@@ -187,8 +187,8 @@ export default function ErrorsPage() {
                 </div>
 
                 {meta && meta.last_page > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border)]">
-                        <span className="text-[0.6rem] uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-(--border)">
+                        <span className="text-[0.6rem] uppercase tracking-widest text-(--muted-foreground)">
                             Mostrando {((meta.current_page - 1) * meta.per_page) + 1}–{Math.min(meta.current_page * meta.per_page, meta.total)} de {meta.total} registros
                         </span>
                         <div className="flex gap-1">
@@ -198,8 +198,8 @@ export default function ErrorsPage() {
                                     onClick={() => setPage(p)}
                                     className={`w-7 h-7 text-[0.68rem] font-semibold border transition-colors ${
                                         p === page
-                                            ? 'bg-[var(--primary)] border-[var(--primary)] text-white'
-                                            : 'border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--primary)] hover:text-[var(--primary)]'
+                                            ? 'bg-(--primary) border-(--primary) text-white'
+                                            : 'border-(--border) text-(--muted-foreground) hover:border-(--primary) hover:text-(--primary)'
                                     }`}
                                 >
                                     {p}

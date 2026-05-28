@@ -9,6 +9,7 @@ import DashboardPage from '@/pages/dashboard/DashboardPage'
 import ListPage from '@/pages/partners/ListPage'
 import CreatePage from '@/pages/partners/CreatePage'
 import EditPage from '@/pages/partners/EditPage'
+import DetailPage from '@/pages/partners/DetailPage'
 import ImportPage from '@/pages/import/ImportPage'
 import ErrorsPage from '@/pages/import/ErrorsPage'
 import EditErrorPage from '@/pages/errors/EditErrorPage'
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
             { path: '/dashboard', element: <DashboardPage /> },
             { path: '/funcionarios', element: <ListPage /> },
             { path: '/funcionarios/cadastrar', element: <CreatePage /> },
+            { path: '/funcionarios/:id', element: <DetailPage /> },
             { path: '/funcionarios/:id/editar', element: <EditPage /> },
             { path: '/importar/csv', element: <ImportPage /> },
             { path: '/importar/erros', element: <ErrorsPage /> },

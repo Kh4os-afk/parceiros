@@ -25,7 +25,7 @@ class UserController extends Controller
             'email'      => ['required', 'email', 'unique:users,email'],
             'password'   => ['required', 'string', 'min:6'],
             'role'       => ['required', Rule::in(['admin', 'user'])],
-            'empresa_id' => ['nullable', 'exists:empresas,id'],
+            'empresa_id' => ['required', 'exists:empresas,id'],
         ]);
 
         $data['password'] = Hash::make($data['password']);
@@ -47,7 +47,7 @@ class UserController extends Controller
             'email'      => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
             'password'   => ['nullable', 'string', 'min:6'],
             'role'       => ['required', Rule::in(['admin', 'user'])],
-            'empresa_id' => ['nullable', 'exists:empresas,id'],
+            'empresa_id' => ['required', 'exists:empresas,id'],
         ]);
 
         if (empty($data['password'])) {

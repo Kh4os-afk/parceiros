@@ -43,7 +43,7 @@ export default function CreatePage() {
                 <h1 className="text-xl font-black uppercase tracking-widest text-(--foreground)">Cadastrar Funcionário</h1>
             </div>
 
-            <div className="bg-white border border-(--border)">
+            <div className="bg-card border border-(--border)">
                 <div className="px-5 py-3 border-b border-(--border) bg-muted flex items-center gap-2">
                     <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-(--foreground)">Dados do Funcionário</span>
                 </div>

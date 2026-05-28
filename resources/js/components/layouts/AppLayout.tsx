@@ -39,6 +39,14 @@ function useBreadcrumbs(): Crumb[] {
         ]
     }
 
+    if (/^\/funcionarios\/\d+$/.test(pathname)) {
+        return [
+            { label: 'Cadastros' },
+            { label: 'Funcionários', href: '/funcionarios' },
+            { label: 'Detalhes' },
+        ]
+    }
+
     if (pathname.startsWith('/funcionarios/') && pathname.endsWith('/editar')) {
         return [
             { label: 'Cadastros' },

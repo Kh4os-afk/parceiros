@@ -83,11 +83,11 @@ export default function EmpresasPage() {
                 </button>
             </div>
 
-            <div className="bg-white border border-(--border)">
+            <div className="bg-card border border-(--border)">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
-                            <tr className="bg-[oklch(0.97_0_0)] border-b border-(--border)">
+                            <tr className="bg-muted border-b border-(--border)">
                                 {['Nome', 'Slug', 'Status'].map(h => (
                                     <th key={h} className="px-4 py-2.5 text-left text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">{h}</th>
                                 ))}
@@ -98,13 +98,13 @@ export default function EmpresasPage() {
                             {loading ? (
                                 <tr><td colSpan={4} className="text-center py-10 text-sm text-(--muted-foreground)">Carregando…</td></tr>
                             ) : empresas.map(e => (
-                                <tr key={e.id} className="border-b border-(--border) last:border-0 hover:bg-[oklch(0.97_0_0)] transition-colors">
+                                <tr key={e.id} className="border-b border-(--border) last:border-0 hover:bg-muted transition-colors">
                                     <td className="px-4 py-2.5 text-sm font-medium text-(--foreground)">{e.nome}</td>
                                     <td className="px-4 py-2.5 text-[0.75rem] text-(--muted-foreground) font-mono">{e.slug}</td>
                                     <td className="px-4 py-2.5">
                                         {e.ativo
-                                            ? <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-green-50 text-green-700 border border-green-200">● Ativa</span>
-                                            : <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-200">✕ Inativa</span>
+                                            ? <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-green-500/10 text-green-600 border border-green-500/20">● Ativa</span>
+                                            : <span className="inline-flex items-center px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">✕ Inativa</span>
                                         }
                                     </td>
                                     <td className="px-4 py-2.5 text-right">
@@ -125,7 +125,7 @@ export default function EmpresasPage() {
             {/* Modal */}
             {modal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="bg-white border border-(--border) shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
+                    <div className="bg-card border border-(--border) shadow-lg w-full max-w-sm p-6 flex flex-col gap-4">
                         <h2 className="text-[0.78rem] font-bold uppercase tracking-widest text-(--foreground)">
                             {modal === 'create' ? 'Nova Empresa' : 'Editar Empresa'}
                         </h2>
@@ -135,7 +135,7 @@ export default function EmpresasPage() {
                                 <input
                                     value={form.nome}
                                     onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
-                                    className={`border px-3 py-2 text-sm bg-[oklch(0.97_0_0)] text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors.nome ? 'border-(--destructive)' : 'border-(--border)'}`}
+                                    className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors.nome ? 'border-(--destructive)' : 'border-(--border)'}`}
                                 />
                                 {errors.nome?.[0] && <p className="text-[0.68rem] text-(--destructive)">{errors.nome[0]}</p>}
                             </div>

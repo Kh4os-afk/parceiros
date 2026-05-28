@@ -69,16 +69,16 @@ export default function EditErrorPage() {
             </div>
 
             {motivo && (
-                <div className="flex items-start gap-2.5 px-4 py-3 border border-amber-200 bg-amber-50">
-                    <AlertCircle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5 px-4 py-3 border border-amber-500/25 bg-amber-500/10">
+                    <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
                     <div>
-                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-amber-700 mb-0.5">Motivo do Erro</p>
-                        <p className="text-[0.78rem] text-amber-800">{motivo}</p>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-amber-500 mb-0.5">Motivo do Erro</p>
+                        <p className="text-[0.78rem] text-amber-500">{motivo}</p>
                     </div>
                 </div>
             )}
 
-            <div className="bg-white border border-(--border)">
+            <div className="bg-card border border-(--border)">
                 <div className="px-5 py-3 border-b border-(--border) bg-muted">
                     <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-(--foreground)">Dados do Funcionário</span>
                 </div>
@@ -131,7 +131,7 @@ export default function EditErrorPage() {
                             <select
                                 value={form.bloqueado}
                                 onChange={e => set('bloqueado', e.target.value)}
-                                className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) cursor-pointer h-9 ${form.bloqueado === '1' ? 'text-red-600 border-red-300' : 'border-(--border)'}`}
+                                className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) cursor-pointer h-9 ${form.bloqueado === '1' ? 'text-(--destructive) border-(--destructive)/50' : 'border-(--border)'}`}
                             >
                                 <option value="0">Ativo</option>
                                 <option value="1">Bloqueado</option>

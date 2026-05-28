@@ -78,58 +78,58 @@ export default function SalesByPartnerPage() {
     return (
         <div className="flex flex-col gap-4 animate-[fade-in_0.2s_ease-out]">
             <div>
-                <p className="text-[0.6rem] uppercase tracking-[0.15em] text-[var(--muted-foreground)] mb-0.5">Relatórios</p>
-                <h1 className="text-xl font-black uppercase tracking-widest text-[var(--foreground)]">Compras por Funcionário</h1>
+                <p className="text-[0.6rem] uppercase tracking-[0.15em] text-(--muted-foreground) mb-0.5">Relatórios</p>
+                <h1 className="text-xl font-black uppercase tracking-widest text-(--foreground)">Compras por Funcionário</h1>
             </div>
 
-            <div className="bg-white border border-[var(--border)]">
-                <div className="px-5 py-3 border-b border-[var(--border)] bg-[oklch(0.97_0_0)]">
-                    <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-[var(--foreground)]">Selecionar Funcionário</span>
+            <div className="bg-card border border-(--border)">
+                <div className="px-5 py-3 border-b border-(--border) bg-muted">
+                    <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-(--foreground)">Selecionar Funcionário</span>
                 </div>
                 <div className="p-5">
                     <div className="relative max-w-md">
-                        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]" />
+                        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted-foreground)" />
                         <input
                             value={search}
                             onChange={e => { setSearch(e.target.value); setSelected(null); setSales([]); setSearched(false) }}
                             onFocus={() => partners.length > 0 && setShowDropdown(true)}
                             placeholder="Buscar por nome, CPF ou matrícula…"
-                            className="w-full pl-8 pr-3 py-2 text-sm border border-[var(--border)] bg-[oklch(0.97_0_0)] text-[var(--foreground)] outline-none focus:border-[var(--primary)] placeholder:text-[var(--muted-foreground)] placeholder:opacity-60"
+                            className="w-full pl-8 pr-3 py-2 text-sm border border-(--border) bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-60"
                         />
                         {showDropdown && partners.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 z-20 bg-white border border-[var(--border)] border-t-0 shadow-sm max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-20 bg-card border border-(--border) border-t-0 shadow-sm max-h-60 overflow-y-auto">
                                 {partners.map(p => (
                                     <button
                                         key={p.id}
                                         onClick={() => selectPartner(p)}
-                                        className="w-full text-left px-3 py-2.5 hover:bg-[oklch(0.97_0_0)] border-b border-[var(--border)] last:border-0 flex items-center justify-between gap-3"
+                                        className="w-full text-left px-3 py-2.5 hover:bg-muted border-b border-(--border) last:border-0 flex items-center justify-between gap-3"
                                     >
-                                        <span className="text-sm font-medium text-[var(--foreground)]">{toTitleCase(p.nome)}</span>
-                                        <span className="text-[0.68rem] text-[var(--muted-foreground)] tracking-wider">{formatCPF(p.cpf)}</span>
+                                        <span className="text-sm font-medium text-(--foreground)">{toTitleCase(p.nome)}</span>
+                                        <span className="text-[0.68rem] text-(--muted-foreground) tracking-wider">{formatCPF(p.cpf)}</span>
                                     </button>
                                 ))}
                             </div>
                         )}
                     </div>
                     {selected && (
-                        <div className="flex items-center gap-4 mt-3 text-[0.72rem] text-[var(--muted-foreground)]">
-                            <span>Matrícula: <strong className="text-[var(--foreground)]">{selected.matricula}</strong></span>
-                            <span>CPF: <strong className="text-[var(--foreground)] tracking-wider">{formatCPF(selected.cpf)}</strong></span>
+                        <div className="flex items-center gap-4 mt-3 text-[0.72rem] text-(--muted-foreground)">
+                            <span>Matrícula: <strong className="text-(--foreground)">{selected.matricula}</strong></span>
+                            <span>CPF: <strong className="text-(--foreground) tracking-wider">{formatCPF(selected.cpf)}</strong></span>
                         </div>
                     )}
                 </div>
             </div>
 
             {searched && (
-                <div className="bg-white border border-[var(--border)]">
-                    <div className="px-5 py-3 border-b border-[var(--border)] bg-[oklch(0.97_0_0)] flex items-center justify-between">
-                        <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-[var(--foreground)]">
+                <div className="bg-card border border-(--border)">
+                    <div className="px-5 py-3 border-b border-(--border) bg-muted flex items-center justify-between">
+                        <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-(--foreground)">
                             {selected ? toTitleCase(selected.nome) : ''} — {sales.length} compra{sales.length !== 1 ? 's' : ''}
                         </span>
                         {sales.length > 0 && (
                             <button
                                 onClick={exportCsv}
-                                className="flex items-center gap-1.5 border border-[var(--border)] px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-wider text-[var(--muted-foreground)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors"
+                                className="flex items-center gap-1.5 border border-(--border) px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-wider text-(--muted-foreground) hover:text-(--primary) hover:border-(--primary) transition-colors"
                             >
                                 <Download size={11} /> Exportar CSV
                             </button>
@@ -139,31 +139,31 @@ export default function SalesByPartnerPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead>
-                                <tr className="bg-[oklch(0.97_0_0)] border-b border-[var(--border)]">
+                                <tr className="bg-muted border-b border-(--border)">
                                     {['Nº Nota', 'Data', 'Filial', 'Valor'].map(h => (
-                                        <th key={h} className="px-4 py-2.5 text-left text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">{h}</th>
+                                        <th key={h} className="px-4 py-2.5 text-left text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">{h}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {loadingSales ? (
-                                    <tr><td colSpan={4} className="text-center py-10 text-sm text-[var(--muted-foreground)]">Carregando…</td></tr>
+                                    <tr><td colSpan={4} className="text-center py-10 text-sm text-(--muted-foreground)">Carregando…</td></tr>
                                 ) : sales.length === 0 ? (
-                                    <tr><td colSpan={4} className="text-center py-10 text-sm text-[var(--muted-foreground)]">Nenhuma compra encontrada.</td></tr>
+                                    <tr><td colSpan={4} className="text-center py-10 text-sm text-(--muted-foreground)">Nenhuma compra encontrada.</td></tr>
                                 ) : sales.map(s => (
-                                    <tr key={s.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[oklch(0.97_0_0)] transition-colors">
-                                        <td className="px-4 py-2.5 text-[0.75rem] font-medium text-[var(--muted-foreground)]">{s.numnota}</td>
-                                        <td className="px-4 py-2.5 text-[0.75rem] text-[var(--muted-foreground)]">{s.dtsaida}</td>
-                                        <td className="px-4 py-2.5 text-[0.78rem] text-[var(--foreground)]">{s.filial?.filial ?? `Filial ${s.codfilial}`}</td>
-                                        <td className="px-4 py-2.5 text-[0.78rem] font-semibold text-[var(--primary)]">{formatMoney(s.vltotal)}</td>
+                                    <tr key={s.id} className="border-b border-(--border) last:border-0 hover:bg-muted transition-colors">
+                                        <td className="px-4 py-2.5 text-[0.75rem] font-medium text-(--muted-foreground)">{s.numnota}</td>
+                                        <td className="px-4 py-2.5 text-[0.75rem] text-(--muted-foreground)">{s.dtsaida}</td>
+                                        <td className="px-4 py-2.5 text-[0.78rem] text-(--foreground)">{s.filial?.filial ?? `Filial ${s.codfilial}`}</td>
+                                        <td className="px-4 py-2.5 text-[0.78rem] font-semibold text-(--primary)">{formatMoney(s.vltotal)}</td>
                                     </tr>
                                 ))}
                             </tbody>
                             {sales.length > 0 && (
                                 <tfoot>
-                                    <tr className="border-t border-[var(--border)] bg-[oklch(0.97_0_0)]">
-                                        <td colSpan={3} className="px-4 py-2.5 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[var(--muted-foreground)] text-right">Total</td>
-                                        <td className="px-4 py-2.5 text-sm font-black text-[var(--primary)]">{formatMoney(total)}</td>
+                                    <tr className="border-t border-(--border) bg-muted">
+                                        <td colSpan={3} className="px-4 py-2.5 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground) text-right">Total</td>
+                                        <td className="px-4 py-2.5 text-sm font-black text-(--primary)">{formatMoney(total)}</td>
                                     </tr>
                                 </tfoot>
                             )}
