@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import api, { initCsrf } from '@/lib/axios'
+import api, { setAuthToken, loadAuthToken } from '@/lib/axios'
 
 interface Empresa {
     id: number
@@ -31,20 +31,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        const token = loadAuthToken()
+        if (!token) {
+            setLoading(false)
+            return
+        }
         api.get('/user')
             .then(res => setUser(res.data.user))
-            .catch(() => setUser(null))
+            .catch(() => setAuthToken(null))
             .finally(() => setLoading(false))
     }, [])
 
-    async function login(email: string, password: string, remember = false) {
-        await initCsrf()
-        const res = await api.post('/login', { email, password, remember })
+    async function login(email: string, password: string, _remember = false) {
+        const res = await api.post('/login', { email, password })
+        setAuthToken(res.data.token)
         setUser(res.data.user)
     }
 
     async function logout() {
-        await api.post('/logout')
+        await api.post('/logout').catch(() => {})
+        setAuthToken(null)
         setUser(null)
     }
 

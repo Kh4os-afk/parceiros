@@ -12,20 +12,22 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request): JsonResponse
     {
-        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return response()->json(['message' => 'Usuário ou senha inválidos.'], 401);
         }
 
-        $request->session()->regenerate();
+        $user  = Auth::user();
+        $token = $user->createToken('spa')->plainTextToken;
 
-        return response()->json(['user' => Auth::user()->load('empresa')]);
+        return response()->json([
+            'token' => $token,
+            'user'  => $user->load('empresa'),
+        ]);
     }
 
     public function logout(Request $request): JsonResponse
     {
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logout realizado com sucesso.']);
     }

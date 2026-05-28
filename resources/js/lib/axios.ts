@@ -1,9 +1,9 @@
 import axios from 'axios'
 
+const TOKEN_KEY = 'spa_token'
+
 const api = axios.create({
     baseURL: '/api',
-    withCredentials: true,
-    withXSRFToken: true,
     headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Accept': 'application/json',
@@ -11,7 +11,7 @@ const api = axios.create({
     },
 })
 
-// Remove Content-Type para FormData — deixa o browser setar multipart/form-data + boundary
+// Remove Content-Type para FormData
 api.interceptors.request.use(config => {
     if (config.data instanceof FormData) {
         delete config.headers['Content-Type']
@@ -19,8 +19,22 @@ api.interceptors.request.use(config => {
     return config
 })
 
-export async function initCsrf(): Promise<void> {
-    await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+export function setAuthToken(token: string | null) {
+    if (token) {
+        localStorage.setItem(TOKEN_KEY, token)
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    } else {
+        localStorage.removeItem(TOKEN_KEY)
+        delete api.defaults.headers.common['Authorization']
+    }
+}
+
+export function loadAuthToken(): string | null {
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (token) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    }
+    return token
 }
 
 export default api
