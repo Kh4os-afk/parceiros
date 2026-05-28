@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PeriodRequest;
+use App\Models\Filial;
 use App\Models\Partner;
 use App\Models\Sale;
 use Carbon\Carbon;
@@ -26,6 +27,27 @@ class SaleController extends Controller
         $partner = Partner::where('cpf', $cpf)->with('compras.filial')->firstOrFail();
 
         return response()->json($partner);
+    }
+
+    public function byFilialPeriod(PeriodRequest $request): JsonResponse
+    {
+        $start = Carbon::createFromFormat('d/m/Y', $request->start_date)->startOfDay();
+        $end   = Carbon::createFromFormat('d/m/Y', $request->end_date)->endOfDay();
+
+        $vendas = Sale::selectRaw('codfilial, COUNT(*) as quantidade, SUM(vltotal) as total')
+            ->whereBetween('dtsaida', [$start, $end])
+            ->groupBy('codfilial')
+            ->get()
+            ->map(fn ($v) => [
+                'codfilial'  => $v->codfilial,
+                'filial'     => Filial::find($v->codfilial)?->filial ?? "Filial {$v->codfilial}",
+                'quantidade' => (int) $v->quantidade,
+                'total'      => (float) $v->total,
+            ])
+            ->sortByDesc('total')
+            ->values();
+
+        return response()->json($vendas);
     }
 
     public function byPeriod(PeriodRequest $request): JsonResponse

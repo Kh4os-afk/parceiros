@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Funcionários (Partners)
     Route::get('/partners',              [PartnerController::class, 'index']);   // ?search=&sort_by=&order=&page=
+    Route::get('/partners/summary',      [PartnerController::class, 'summary']);
     Route::post('/partners',             [PartnerController::class, 'store']);
     Route::post('/partners/import',      [PartnerController::class, 'import']);
     Route::get('/partners/{partner}',    [PartnerController::class, 'show']);
@@ -36,8 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/partner-errors/{error}/approve',      [PartnerErrorController::class, 'approve']);
 
     // Relatórios de vendas
-    Route::get('/sales/by-cpf',  [SaleController::class, 'byPartnerCpf']); // ?cpf=
-    Route::get('/sales/period',  [SaleController::class, 'byPeriod']);     // ?start_date=&end_date=
+    Route::get('/sales/by-cpf',          [SaleController::class, 'byPartnerCpf']);    // ?cpf=
+    Route::get('/sales/period',          [SaleController::class, 'byPeriod']);         // ?start_date=&end_date=
+    Route::get('/sales/period/filiais',  [SaleController::class, 'byFilialPeriod']);   // ?start_date=&end_date=
 
     // Filiais
     Route::get('/filiais', [FilialController::class, 'index']);

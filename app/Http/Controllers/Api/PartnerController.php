@@ -39,6 +39,27 @@ class PartnerController extends Controller
         return response()->json($partners);
     }
 
+    public function summary(Request $request): JsonResponse
+    {
+        $query = Partner::query();
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nome', 'like', "%{$search}%")
+                  ->orWhere('cpf', 'like', "%{$search}%")
+                  ->orWhere('matricula', 'like', $search);
+            });
+        }
+
+        return response()->json([
+            'total'      => (clone $query)->count(),
+            'ativos'     => (clone $query)->where('bloqueado', 0)->count(),
+            'bloqueados' => (clone $query)->where('bloqueado', 1)->count(),
+            'lim_medio'  => (float) ((clone $query)->avg('limcred') ?? 0),
+            'lim_total'  => (float) ((clone $query)->sum('limcred') ?? 0),
+        ]);
+    }
+
     public function show(Partner $partner): JsonResponse
     {
         return response()->json($partner);
