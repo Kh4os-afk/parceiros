@@ -1,0 +1,27 @@
+# <tipo>: <descrição curta em português — máximo 72 caracteres>
+#
+# - <arquivo1>: <o que foi alterado e por quê>
+# - <arquivo2>: <o que foi alterado e por quê>
+# - <arquivo3>: <o que foi alterado e por quê>
+#
+# ─────────────────────────────────────────────────────────────────
+# TIPOS:
+#   feat     → nova funcionalidade ou melhoria significativa
+#   fix      → correção de bug ou comportamento incorreto
+#   refactor → refatoração sem mudança de funcionalidade
+#   docs     → documentação (README, comentários, arquitetura)
+#   style    → formatação, indentação (sem mudança de lógica)
+#   chore    → dependências, configs, build, deploy
+#   test     → adição ou modificação de testes
+#
+# EXEMPLOS:
+#   feat: adiciona scanner de câmera com fallback HTTP no Coletor
+#   fix: corrige VirtualHost HTTP que redirecionava para HTTPS
+#   docs: atualiza arquitetura com fluxo de certificados SSL
+#
+# REGRAS:
+#   ✅ SEMPRE em português (pt-BR)
+#   ✅ Verbos no infinitivo: adiciona, corrige, remove, implementa
+#   ✅ Liste cada arquivo modificado no corpo da mensagem
+#   ❌ NUNCA em inglês
+# ─────────────────────────────────────────────────────────────────

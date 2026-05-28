@@ -2,9 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\EmpresaScope;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartnerError extends Model
 {
-    protected $fillable = ['nome','cpf','matricula','limcred','bloqueado','erros'];
+    protected $fillable = ['empresa_id', 'nome', 'cpf', 'matricula', 'limcred', 'bloqueado', 'erros'];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new EmpresaScope());
+    }
+
+    public function empresa(): BelongsTo
+    {
+        return $this->belongsTo(Empresa::class);
+    }
 }
