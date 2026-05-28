@@ -15,13 +15,15 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { AppSidebar } from '@/components/layouts/AppSidebar'
 
-const routeMap: Record<string, { section: string; label: string; sectionHref?: string }> = {
-    '/dashboard':           { section: 'Geral',      label: 'Dashboard' },
-    '/funcionarios':        { section: 'Cadastros',   label: 'Funcionários' },
-    '/importar/csv':        { section: 'Importação',  label: 'Importar CSV' },
-    '/importar/erros':      { section: 'Importação',  label: 'Erros de Importação' },
-    '/compras/funcionario': { section: 'Relatórios',  label: 'Compras por Funcionário' },
-    '/compras/periodo':     { section: 'Relatórios',  label: 'Extrato por Período' },
+const routeMap: Record<string, { section: string; label: string }> = {
+    '/dashboard':           { section: 'Geral',          label: 'Dashboard' },
+    '/funcionarios':        { section: 'Cadastros',       label: 'Funcionários' },
+    '/importar/csv':        { section: 'Importação',      label: 'Importar CSV' },
+    '/importar/erros':      { section: 'Importação',      label: 'Erros de Importação' },
+    '/compras/funcionario': { section: 'Relatórios',      label: 'Compras por Funcionário' },
+    '/compras/periodo':     { section: 'Relatórios',      label: 'Extrato por Período' },
+    '/admin/empresas':      { section: 'Administração',   label: 'Empresas' },
+    '/admin/usuarios':      { section: 'Administração',   label: 'Usuários' },
 }
 
 type Crumb = { label: string; href?: string }

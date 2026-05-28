@@ -2,64 +2,55 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Empresa;
 use App\Models\Filial;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        \App\Models\User::firstOrCreate(
-            ['id' => 1], [
-            'name' => 'Administrador',
-            'email' => 'ti@barataodacarne.com.br',
-            'email_verified_at' => now(),
-            'password' => Hash::make('admb4r4t40**'),
-            'remember_token' => Str::random(10),
-        ]);
-
-        \App\Models\User::firstOrCreate(
-            ['id' => 2], [
-            'name' => 'Santo Remedio',
-            'email' => 'santoremedio@barataodacarne.com.br',
-            'email_verified_at' => now(),
-            'password' => Hash::make('baratao@2024'),
-            'remember_token' => Str::random(10),
-        ]);
-
-        \App\Models\User::firstOrCreate(
-            ['id' => 3], [
-            'name' => 'Grupo Tapajos',
-            'email' => 'grupotapajos@barataodacarne.com.br',
-            'email_verified_at' => now(),
-            'password' => Hash::make('baratao@2024'),
-            'remember_token' => Str::random(10),
-        ]);
-
-        $filiais = array(
-            array('id' => 3, 'filial' => 'Betânia'),
-            array('id' => 4, 'filial' => 'Barreira'),
-            array('id' => 5, 'filial' => 'Grande Vitoria'),
-            array('id' => 6, 'filial' => 'Cidade de Deus'),
-            array('id' => 7, 'filial' => 'Torquato Flores'),
-            array('id' => 8, 'filial' => 'Japiim'),
-            array('id' => 9, 'filial' => 'Parque Dez'),
-            array('id' => 10, 'filial' => 'Bola do Produtos'),
-            array('id' => 12, 'filial' => 'Torres'),
-            array('id' => 13, 'filial' => 'Alvorada'),
-            array('id' => 14, 'filial' => 'Shopping Cidade Leste')
+        // Empresas
+        $baratao = Empresa::firstOrCreate(
+            ['slug' => 'baratao'],
+            ['nome' => 'Baratão da Carne', 'ativo' => true]
         );
-        foreach ($filiais as $filial) {
-            Filial::firstOrCreate(['id' => $filial['id']], ['filial' => $filial['filial']]);
-        }
 
+        // Usuários
+        User::firstOrCreate(
+            ['email' => 'ti@barataodacarne.com.br'],
+            [
+                'name'              => 'Administrador',
+                'email_verified_at' => now(),
+                'password'          => Hash::make('admb4r4t40**'),
+                'remember_token'    => Str::random(10),
+                'role'              => 'admin',
+                'empresa_id'        => null,
+            ]
+        );
+        // Filiais da empresa Baratão
+        $filiais = [
+            ['id' => 3,  'filial' => 'Betânia'],
+            ['id' => 4,  'filial' => 'Barreira'],
+            ['id' => 5,  'filial' => 'Grande Vitoria'],
+            ['id' => 6,  'filial' => 'Cidade de Deus'],
+            ['id' => 7,  'filial' => 'Torquato Flores'],
+            ['id' => 8,  'filial' => 'Japiim'],
+            ['id' => 9,  'filial' => 'Parque Dez'],
+            ['id' => 10, 'filial' => 'Bola do Produtos'],
+            ['id' => 12, 'filial' => 'Torres'],
+            ['id' => 13, 'filial' => 'Alvorada'],
+            ['id' => 14, 'filial' => 'Shopping Cidade Leste'],
+        ];
+
+        foreach ($filiais as $f) {
+            Filial::firstOrCreate(
+                ['id' => $f['id']],
+                ['filial' => $f['filial'], 'empresa_id' => $baratao->id]
+            );
+        }
     }
 }

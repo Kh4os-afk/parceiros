@@ -33,7 +33,11 @@ class PartnerErrorController extends Controller
 
     public function destroyAll(): JsonResponse
     {
-        PartnerError::truncate();
+        if (auth()->user()->isAdmin()) {
+            PartnerError::truncate();
+        } else {
+            PartnerError::where('empresa_id', auth()->user()->empresa_id)->delete();
+        }
 
         return response()->json(['message' => 'Todos os registros deletados com sucesso.']);
     }
@@ -51,11 +55,12 @@ class PartnerErrorController extends Controller
         DB::beginTransaction();
         try {
             $partner = Partner::create([
-                'nome'      => mb_strtoupper($request->nome),
-                'cpf'       => $request->cpf,
-                'matricula' => $request->matricula,
-                'limcred'   => $request->limcred,
-                'bloqueado' => $request->bloqueado,
+                'empresa_id' => auth()->user()->empresa_id,
+                'nome'       => mb_strtoupper($request->nome),
+                'cpf'        => $request->cpf,
+                'matricula'  => $request->matricula,
+                'limcred'    => $request->limcred,
+                'bloqueado'  => $request->bloqueado,
             ]);
 
             $error->delete();

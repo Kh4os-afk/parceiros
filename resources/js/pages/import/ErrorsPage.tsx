@@ -32,14 +32,14 @@ export default function ErrorsPage() {
     const [confirm, setConfirm] = useState<ConfirmAction | null>(null)
     const [deleting, setDeleting] = useState(false)
 
-    const fetchErrors = useCallback(async () => {
-        setLoading(true)
+    const fetchErrors = useCallback(async (silent = false) => {
+        if (!silent) setLoading(true)
         try {
             const res = await api.get('/partner-errors', { params: { page } })
             setErrors(res.data.data)
             setMeta(res.data)
         } finally {
-            setLoading(false)
+            if (!silent) setLoading(false)
         }
     }, [page])
 
@@ -49,12 +49,19 @@ export default function ErrorsPage() {
         if (!confirm) return
         setDeleting(true)
         try {
-            if (confirm === 'all') await api.delete('/partner-errors/all')
-            else if (confirm === 'duplicates') await api.delete('/partner-errors/duplicates')
-            else await api.delete(`/partner-errors/${confirm.id}`)
+            if (confirm === 'all') {
+                await api.delete('/partner-errors/all')
+                setErrors([])
+                setMeta(null)
+            } else if (confirm === 'duplicates') {
+                await api.delete('/partner-errors/duplicates')
+                fetchErrors(true) // não sabe quais foram removidos — re-fetch silencioso
+            } else {
+                await api.delete(`/partner-errors/${confirm.id}`)
+                setErrors(prev => prev.filter(e => e.id !== confirm.id))
+                setMeta(prev => prev ? { ...prev, total: prev.total - 1 } : null)
+            }
             setConfirm(null)
-            setPage(1)
-            fetchErrors()
         } finally {
             setDeleting(false)
         }

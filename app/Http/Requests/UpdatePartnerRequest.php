@@ -16,9 +16,12 @@ class UpdatePartnerRequest extends FormRequest
     {
         $partnerId = $this->route('partner')?->id ?? $this->route('partner');
 
+        $empresaId = auth()->user()->empresa_id;
+
         return [
             'nome'      => ['required', 'string', 'min:3', 'max:60', 'regex:/^[\pL\s\-]+$/u'],
-            'matricula' => ['required', 'integer', 'min:1', 'max:99999', Rule::unique('partners', 'matricula')->ignore($partnerId)],
+            'matricula' => ['required', 'integer', 'min:1', 'max:99999',
+                Rule::unique('partners', 'matricula')->where('empresa_id', $empresaId)->ignore($partnerId)],
             'limcred'   => ['required', 'numeric', 'min:0', 'max:999'],
             'bloqueado' => ['required', 'integer', 'in:0,1'],
         ];

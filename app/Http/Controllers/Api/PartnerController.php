@@ -49,11 +49,12 @@ class PartnerController extends Controller
         DB::beginTransaction();
         try {
             $partner = Partner::create([
-                'nome'      => mb_strtoupper($request->nome),
-                'cpf'       => $request->cpf,
-                'matricula' => $request->matricula,
-                'limcred'   => $request->limcred,
-                'bloqueado' => $request->bloqueado,
+                'empresa_id' => auth()->user()->empresa_id,
+                'nome'       => mb_strtoupper($request->nome),
+                'cpf'        => $request->cpf,
+                'matricula'  => $request->matricula,
+                'limcred'    => $request->limcred,
+                'bloqueado'  => $request->bloqueado,
             ]);
 
             ChangeLog::create([
@@ -128,6 +129,8 @@ class PartnerController extends Controller
                 continue;
             }
 
+            $empresaId = auth()->user()->empresa_id;
+
             $validator = validator([
                 'matricula' => $matricula,
                 'cpf'       => $cpf,
@@ -135,8 +138,10 @@ class PartnerController extends Controller
                 'limcred'   => $limcred,
                 'bloqueado' => $bloqueado,
             ], [
-                'matricula' => ['required', 'integer', 'min:1', 'max:99999', 'unique:partners,matricula'],
-                'cpf'       => ['required', 'numeric', 'digits:11', 'unique:partners,cpf', 'cpf'],
+                'matricula' => ['required', 'integer', 'min:1', 'max:99999',
+                    \Illuminate\Validation\Rule::unique('partners', 'matricula')->where('empresa_id', $empresaId)],
+                'cpf'       => ['required', 'numeric', 'digits:11', 'cpf',
+                    \Illuminate\Validation\Rule::unique('partners', 'cpf')->where('empresa_id', $empresaId)],
                 'nome'      => ['required', 'string', 'min:3', 'max:60', 'regex:/^[\pL\s\-]+$/u'],
                 'limcred'   => ['required', 'numeric', 'min:0', 'max:999'],
                 'bloqueado' => ['required', 'integer', 'in:0,1'],
@@ -148,12 +153,13 @@ class PartnerController extends Controller
                     $errosMsg = implode(' | ', $validator->errors()->all());
 
                     $partnerError = PartnerError::create([
-                        'matricula' => $matricula,
-                        'cpf'       => $cpf,
-                        'nome'      => mb_strtoupper($nome),
-                        'limcred'   => $limcred,
-                        'bloqueado' => $bloqueado,
-                        'erros'     => $errosMsg,
+                        'empresa_id' => $empresaId,
+                        'matricula'  => $matricula,
+                        'cpf'        => $cpf,
+                        'nome'       => mb_strtoupper($nome),
+                        'limcred'    => $limcred,
+                        'bloqueado'  => $bloqueado,
+                        'erros'      => $errosMsg,
                     ]);
 
                     ChangeLog::create([
@@ -166,11 +172,12 @@ class PartnerController extends Controller
                     $errors++;
                 } else {
                     $partner = Partner::create([
-                        'matricula' => $matricula,
-                        'cpf'       => $cpf,
-                        'nome'      => mb_strtoupper($nome),
-                        'limcred'   => $limcred,
-                        'bloqueado' => $bloqueado,
+                        'empresa_id' => $empresaId,
+                        'matricula'  => $matricula,
+                        'cpf'        => $cpf,
+                        'nome'       => mb_strtoupper($nome),
+                        'limcred'    => $limcred,
+                        'bloqueado'  => $bloqueado,
                     ]);
 
                     ChangeLog::create([

@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmpresaController;
 use App\Http\Controllers\Api\FilialController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\PartnerErrorController;
 use App\Http\Controllers\Api\SaleController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Autenticação (público)
@@ -39,4 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Filiais
     Route::get('/filiais', [FilialController::class, 'index']);
+
+    // Admin only
+    Route::middleware('admin')->group(function () {
+        Route::apiResource('empresas', EmpresaController::class)->except(['destroy']);
+        Route::apiResource('users', UserController::class);
+    });
 });

@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import {
     LayoutDashboard, Users, Upload, AlertCircle,
     DollarSign, CalendarRange, LogOut, ChevronsUpDown,
+    Building2, UserCog,
 } from 'lucide-react'
 import {
     Sidebar,
@@ -64,7 +65,15 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementTyp
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const { user, logout } = useAuth()
+    const { user, logout, isAdmin } = useAuth()
+
+    const adminGroup = {
+        label: 'Administração',
+        items: [
+            { to: '/admin/empresas', icon: Building2, label: 'Empresas' },
+            { to: '/admin/usuarios', icon: UserCog, label: 'Usuários' },
+        ],
+    }
 
     const initials = user?.name
         ?.split(' ')
@@ -100,7 +109,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             {/* ── Nav ── */}
             <SidebarContent>
-                {navGroups.map(group => (
+                {[...navGroups, ...(isAdmin ? [adminGroup] : [])].map(group => (
                     <SidebarGroup key={group.label}>
                         <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                         <SidebarMenu>
@@ -127,7 +136,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     </div>
                                     <div className="grid flex-1 text-left leading-tight">
                                         <span className="truncate font-semibold text-[0.78rem]">{user?.name}</span>
-                                        <span className="truncate text-[0.6rem] text-sidebar-foreground/55">{user?.email}</span>
+                                        <span className="truncate text-[0.6rem] text-sidebar-foreground/55">
+                                            {isAdmin ? 'Administrador' : (user?.empresa?.nome ?? user?.email)}
+                                        </span>
                                     </div>
                                     <ChevronsUpDown className="ml-auto size-3.5 text-sidebar-foreground/50" />
                                 </SidebarMenuButton>

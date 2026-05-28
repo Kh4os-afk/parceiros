@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@/components/layouts/AppLayout'
 import AuthLayout from '@/components/layouts/AuthLayout'
 import ProtectedRoute from '@/components/layouts/ProtectedRoute'
+import AdminRoute from '@/components/layouts/AdminRoute'
 
 import LoginPage from '@/pages/auth/LoginPage'
 import DashboardPage from '@/pages/dashboard/DashboardPage'
@@ -13,6 +14,8 @@ import ErrorsPage from '@/pages/import/ErrorsPage'
 import EditErrorPage from '@/pages/errors/EditErrorPage'
 import SalesByPartnerPage from '@/pages/reports/SalesByPartnerPage'
 import SalesByPeriodPage from '@/pages/reports/SalesByPeriodPage'
+import EmpresasPage from '@/pages/admin/EmpresasPage'
+import UsuariosPage from '@/pages/admin/UsuariosPage'
 
 export const router = createBrowserRouter([
     {
@@ -38,6 +41,9 @@ export const router = createBrowserRouter([
             { path: '/importar/erros/:id/editar', element: <EditErrorPage /> },
             { path: '/compras/funcionario', element: <SalesByPartnerPage /> },
             { path: '/compras/periodo', element: <SalesByPeriodPage /> },
+            // Rotas exclusivas de admin
+            { path: '/admin/empresas', element: <AdminRoute><EmpresasPage /></AdminRoute> },
+            { path: '/admin/usuarios', element: <AdminRoute><UsuariosPage /></AdminRoute> },
         ],
     },
     { path: '*', element: <Navigate to="/dashboard" replace /> },

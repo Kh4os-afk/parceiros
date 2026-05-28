@@ -1,15 +1,25 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import api, { initCsrf } from '@/lib/axios'
 
+interface Empresa {
+    id: number
+    nome: string
+    slug: string
+}
+
 interface User {
     id: number
     name: string
     email: string
+    role: 'admin' | 'user'
+    empresa_id: number | null
+    empresa: Empresa | null
 }
 
 interface AuthContextType {
     user: User | null
     loading: boolean
+    isAdmin: boolean
     login: (email: string, password: string, remember?: boolean) => Promise<void>
     logout: () => Promise<void>
 }
@@ -38,8 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
     }
 
+    const isAdmin = user?.role === 'admin'
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, isAdmin, login, logout }}>
             {children}
         </AuthContext.Provider>
     )
