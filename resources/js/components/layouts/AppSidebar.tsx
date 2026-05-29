@@ -16,6 +16,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarRail,
+    useSidebar,
 } from '@/components/ui/sidebar'
 import {
     DropdownMenu,
@@ -50,12 +51,13 @@ const navGroups = [
 
 function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementType; label: string }) {
     const { pathname } = useLocation()
+    const { setOpenMobile } = useSidebar()
     const isActive = pathname === to || (to !== '/dashboard' && pathname.startsWith(to))
 
     return (
         <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={label} isActive={isActive}>
-                <NavLink to={to} end>
+                <NavLink to={to} end onClick={() => setOpenMobile(false)}>
                     <Icon />
                     <span>{label}</span>
                 </NavLink>
