@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Loader2, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import api from '@/lib/axios'
-import { formatCPF, toTitleCase } from '@/lib/utils'
+import { formatCPF, formatMoneyInput, maskMoney, parseMoney, toTitleCase } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 
 interface Errors { [key: string]: string[] }
@@ -32,7 +32,7 @@ export default function EditErrorPage() {
                     nome:      toTitleCase(p.nome),
                     cpf:       formatCPF(p.cpf),
                     matricula: p.matricula != null ? String(p.matricula) : '',
-                    limcred:   String(p.limcred ?? ''),
+                    limcred:   formatMoneyInput(p.limcred ?? 0),
                     bloqueado: String(p.bloqueado ?? '0'),
                 })
             })
@@ -53,7 +53,7 @@ export default function EditErrorPage() {
                 nome:      form.nome,
                 cpf:       form.cpf.replace(/\D/g, ''),
                 matricula: form.matricula || null,
-                limcred:   form.limcred,
+                limcred:   parseMoney(form.limcred),
                 bloqueado: form.bloqueado,
             })
             navigate('/importar/erros')
@@ -170,11 +170,16 @@ export default function EditErrorPage() {
                             <label className="text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 Limite Mensal (R$)
                             </label>
-                            <Input
-                                value={form.limcred}
-                                onChange={e => set('limcred', e.target.value)}
-                                className={errors.limcred ? 'border-(--destructive)' : ''}
-                            />
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[0.62rem] text-(--muted-foreground) pointer-events-none">R$</span>
+                                <Input
+                                    value={form.limcred}
+                                    onChange={e => set('limcred', maskMoney(e.target.value))}
+                                    placeholder="0,00"
+                                    inputMode="decimal"
+                                    className={`pl-9 ${errors.limcred ? 'border-(--destructive)' : ''}`}
+                                />
+                            </div>
                             {errors.limcred?.[0] && <p className="text-[0.62rem] text-(--destructive)">{errors.limcred[0]}</p>}
                         </div>
                         <div className="flex flex-col gap-1.5">

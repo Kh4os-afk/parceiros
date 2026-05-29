@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import api from '@/lib/axios'
-import { maskCPF, stripCPF } from '@/lib/utils'
+import { maskCPF, maskMoney, parseMoney, stripCPF } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 
 interface Errors { [key: string]: string[] }
@@ -27,7 +27,7 @@ export default function CreatePage() {
                 nome: form.nome,
                 cpf: stripCPF(form.cpf),
                 matricula: form.matricula.trim() ? Number(form.matricula) : null,
-                limcred: form.limcred,
+                limcred: parseMoney(form.limcred),
                 bloqueado: form.bloqueado,
             })
             navigate('/funcionarios')
@@ -93,12 +93,16 @@ export default function CreatePage() {
                         </div>
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Limite de Crédito (R$)</label>
-                            <Input
-                                value={form.limcred}
-                                onChange={e => set('limcred', e.target.value)}
-                                placeholder="350,00"
-                                className={fieldError('limcred') ? 'border-(--destructive)' : ''}
-                            />
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[0.72rem] text-(--muted-foreground) pointer-events-none">R$</span>
+                                <Input
+                                    value={form.limcred}
+                                    onChange={e => set('limcred', maskMoney(e.target.value))}
+                                    placeholder="0,00"
+                                    inputMode="decimal"
+                                    className={`pl-9 ${fieldError('limcred') ? 'border-(--destructive)' : ''}`}
+                                />
+                            </div>
                             {fieldError('limcred') && <p className="text-[0.68rem] text-(--destructive)">{fieldError('limcred')}</p>}
                         </div>
                         <div className="flex flex-col gap-1.5">
