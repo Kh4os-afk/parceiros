@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Este arquivo fornece orientações ao Claude Code (claude.ai/code) ao trabalhar com o código neste repositório.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Visão Geral do Projeto
 
@@ -24,7 +24,7 @@ php artisan migrate
 php artisan db:seed
 php artisan tinker
 
-# Executar testes
+# Executar testes (os testes em tests/Feature/Livewire/ são do frontend Livewire anterior — desatualizados)
 php artisan test
 ./vendor/bin/pest
 ./vendor/bin/pest --filter=NomeDoTeste
@@ -75,7 +75,7 @@ Controllers em `app/Http/Controllers/Api/`:
 
 Form Requests em `app/Http/Requests/` para validação (CPF via `laravellegends/pt-br-validator`).
 
-Rotas em `routes/api.php` — todas protegidas por `auth:sanctum` exceto `/login`. As rotas de empresas e usuários também exigem o middleware `AdminOnly` (retorna 403 para não-admins).
+Rotas em `routes/api.php` — todas protegidas por `auth:sanctum` exceto `/login` e `GET /api/saldo` (endpoint público para consulta de saldo por CPF via `?cpf=`). As rotas de empresas e usuários também exigem o middleware `AdminOnly` (retorna 403 para não-admins).
 
 `routes/web.php` → catch-all SPA: `Route::get('/{any}', fn() => view('app'))`.
 
@@ -110,27 +110,36 @@ A relação Partner ↔ Sale é via campo string `cpf`, não por chave estrangei
 
 ```
 resources/js/
-├── app.tsx                          # Entry point: QueryClient + AuthProvider + RouterProvider
+├── app.tsx                          # Entry point: QueryClient (retry:1, staleTime:30s) + AuthProvider + RouterProvider
 ├── router.tsx                       # createBrowserRouter com ProtectedRoute e AdminRoute
 ├── lib/
 │   ├── axios.ts                     # Instância axios (withCredentials, XSRF)
-│   └── utils.ts                     # cn(), formatCPF(), formatMoney(), toTitleCase()
+│   └── utils.ts                     # cn(), formatCPF(), stripCPF(), formatMoney(), toTitleCase()
+├── hooks/
+│   ├── use-mobile.tsx               # Detecção de viewport mobile
+│   └── use-is-in-view.tsx           # Intersection Observer para animações
 ├── contexts/AuthContext.tsx         # Login, logout, usuário autenticado
-├── components/layouts/
-│   ├── AppLayout.tsx                # SidebarProvider + SidebarInset + Breadcrumb
-│   ├── AppSidebar.tsx               # Sidebar shadcn com nav e footer de usuário
-│   ├── AuthLayout.tsx               # Layout centralizado para login
-│   ├── ProtectedRoute.tsx           # Redireciona para /login se não autenticado
-│   └── AdminRoute.tsx               # Redireciona se não for admin
-├── components/ui/                   # Componentes shadcn/ui
+├── components/
+│   ├── layouts/
+│   │   ├── AppLayout.tsx            # SidebarProvider + SidebarInset + Breadcrumb
+│   │   ├── AppSidebar.tsx           # Sidebar shadcn com nav e footer de usuário
+│   │   ├── AuthLayout.tsx           # Layout centralizado para login
+│   │   ├── SaldoLayout.tsx          # Layout para página pública de saldo (sem auth)
+│   │   ├── ProtectedRoute.tsx       # Redireciona para /login se não autenticado
+│   │   └── AdminRoute.tsx           # Redireciona se não for admin
+│   ├── ui/                          # Componentes shadcn/ui
+│   ├── animate-ui/                  # Componentes do registro @animate-ui (ex: CountingNumber)
+│   └── PartnerDrawer.tsx            # Drawer reutilizável para ações de funcionário
 └── pages/
     ├── admin/EmpresasPage.tsx, UsuariosPage.tsx
     ├── auth/LoginPage.tsx
     ├── dashboard/DashboardPage.tsx
-    ├── partners/ListPage.tsx, CreatePage.tsx, EditPage.tsx
+    ├── partners/ListPage.tsx, CreatePage.tsx, EditPage.tsx, DetailPage.tsx
     ├── import/ImportPage.tsx, ErrorsPage.tsx
     ├── errors/EditErrorPage.tsx
-    └── reports/SalesByPartnerPage.tsx, SalesByPeriodPage.tsx
+    ├── reports/SalesByPartnerPage.tsx, SalesByPeriodPage.tsx
+    ├── consulta/ConsultaPage.tsx    # Consulta interna de compras
+    └── saldo/SaldoPage.tsx          # Página pública de saldo (usa SaldoLayout, sem auth)
 ```
 
 Estado servidor gerenciado com `@tanstack/react-query` v5. Notificações toast via `sonner`.
