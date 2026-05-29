@@ -35,6 +35,12 @@ php artisan test
 
 A aplicação roda via XAMPP em `http://localhost/parceiros/public/`. Banco de dados MySQL, nome `convenio`.
 
+Para resetar e recriar dados de demonstração:
+```bash
+php artisan db:seed --class=DemoSeeder
+```
+Cria 3 empresas (Baratão da Carne, Frigorífico Norte, Mercado Central), 1 usuário gestor por empresa (senha `gerente123`) e funcionários com `limcred` em **reais** (máx R$ 500).
+
 ## Commits
 
 **OBRIGATÓRIO: todas as mensagens de commit devem ser em Português (pt-BR)**, seguindo o formato definido em `.gitmessage`:
@@ -105,6 +111,8 @@ A relação Partner ↔ Sale é via campo string `cpf`, não por chave estrangei
 - Toda escrita bem-sucedida registra em `change_logs`
 - Nomes salvos em `mb_strtoupper()`, exibidos em `toTitleCase()` no frontend
 - Importação CSV usa `League\Csv\Reader`
+- `limcred` é armazenado em **reais** (decimal), não centavos — ex: `350.00` = R$ 350. A validação do CSV impõe `max:999`.
+- `PartnerController@index` faz eager load de `with('empresa')` para exibir a empresa na listagem (admin vê coluna Empresa).
 
 ### Frontend — React + Vite + TypeScript
 
@@ -144,6 +152,47 @@ resources/js/
 
 Estado servidor gerenciado com `@tanstack/react-query` v5. Notificações toast via `sonner`.
 
+#### Padrões de responsividade
+
+Todas as páginas são responsivas (mobile + desktop). Padrões estabelecidos:
+
+- **Grids de KPI**: `grid-cols-2 md:grid-cols-N lg:grid-cols-N`
+- **Layouts 2/3 + 1/3**: `grid-cols-1 lg:grid-cols-3` com `lg:col-span-2`
+- **Headers com ações**: `flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`
+- **Formulários multi-coluna**: `grid-cols-1 md:grid-cols-3` com `md:col-span-2`
+- **Tabelas**: `<table className="w-full min-w-max border-collapse">` dentro de `<div className="overflow-x-auto">` — o `min-w-max` garante scroll horizontal no mobile
+- **KPI items em grid**: `border-r border-b border-(--border)` em cada item — o `overflow-hidden` do container corta os excessos nas bordas externas
+- **Modais**: adicionar `mx-4` para não encostar nas bordas no mobile
+- **PartnerDrawer**: `w-full sm:max-w-120`
+- **Padding de headers**: `px-4 md:px-7 pt-5 md:pt-6`
+
+#### Breadcrumb
+
+`AppLayout.tsx` mapeia cada rota para uma trilha de navegação começando em Dashboard:
+- `/funcionarios` → Dashboard > Funcionários
+- `/importar/csv` → Dashboard > Funcionários > Importar CSV
+- `/compras/periodo` → Dashboard > Relatórios > Extrato por Período
+
+#### CountUp com valores monetários
+
+Sempre passar o valor **numérico** ao `CountUp`, nunca a string do `formatMoney()`:
+```tsx
+// ✅ Correto
+<span className="text-[0.5em] opacity-50 mr-0.5">R$</span>
+<CountUp value={grandTotal} decimals={2} duration={1.5} />
+
+// ❌ Errado — NaN
+<CountUp value={formatMoney(grandTotal)} decimals={2} duration={1.5} />
+```
+
+#### Barra de utilização de crédito
+
+Componente visual com gradiente + glow + shimmer animado. Keyframe `bar-shimmer` definido em `resources/css/app.css`. Usado em: `DetailPage`, `ConsultaPage`, `PartnerDrawer`.
+
+#### Sidebar mobile
+
+`AppSidebar` usa `useSidebar().setOpenMobile(false)` no `onClick` de cada `NavItem` para fechar automaticamente ao navegar.
+
 ### Frontend — Tailwind v4 + shadcn/ui
 
 **ATENÇÃO:** Este projeto usa **Tailwind v4**. CSS variables em classes arbitrárias usam parênteses, não colchetes:
@@ -160,3 +209,5 @@ CSS variables do tema em `resources/css/app.css`. Fonte: Oxanium (todas as varia
 ### Autenticação
 
 Sanctum SPA mode com cookies httpOnly. O frontend chama `GET /sanctum/csrf-cookie` antes do login para inicializar o XSRF token. Veja `resources/js/lib/axios.ts`.
+
+A `LoginPage` tem botão "Consultar Limite" que navega para a rota pública `/saldo` sem autenticação.

@@ -12,6 +12,13 @@ class UpdatePartnerRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->matricula === '' || $this->matricula === null) {
+            $this->merge(['matricula' => null]);
+        }
+    }
+
     public function rules(): array
     {
         $partnerId = $this->route('partner')?->id ?? $this->route('partner');

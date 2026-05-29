@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import api from '@/lib/axios'
-import { stripCPF } from '@/lib/utils'
+import { maskCPF, stripCPF } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 
 interface Errors { [key: string]: string[] }
@@ -23,7 +23,13 @@ export default function CreatePage() {
         setLoading(true)
         setErrors({})
         try {
-            await api.post('/partners', { ...form, cpf: stripCPF(form.cpf) })
+            await api.post('/partners', {
+                nome: form.nome,
+                cpf: stripCPF(form.cpf),
+                matricula: form.matricula.trim() ? Number(form.matricula) : null,
+                limcred: form.limcred,
+                bloqueado: form.bloqueado,
+            })
             navigate('/funcionarios')
         } catch (err: any) {
             if (err.response?.status === 422) setErrors(err.response.data.errors ?? {})
@@ -61,7 +67,7 @@ export default function CreatePage() {
                             {fieldError('nome') && <p className="text-[0.68rem] text-(--destructive)">{fieldError('nome')}</p>}
                         </div>
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Matrícula</label>
+                            <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Matrícula <span className="font-normal normal-case tracking-normal">(opcional)</span></label>
                             <Input
                                 value={form.matricula}
                                 onChange={e => set('matricula', e.target.value)}
@@ -77,8 +83,9 @@ export default function CreatePage() {
                             <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">CPF</label>
                             <Input
                                 value={form.cpf}
-                                onChange={e => set('cpf', e.target.value)}
+                                onChange={e => set('cpf', maskCPF(e.target.value))}
                                 placeholder="000.000.000-00"
+                                inputMode="numeric"
                                 maxLength={14}
                                 className={fieldError('cpf') ? 'border-(--destructive) tracking-widest' : 'tracking-widest'}
                             />

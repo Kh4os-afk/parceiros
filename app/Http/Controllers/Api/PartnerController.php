@@ -73,7 +73,7 @@ class PartnerController extends Controller
                 'empresa_id' => auth()->user()->empresa_id,
                 'nome'       => mb_strtoupper($request->nome),
                 'cpf'        => $request->cpf,
-                'matricula'  => $request->matricula,
+                'matricula'  => $request->filled('matricula') ? $request->matricula : null,
                 'limcred'    => $request->limcred,
                 'bloqueado'  => $request->bloqueado,
             ]);
@@ -103,7 +103,7 @@ class PartnerController extends Controller
 
             $partner->update([
                 'nome'      => mb_strtoupper($request->nome),
-                'matricula' => $request->matricula,
+                'matricula' => $request->filled('matricula') ? $request->matricula : null,
                 'limcred'   => $request->limcred,
                 'bloqueado' => $request->bloqueado,
                 'alterado'  => 1,
