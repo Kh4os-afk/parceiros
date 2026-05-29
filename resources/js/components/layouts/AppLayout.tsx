@@ -15,64 +15,34 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { AppSidebar } from '@/components/layouts/AppSidebar'
 
-const routeMap: Record<string, { section: string; label: string }> = {
-    '/dashboard':           { section: 'Geral',          label: 'Dashboard' },
-    '/funcionarios':        { section: 'Cadastros',       label: 'Funcionários' },
-    '/importar/csv':        { section: 'Importação',      label: 'Importar CSV' },
-    '/importar/erros':      { section: 'Importação',      label: 'Erros de Importação' },
-    '/compras/funcionario': { section: 'Relatórios',      label: 'Compras por Funcionário' },
-    '/compras/periodo':     { section: 'Relatórios',      label: 'Extrato por Período' },
-    '/consulta':            { section: 'Relatórios',      label: 'Consulta de Saldo'   },
-    '/admin/empresas':      { section: 'Administração',   label: 'Empresas' },
-    '/admin/usuarios':      { section: 'Administração',   label: 'Usuários' },
-}
-
 type Crumb = { label: string; href?: string }
 
 function useBreadcrumbs(): Crumb[] {
     const { pathname } = useLocation()
 
-    const exact = routeMap[pathname]
-    if (exact) {
-        return [
-            { label: exact.section },
-            { label: exact.label },
-        ]
-    }
+    const dash: Crumb  = { label: 'Dashboard',            href: '/dashboard'      }
+    const func: Crumb  = { label: 'Funcionários',          href: '/funcionarios'   }
+    const erros: Crumb = { label: 'Erros de Importação',   href: '/importar/erros' }
 
-    if (/^\/funcionarios\/\d+$/.test(pathname)) {
-        return [
-            { label: 'Cadastros' },
-            { label: 'Funcionários', href: '/funcionarios' },
-            { label: 'Detalhes' },
-        ]
-    }
+    if (pathname === '/dashboard') return [{ label: 'Dashboard' }]
 
-    if (pathname.startsWith('/funcionarios/') && pathname.endsWith('/editar')) {
-        return [
-            { label: 'Cadastros' },
-            { label: 'Funcionários', href: '/funcionarios' },
-            { label: 'Editar' },
-        ]
-    }
+    if (pathname === '/funcionarios')             return [dash, { label: 'Funcionários' }]
+    if (pathname === '/funcionarios/cadastrar')   return [dash, func, { label: 'Cadastrar' }]
+    if (/^\/funcionarios\/\d+$/.test(pathname))  return [dash, func, { label: 'Detalhes' }]
+    if (/^\/funcionarios\/\d+\/editar$/.test(pathname)) return [dash, func, { label: 'Editar' }]
 
-    if (pathname.startsWith('/funcionarios/cadastrar')) {
-        return [
-            { label: 'Cadastros' },
-            { label: 'Funcionários', href: '/funcionarios' },
-            { label: 'Cadastrar' },
-        ]
-    }
+    if (pathname === '/importar/csv')   return [dash, func, { label: 'Importar CSV' }]
+    if (pathname === '/importar/erros') return [dash, func, { label: 'Erros de Importação' }]
+    if (/^\/importar\/erros\/\d+\/editar$/.test(pathname)) return [dash, func, erros, { label: 'Corrigir' }]
 
-    if (/^\/importar\/erros\/\d+\/editar$/.test(pathname)) {
-        return [
-            { label: 'Importação' },
-            { label: 'Erros de Importação', href: '/importar/erros' },
-            { label: 'Corrigir' },
-        ]
-    }
+    if (pathname === '/compras/funcionario') return [dash, { label: 'Relatórios' }, { label: 'Compras por Funcionário' }]
+    if (pathname === '/compras/periodo')     return [dash, { label: 'Relatórios' }, { label: 'Extrato por Período' }]
+    if (pathname === '/consulta')            return [dash, { label: 'Relatórios' }, { label: 'Consulta de Saldo' }]
 
-    return [{ label: 'Dashboard' }]
+    if (pathname === '/admin/empresas')  return [dash, { label: 'Administração' }, { label: 'Empresas' }]
+    if (pathname === '/admin/usuarios')  return [dash, { label: 'Administração' }, { label: 'Usuários' }]
+
+    return [dash]
 }
 
 export default function AppLayout() {

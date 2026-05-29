@@ -200,11 +200,14 @@ export default function DashboardPage() {
                                             {r.quantidade}x
                                         </span>
                                     </div>
-                                    <div className="h-0.5 bg-(--border) w-full overflow-hidden ml-8">
-                                        <div
-                                            className="h-full bg-(--primary) opacity-50 group-hover:opacity-90 transition-all duration-500"
-                                            style={{ width: `${barW}%` }}
-                                        />
+                                    <div className="flex gap-3">
+                                        <div className="w-5 shrink-0" />
+                                        <div className="flex-1 h-0.5 bg-(--border) overflow-hidden">
+                                            <div
+                                                className="h-full bg-(--primary) opacity-50 group-hover:opacity-90 transition-all duration-500"
+                                                style={{ width: `${barW}%` }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             )
@@ -245,11 +248,14 @@ export default function DashboardPage() {
                                                 {formatMoney(f.total)}
                                             </span>
                                         </div>
-                                        <div className="h-0.5 bg-(--border) w-full overflow-hidden ml-6">
-                                            <div
-                                                className="h-full bg-(--primary) opacity-50 group-hover:opacity-90 transition-all duration-500"
-                                                style={{ width: `${barW}%` }}
-                                            />
+                                        <div className="flex gap-2">
+                                            <div className="w-4 shrink-0" />
+                                            <div className="flex-1 h-0.5 bg-(--border) overflow-hidden">
+                                                <div
+                                                    className="h-full bg-(--primary) opacity-50 group-hover:opacity-90 transition-all duration-500"
+                                                    style={{ width: `${barW}%` }}
+                                                />
+                                            </div>
                                         </div>
                                         <p className="text-[0.43rem] uppercase tracking-[0.12em] text-(--muted-foreground) ml-6">
                                             {f.quantidade} compra{f.quantidade !== 1 ? 's' : ''}
