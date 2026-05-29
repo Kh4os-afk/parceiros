@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { Loader2, ShoppingCart, LogIn } from 'lucide-react'
+import { Loader2, ShoppingCart, LogIn, Wallet } from 'lucide-react'
 
 export default function LoginPage() {
     const { login }   = useAuth()
@@ -124,17 +124,28 @@ export default function LoginPage() {
                         />
                     </div>
 
-                    <label className="flex items-center gap-2.5 cursor-pointer group mt-1">
-                        <input
-                            type="checkbox"
-                            checked={remember}
-                            onChange={e => setRemember(e.target.checked)}
-                            className="accent-(--primary) w-3.5 h-3.5"
-                        />
-                        <span className="text-[0.62rem] text-(--muted-foreground) group-hover:text-(--foreground) transition-colors">
-                            Permanecer logado
-                        </span>
-                    </label>
+                    <div className="flex items-center justify-between mt-1">
+                        <label className="flex items-center gap-2.5 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                checked={remember}
+                                onChange={e => setRemember(e.target.checked)}
+                                className="accent-(--primary) w-3.5 h-3.5"
+                            />
+                            <span className="text-[0.62rem] text-(--muted-foreground) group-hover:text-(--foreground) transition-colors">
+                                Permanecer logado
+                            </span>
+                        </label>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/saldo')}
+                            className="flex items-center gap-1.5 text-[0.58rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground) hover:text-(--primary) transition-colors"
+                        >
+                            <Wallet size={11} />
+                            Consultar Limite
+                        </button>
+                    </div>
 
                     {error && (
                         <div className="flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 text-red-500">
