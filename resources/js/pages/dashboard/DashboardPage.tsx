@@ -125,12 +125,12 @@ export default function DashboardPage() {
                     <div key={i} className={`absolute z-10 w-5 h-5 border-(--primary)/30 ${cls}`} />
                 ))}
 
-                <div className="relative grid grid-cols-4 divide-x divide-(--border)">
+                <div className="relative grid grid-cols-2 md:grid-cols-4 divide-(--border) [&>*]:border-r [&>*:nth-child(2n)]:border-r-0 md:[&>*]:border-r md:[&>*:nth-child(2n)]:border-r md:[&>*:nth-child(4n)]:border-r-0 [&>*:nth-child(n+3)]:border-t md:[&>*:nth-child(n+3)]:border-t-0">
                     {kpis.map(({ label, sub, value, decimals, icon: Icon, color, highlight, to }) => (
                         <button
                             key={label}
                             onClick={() => navigate(to)}
-                            className={`group relative text-left px-7 py-5 overflow-hidden transition-all duration-200 ${highlight ? 'bg-(--primary)/5 hover:bg-(--primary)/10' : 'bg-transparent hover:bg-muted'}`}
+                            className={`group relative text-left px-4 md:px-7 py-5 border-r border-b border-(--border) overflow-hidden transition-all duration-200 ${highlight ? 'bg-(--primary)/5 hover:bg-(--primary)/10' : 'bg-transparent hover:bg-muted'}`}
                         >
                             <div className={`absolute top-0 left-0 right-0 h-0.5 transition-opacity duration-200 ${highlight ? 'opacity-100 bg-(--primary)' : 'opacity-0 group-hover:opacity-50 bg-(--primary)'}`} />
 
@@ -156,10 +156,10 @@ export default function DashboardPage() {
             </div>
 
             {/* ── Grid: ranking + info ── */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
                 {/* Ranking do mês — 2/3 */}
-                <div className="col-span-2 bg-card border border-(--border) flex flex-col">
+                <div className="lg:col-span-2 bg-card border border-(--border) flex flex-col">
                     <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between">
                         <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                             Maiores Compradores — {mesAtualLabel()}

@@ -81,7 +81,7 @@ export default function PartnerDrawer({ partner, onClose }: Props) {
             {/* Panel */}
             <div
                 style={{ transition: 'transform 280ms cubic-bezier(0.4,0,0.2,1)' }}
-                className={`fixed right-0 top-0 bottom-0 z-50 w-full max-w-[480px] bg-card shadow-2xl flex flex-col ${mounted ? 'translate-x-0' : 'translate-x-full'}`}
+                className={`fixed right-0 top-0 bottom-0 z-50 w-full sm:max-w-120 bg-card shadow-2xl flex flex-col ${mounted ? 'translate-x-0' : 'translate-x-full'}`}
             >
                 {/* ── Header escuro ── */}
                 <div className="relative bg-(--foreground) px-6 pt-7 pb-5 shrink-0 overflow-hidden">
@@ -132,7 +132,7 @@ export default function PartnerDrawer({ partner, onClose }: Props) {
                     </div>
 
                     {/* Stats grid */}
-                    <div className="grid grid-cols-4 gap-px mt-5 bg-card/8">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px mt-5 bg-card/8">
                         {stats.map(({ label, value, icon: Icon }) => (
                             <div key={label} className="bg-card/5 px-3 py-2.5">
                                 <Icon size={10} className="text-white/25 mb-1.5" />

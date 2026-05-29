@@ -118,7 +118,7 @@ export default function AppLayout() {
                 </header>
 
                 {/* ── Conteúdo da página ── */}
-                <main className="flex flex-1 flex-col gap-4 p-6">
+                <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
                     <Outlet />
                 </main>
             </SidebarInset>

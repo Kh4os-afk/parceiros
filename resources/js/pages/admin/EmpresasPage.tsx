@@ -72,7 +72,7 @@ export default function EmpresasPage() {
                     <div key={i} className={`absolute w-5 h-5 border-(--primary)/30 ${cls}`} />
                 ))}
 
-                <div className="relative flex items-center justify-between px-7 pt-6 pb-5">
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 md:px-7 pt-5 md:pt-6 pb-4 md:pb-5">
                     <div>
                         <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Administração</p>
                         <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Empresas</h1>
@@ -118,7 +118,7 @@ export default function EmpresasPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full min-w-max border-collapse">
                         <thead>
                             <tr className="bg-muted border-b border-(--border)">
                                 {['Nome', 'Slug', 'Status'].map(h => (
@@ -173,7 +173,7 @@ export default function EmpresasPage() {
             {/* ── Modal criar/editar ── */}
             {modal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="relative bg-card border border-(--border) shadow-2xl w-full max-w-sm overflow-hidden">
+                    <div className="relative bg-card border border-(--border) shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
                         <div className="h-0.5 bg-(--primary) w-full" />
                         <div className="px-6 py-4 border-b border-(--border) bg-muted flex items-center justify-between">
                             <span className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-(--foreground)">

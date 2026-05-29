@@ -87,7 +87,7 @@ export default function ListPage() {
                 ))}
 
                 {/* Título + ações */}
-                <div className="relative flex items-center justify-between px-7 pt-6 pb-5">
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 md:px-7 pt-5 md:pt-6 pb-4 md:pb-5">
                     <div>
                         <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Gestão</p>
                         <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Funcionários</h1>
@@ -109,7 +109,7 @@ export default function ListPage() {
                 </div>
 
                 {/* Strip de KPIs */}
-                <div className="relative grid grid-cols-5 border-t border-(--border)">
+                <div className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 border-t border-(--border)">
                     {[
                         {
                             label: 'Total Cadastrados',
@@ -149,7 +149,7 @@ export default function ListPage() {
                             money: true,
                         },
                     ].map(({ label, value, sub, icon: Icon, color, money }) => (
-                        <div key={label} className="group relative px-6 py-3.5 border-r border-(--border) last:border-r-0 bg-muted hover:bg-card cursor-default transition-colors duration-150 overflow-hidden">
+                        <div key={label} className="group relative px-4 md:px-6 py-3.5 border-r border-b border-(--border) bg-muted hover:bg-card cursor-default transition-colors duration-150 overflow-hidden">
                             <div className={`absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-60 transition-opacity ${
                                 color === 'green' ? 'bg-green-500' : color === 'red' ? 'bg-red-500' : 'bg-(--primary)'
                             }`} />
@@ -204,7 +204,7 @@ export default function ListPage() {
 
                 {/* Table */}
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full min-w-max border-collapse">
                         <thead>
                             <tr className="bg-muted border-b border-(--border)">
                                 {([

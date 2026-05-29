@@ -99,7 +99,7 @@ export default function ImportPage() {
                 {corners.map((cls, i) => (
                     <div key={i} className={`absolute w-5 h-5 border-(--primary)/30 ${cls}`} />
                 ))}
-                <div className="relative px-7 py-5">
+                <div className="relative px-4 md:px-7 py-5">
                     <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Importação</p>
                     <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Importar CSV</h1>
                     <p className="text-[0.62rem] text-(--muted-foreground) mt-1.5">
@@ -109,10 +109,10 @@ export default function ImportPage() {
             </div>
 
             {/* ── Conteúdo — 2 colunas ── */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
                 {/* Upload — 2/3 */}
-                <div className="col-span-2 bg-card border border-(--border) flex flex-col">
+                <div className="lg:col-span-2 bg-card border border-(--border) flex flex-col">
                     <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center gap-2">
                         <Upload size={11} className="text-(--primary) opacity-70" />
                         <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Arquivo CSV</span>

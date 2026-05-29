@@ -137,7 +137,7 @@ export default function SalesByPartnerPage() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
+                        <table className="w-full min-w-max border-collapse">
                             <thead>
                                 <tr className="bg-muted border-b border-(--border)">
                                     {['Nº Nota', 'Data', 'Filial', 'Valor'].map(h => (

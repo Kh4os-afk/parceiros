@@ -120,7 +120,7 @@ export default function ConsultaPage() {
                     <div key={i} className={`absolute z-10 w-5 h-5 border-(--primary)/30 ${cls}`} />
                 ))}
 
-                <div className="relative px-7 py-5">
+                <div className="relative px-4 md:px-7 py-5">
                     <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Convênio</p>
                     <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Consulta de Saldo</h1>
                     <p className="text-[0.62rem] text-(--muted-foreground) mt-1.5">
@@ -128,7 +128,7 @@ export default function ConsultaPage() {
                     </p>
 
                     {/* Busca por CPF */}
-                    <form onSubmit={handleSearch} className="flex items-end gap-3 mt-5">
+                    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row sm:items-end gap-3 mt-5">
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[0.5rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">CPF do Funcionário</label>
                             <input
@@ -136,7 +136,7 @@ export default function ConsultaPage() {
                                 onChange={e => setCpfInput(e.target.value)}
                                 placeholder="000.000.000-00"
                                 maxLength={14}
-                                className="w-52 border border-(--border) px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-40 transition-colors font-mono tracking-widest"
+                                className="w-full sm:w-52 border border-(--border) px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-40 transition-colors font-mono tracking-widest"
                             />
                         </div>
                         <button type="submit" disabled={loading || stripCPF(cpfInput).length !== 11}
@@ -157,10 +157,10 @@ export default function ConsultaPage() {
             {partner && (
                 <>
                     {/* ── Card de destaque ── */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
                         {/* Disponível — destaque principal */}
-                        <div className={`col-span-2 relative border overflow-hidden flex flex-col justify-between p-8 ${
+                        <div className={`lg:col-span-2 relative border overflow-hidden flex flex-col justify-between p-5 md:p-8 ${
                             partner.bloqueado
                                 ? 'bg-red-500/5 border-red-500/20'
                                 : disponivel === 0
@@ -204,7 +204,7 @@ export default function ConsultaPage() {
                                     {partner.bloqueado ? (
                                         <p className="text-2xl font-black text-red-500 uppercase tracking-wide">Acesso suspenso</p>
                                     ) : (
-                                        <p className={`text-[2.8rem] font-black tabular-nums leading-none ${
+                                        <p className={`text-[2rem] md:text-[2.8rem] font-black tabular-nums leading-none ${
                                             disponivel === 0 ? 'text-amber-500' : 'text-(--primary)'
                                         }`}>
                                             <span className="text-[0.3em] font-bold opacity-60 mr-1">R$</span>
@@ -310,7 +310,7 @@ export default function ConsultaPage() {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full border-collapse">
+                                <table className="w-full min-w-max border-collapse">
                                     <thead>
                                         <tr className="bg-muted border-b border-(--border)">
                                             {['Data', 'Loja', 'Nº Nota', 'Valor', 'NFC-e', 'Status'].map(h => (

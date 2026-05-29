@@ -274,7 +274,7 @@ export default function PartnerDetailPage() {
                 ))}
 
                 {/* ── Identidade ── */}
-                <div className="relative flex items-start gap-6 px-8 pt-7 pb-6">
+                <div className="relative flex flex-col sm:flex-row items-start gap-4 md:gap-6 px-4 md:px-8 pt-5 md:pt-7 pb-4 md:pb-6">
                     {/* Avatar */}
                     <div className="shrink-0 relative mt-1">
                         <div
@@ -346,7 +346,7 @@ export default function PartnerDetailPage() {
                     </div>
 
                     {/* Sparkline + tendência */}
-                    <div className="shrink-0 flex flex-col items-end gap-2 pt-1">
+                    <div className="shrink-0 hidden sm:flex flex-col items-end gap-2 pt-1">
                         <span className="text-[0.42rem] uppercase tracking-[0.3em] text-(--muted-foreground)">
                             Tendência · 6m
                         </span>
@@ -390,7 +390,7 @@ export default function PartnerDetailPage() {
                     </div>
 
                     {/* Ações */}
-                    <div className="shrink-0 flex flex-col gap-1.5 self-start pt-1">
+                    <div className="shrink-0 flex sm:flex-col flex-row gap-1.5 self-start sm:pt-1">
                         <button
                             onClick={() =>
                                 navigate(`/funcionarios/${id}/editar`)
@@ -409,7 +409,7 @@ export default function PartnerDetailPage() {
                 </div>
 
                 {/* ── KPIs ── */}
-                <div className="relative grid grid-cols-5 border-t border-(--border)">
+                <div className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 border-t border-(--border)">
                     {[
                         {
                             label: "Compras Ativas",
@@ -462,7 +462,7 @@ export default function PartnerDetailPage() {
                         }) => (
                             <div
                                 key={label}
-                                className={`group relative px-6 py-4 border-r border-(--border) last:border-r-0 overflow-hidden cursor-default transition-all duration-200 ${highlight ? "bg-(--primary)/5 hover:bg-(--primary)/10" : "bg-muted hover:bg-card"}`}
+                                className={`group relative px-4 md:px-6 py-4 border-r border-b border-(--border) overflow-hidden cursor-default transition-all duration-200 ${highlight ? "bg-(--primary)/5 hover:bg-(--primary)/10" : "bg-muted hover:bg-card"}`}
                             >
                                 {/* Linha de acento — sempre presente no destaque, aparece no hover dos demais */}
                                 <div
@@ -502,7 +502,7 @@ export default function PartnerDetailPage() {
 
                 {/* ── Barra de utilização ── */}
                 {partner.limcred > 0 && (
-                    <div className="relative px-8 py-3 border-t border-(--border)">
+                    <div className="relative px-4 md:px-8 py-3 border-t border-(--border)">
                         <div className="flex justify-between mb-1.5">
                             <span className="text-(--muted-foreground) text-[0.44rem] uppercase tracking-[0.25em]">
                                 Utilização do limite de crédito
@@ -532,9 +532,9 @@ export default function PartnerDetailPage() {
             </div>
 
             {/* ── Grid: gráfico + filiais ────────────────────────────────────── */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Gráfico mensal — 2/3 */}
-                <div className="col-span-2 bg-card border border-(--border) flex flex-col">
+                <div className="lg:col-span-2 bg-card border border-(--border) flex flex-col">
                     <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between gap-6">
                         <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) shrink-0">
                             Gastos por Mês — últimos 12 meses
@@ -707,7 +707,7 @@ export default function PartnerDetailPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full min-w-max border-collapse">
                         <thead>
                             <tr className="bg-muted border-b border-(--border)">
                                 {[

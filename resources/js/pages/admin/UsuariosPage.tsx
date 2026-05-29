@@ -108,7 +108,7 @@ export default function UsuariosPage() {
                     <div key={i} className={`absolute w-5 h-5 border-(--primary)/30 ${cls}`} />
                 ))}
 
-                <div className="relative flex items-center justify-between px-7 pt-6 pb-5">
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 md:px-7 pt-5 md:pt-6 pb-4 md:pb-5">
                     <div>
                         <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Administração</p>
                         <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Usuários</h1>
@@ -150,7 +150,7 @@ export default function UsuariosPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full min-w-max border-collapse">
                         <thead>
                             <tr className="bg-muted border-b border-(--border)">
                                 {['Nome', 'E-mail', 'Empresa', 'Perfil'].map(h => (
@@ -215,7 +215,7 @@ export default function UsuariosPage() {
             {/* ── Modal criar/editar ── */}
             {modal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="relative bg-card border border-(--border) shadow-2xl w-full max-w-sm overflow-hidden">
+                    <div className="relative bg-card border border-(--border) shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
                         <div className="h-0.5 bg-(--primary) w-full" />
                         <div className="px-6 py-4 border-b border-(--border) bg-muted">
                             <span className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-(--foreground)">
@@ -252,7 +252,7 @@ export default function UsuariosPage() {
                                 {errors.password?.[0] && <p className="text-[0.62rem] text-(--destructive)">{errors.password[0]}</p>}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Perfil</label>
                                     <select value={form.role} onChange={e => set('role', e.target.value)}
@@ -295,7 +295,7 @@ export default function UsuariosPage() {
             {/* ── Confirm delete ── */}
             {confirmDelete && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="relative bg-card border border-(--border) shadow-2xl w-full max-w-sm overflow-hidden">
+                    <div className="relative bg-card border border-(--border) shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
                         <div className="h-0.5 bg-red-500 w-full" />
                         <div className="p-6 flex flex-col gap-5">
                             <div className="flex items-start gap-3">

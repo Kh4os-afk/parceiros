@@ -94,11 +94,11 @@ export default function SalesByPeriodPage() {
                     <div key={i} className={`absolute w-4 h-4 border-(--primary)/30 ${cls}`} />
                 ))}
 
-                <div className="relative px-7 py-5">
+                <div className="relative px-4 md:px-7 py-5">
                     <p className="text-[0.48rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-4">
                         Selecionar Período
                     </p>
-                    <form onSubmit={handleSubmit} className="flex items-end gap-4 flex-wrap">
+                    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row sm:items-end gap-4 flex-wrap">
                         {[
                             { id: 'start', label: 'Data Inicial', value: startDate, set: setStartDate, err: errors.start_date },
                             { id: 'end',   label: 'Data Final',   value: endDate,   set: setEndDate,   err: errors.end_date   },
@@ -112,7 +112,7 @@ export default function SalesByPeriodPage() {
                                     value={value}
                                     onChange={e => set(e.target.value)}
                                     required
-                                    className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) transition-colors w-44 ${err ? 'border-(--destructive)' : 'border-(--border)'}`}
+                                    className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) transition-colors w-full sm:w-44 ${err ? 'border-(--destructive)' : 'border-(--border)'}`}
                                 />
                                 {err?.[0] && <p className="text-[0.62rem] text-(--destructive)">{err[0]}</p>}
                             </div>
@@ -135,7 +135,7 @@ export default function SalesByPeriodPage() {
                 <>
                     {/* Stats do período */}
                     {results.length > 0 && (
-                        <div className="grid grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             {[
                                 { label: 'Total no Período',       value: formatMoney(grandTotal),           sub: `${formatDateLabel(startDate)} → ${formatDateLabel(endDate)}`, icon: TrendingUp, highlight: true  },
                                 { label: 'Funcionários',           value: String(results.length),            sub: 'com compras no período',                                        icon: Users,      highlight: false },
@@ -180,7 +180,7 @@ export default function SalesByPeriodPage() {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full border-collapse">
+                                <table className="w-full min-w-max border-collapse">
                                     <thead>
                                         <tr className="bg-muted border-b border-(--border)">
                                             <th className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) w-8">#</th>

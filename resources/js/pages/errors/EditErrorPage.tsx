@@ -81,7 +81,7 @@ export default function EditErrorPage() {
                     <div key={i} className={`absolute w-5 h-5 border-(--primary)/30 ${cls}`} />
                 ))}
 
-                <div className="relative px-7 py-5">
+                <div className="relative px-4 md:px-7 py-5">
                     <button
                         onClick={() => navigate('/importar/erros')}
                         className="flex items-center gap-1.5 text-[0.5rem] uppercase tracking-[0.25em] text-(--muted-foreground) hover:text-(--primary) transition-colors mb-3"
@@ -127,8 +127,8 @@ export default function EditErrorPage() {
 
                 <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5" autoComplete="off">
 
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-2 flex flex-col gap-1.5">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="md:col-span-2 flex flex-col gap-1.5">
                             <label className="text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 Nome Completo
                             </label>
@@ -152,7 +152,7 @@ export default function EditErrorPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 CPF
