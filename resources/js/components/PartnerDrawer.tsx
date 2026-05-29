@@ -149,11 +149,24 @@ export default function PartnerDrawer({ partner, onClose }: Props) {
                                 <span className="text-white/35 text-[0.48rem] uppercase tracking-[0.15em]">Utilização do limite</span>
                                 <span className="text-white/35 text-[0.48rem]">{Math.round(pct)}%</span>
                             </div>
-                            <div className="h-[2px] bg-card/10 w-full">
+                            <div className="h-1.5 bg-card/10 w-full overflow-hidden">
                                 <div
-                                    className="h-full bg-(--primary) transition-all duration-700 ease-out"
-                                    style={{ width: `${pct}%`, transitionDelay: '200ms' }}
-                                />
+                                    className="h-full relative overflow-hidden transition-all duration-700 ease-out"
+                                    style={{
+                                        width: `${pct}%`,
+                                        transitionDelay: '200ms',
+                                        background: "linear-gradient(90deg, color-mix(in oklch, var(--primary) 70%, black) 0%, var(--primary) 100%)",
+                                        boxShadow: "0 0 8px color-mix(in oklch, var(--primary) 60%, transparent)",
+                                    }}
+                                >
+                                    <div
+                                        className="absolute inset-0 w-1/3"
+                                        style={{
+                                            background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
+                                            animation: "bar-shimmer 2.8s ease-in-out infinite",
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}

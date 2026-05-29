@@ -2,122 +2,167 @@
 
 namespace Database\Seeders;
 
+use App\Models\ChangeLog;
 use App\Models\Empresa;
+use App\Models\Filial;
 use App\Models\Partner;
 use App\Models\PartnerError;
 use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class DemoSeeder extends Seeder
 {
-    private array $filiais = [3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14];
+    // ── Dados das 3 empresas ─────────────────────────────────────────────────
 
-    private array $nomes = [
-        'ANA PAULA FERREIRA COSTA', 'CARLOS EDUARDO SOUZA LIMA', 'FERNANDA CRISTINA ALVES SANTOS',
-        'JOÃO MARCOS RIBEIRO SILVA', 'MARIA APARECIDA NASCIMENTO', 'ANTONIO CARLOS PEREIRA GOMES',
-        'ROSANA DE OLIVEIRA MATOS', 'DIEGO HENRIQUE CAVALCANTE', 'PATRICIA LIMA RODRIGUES',
-        'LUCAS GABRIEL TEIXEIRA', 'SIMONE ALMEIDA BARBOSA', 'RAFAEL AUGUSTO CORREIA',
-        'JULIANA CRISTINA MARTINS', 'ANDERSON LUIZ FERREIRA', 'CAMILA SOUZA NUNES',
-        'WELLINGTON SANTOS PINTO', 'FABIANA ROCHA CARVALHO', 'MARCOS VINICIUS GONCALVES',
-        'JESSICA APARECIDA MOREIRA', 'THIAGO HENRIQUE AZEVEDO', 'CLAUDIA MENDES FREITAS',
-        'RODRIGO PEREIRA DA SILVA', 'VANESSA CRISTINA LIMA', 'LEANDRO FERREIRA BATISTA',
-        'ADRIANA SOUSA CAMPOS', 'GABRIEL LUCAS VIEIRA', 'CRISTIANE OLIVEIRA SANTOS',
-        'FELIPE AUGUSTO COSTA', 'LARISSA MELO CARDOSO', 'BRUNO HENRIQUE MACEDO',
-        'SANDRA FARIA RESENDE', 'GUSTAVO ALVES MONTEIRO', 'RENATA GOMES VIEIRA',
-        'MARCELO TEIXEIRA AMORIM', 'ELIZANGELA SOUZA RAMOS', 'PABLO CESAR LEAL',
-        'TATIANE ARAUJO CUNHA', 'EDSON RODRIGUES CAVALCANTE', 'ALINE PAIVA SILVEIRA',
-        'DEIVID ARCANJO FARIAS', 'ROSIMEIRE TAVARES DUARTE', 'CELSO BRITO MAGALHAES',
+    private array $config = [
+        [
+            'nome' => 'Baratão da Carne',
+            'slug' => 'baratao',
+            'user' => ['email' => 'gerente@barataodacarne.com.br', 'name' => 'Gerente Baratão', 'senha' => 'gerente123'],
+            'filiais' => ['Betânia', 'Barreira', 'Grande Vitória', 'Cidade de Deus', 'Torquato Flores', 'Japiim'],
+            'nomes' => [
+                'MARCELO TEIXEIRA AMORIM', 'PATRICIA LIMA RODRIGUES', 'LARISSA MELO CARDOSO',
+                'DEIVID ARCANJO FARIAS', 'RENATA GOMES VIEIRA', 'CARLOS EDUARDO SOUZA LIMA',
+                'FERNANDA CRISTINA ALVES SANTOS', 'JOÃO MARCOS RIBEIRO SILVA', 'MARIA APARECIDA NASCIMENTO',
+                'ANTONIO CARLOS PEREIRA GOMES', 'ROSANA DE OLIVEIRA MATOS', 'DIEGO HENRIQUE CAVALCANTE',
+            ],
+            'cpf_base' => 100,
+            'mat_base' => 1000,
+        ],
+        [
+            'nome' => 'Frigorífico Norte',
+            'slug' => 'frigorifico-norte',
+            'user' => ['email' => 'gerente@frigorificonorte.com.br', 'name' => 'Gerente Frigorífico Norte', 'senha' => 'gerente123'],
+            'filiais' => ['Unidade Centro', 'Unidade Norte', 'Unidade Sul', 'Unidade Leste'],
+            'nomes' => [
+                'LUCAS GABRIEL TEIXEIRA', 'SIMONE ALMEIDA BARBOSA', 'RAFAEL AUGUSTO CORREIA',
+                'JULIANA CRISTINA MARTINS', 'ANDERSON LUIZ FERREIRA', 'CAMILA SOUZA NUNES',
+                'WELLINGTON SANTOS PINTO', 'FABIANA ROCHA CARVALHO', 'MARCOS VINICIUS GONCALVES',
+                'JESSICA APARECIDA MOREIRA',
+            ],
+            'cpf_base' => 200,
+            'mat_base' => 2000,
+        ],
+        [
+            'nome' => 'Mercado Central',
+            'slug' => 'mercado-central',
+            'user' => ['email' => 'gerente@mercadocentral.com.br', 'name' => 'Gerente Mercado Central', 'senha' => 'gerente123'],
+            'filiais' => ['Matriz', 'Filial Shopping', 'Filial Zona Leste'],
+            'nomes' => [
+                'THIAGO HENRIQUE AZEVEDO', 'CLAUDIA MENDES FREITAS', 'RODRIGO PEREIRA DA SILVA',
+                'VANESSA CRISTINA LIMA', 'LEANDRO FERREIRA BATISTA', 'ADRIANA SOUSA CAMPOS',
+                'GABRIEL LUCAS VIEIRA', 'CRISTIANE OLIVEIRA SANTOS',
+            ],
+            'cpf_base' => 300,
+            'mat_base' => 3000,
+        ],
     ];
+
+    // ── Limites em reais — máximo R$ 500 ─────────────────────────────────────
+
+    private array $limites = [150, 200, 250, 300, 350, 400, 450, 500];
+
+    // ────────────────────────────────────────────────────────────────────────
 
     public function run(): void
     {
-        $baratao = Empresa::where('slug', 'baratao')->firstOrFail();
+        // Zerar todas as tabelas de dados
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        Sale::truncate();
+        ChangeLog::truncate();
+        PartnerError::truncate();
+        Partner::withoutGlobalScopes()->truncate();
+        Filial::withoutGlobalScopes()->truncate();
+        User::where('role', '!=', 'admin')->delete();
+        Empresa::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-        // Usuário padrão da empresa
-        User::firstOrCreate(
-            ['email' => 'gerente@barataodacarne.com.br'],
-            [
-                'name'              => 'Gerente Baratão',
+        foreach ($this->config as $cfg) {
+
+            // Empresa
+            $empresa = Empresa::create([
+                'nome'  => $cfg['nome'],
+                'slug'  => $cfg['slug'],
+                'ativo' => true,
+            ]);
+
+            // Usuário gestor
+            User::create([
+                'name'              => $cfg['user']['name'],
+                'email'             => $cfg['user']['email'],
                 'email_verified_at' => now(),
-                'password'          => Hash::make('gerente123'),
+                'password'          => Hash::make($cfg['user']['senha']),
                 'remember_token'    => Str::random(10),
                 'role'              => 'user',
-                'empresa_id'        => $baratao->id,
-            ]
-        );
+                'empresa_id'        => $empresa->id,
+            ]);
 
-        foreach ($this->nomes as $index => $nome) {
-            $cpf = $this->cpf($index + 1);
+            // Filiais
+            $filiaisIds = [];
+            foreach ($cfg['filiais'] as $nomeFilial) {
+                $f = Filial::create(['filial' => $nomeFilial, 'empresa_id' => $empresa->id]);
+                $filiaisIds[] = $f->id;
+            }
 
-            $partner = Partner::withoutGlobalScopes()->firstOrCreate(
-                ['cpf' => $cpf],
-                [
-                    'empresa_id' => $baratao->id,
-                    'nome'       => $nome,
-                    'matricula'  => 1000 + $index,
-                    'limcred'    => $this->sortearLimite(),
-                    'bloqueado'  => $index % 9 === 0,
-                    'alterado'   => false,
-                ]
-            );
+            // Funcionários e compras
+            foreach ($cfg['nomes'] as $i => $nome) {
+                $cpf      = str_pad((string) ($cfg['cpf_base'] + $i + 1), 11, '0', STR_PAD_LEFT);
+                $limcred  = $this->limites[array_rand($this->limites)];
+                $bloqueado = ($i % 7 === 0);
 
-            // 2 a 14 compras por funcionário nos últimos 6 meses
-            $qtd = rand(2, 14);
-            for ($i = 0; $i < $qtd; $i++) {
-                $dtsaida = now()->subDays(rand(1, 180))->toDateString();
-                $cancelado = rand(1, 15) === 1;
-
-                Sale::create([
-                    'empresa_id' => $baratao->id,
+                Partner::withoutGlobalScopes()->create([
+                    'empresa_id' => $empresa->id,
                     'cpf'        => $cpf,
-                    'codfilial'  => $this->filiais[array_rand($this->filiais)],
-                    'caixa'      => rand(1, 6),
-                    'numnota'    => rand(100000, 999999),
-                    'dtsaida'    => $dtsaida,
-                    'vltotal'    => round(rand(2500, 95000) / 100, 2),
-                    'qrcodenfce' => 'https://www.sefaz.am.gov.br/nfce/qrcode/' . strtoupper(Str::random(40)),
-                    'dtcancel'   => $cancelado ? now()->subDays(rand(0, 10))->toDateString() : null,
-                    'dtdevol'    => null,
+                    'nome'       => $nome,
+                    'matricula'  => $cfg['mat_base'] + $i + 1,
+                    'limcred'    => $limcred,
+                    'bloqueado'  => $bloqueado,
+                    'alterado'   => false,
+                ]);
+
+                if ($bloqueado) {
+                    continue;
+                }
+
+                // Entre 3 e 15 compras nos últimos 6 meses
+                $qtd = rand(3, 15);
+                for ($j = 0; $j < $qtd; $j++) {
+                    $cancelado = rand(1, 12) === 1;
+                    Sale::create([
+                        'empresa_id' => $empresa->id,
+                        'cpf'        => $cpf,
+                        'codfilial'  => $filiaisIds[array_rand($filiaisIds)],
+                        'caixa'      => rand(1, 5),
+                        'numnota'    => rand(100000, 999999),
+                        'dtsaida'    => now()->subDays(rand(1, 180))->toDateString(),
+                        'vltotal'    => round(rand(1500, 18000) / 100, 2),
+                        'qrcodenfce' => 'https://www.sefaz.am.gov.br/nfce/qrcode/' . strtoupper(Str::random(40)),
+                        'dtcancel'   => $cancelado ? now()->subDays(rand(0, 15))->toDateString() : null,
+                        'dtdevol'    => null,
+                    ]);
+                }
+            }
+
+            // Alguns erros de importação por empresa
+            $erros = [
+                ['nome' => 'JOSE WILLIAN BRITO', 'cpf' => str_pad($cfg['cpf_base'] . '91', 11, '0', STR_PAD_LEFT), 'erros' => 'CPF inválido'],
+                ['nome' => 'MARIA JOSE SANTOS',  'cpf' => str_pad($cfg['cpf_base'] . '92', 11, '0', STR_PAD_LEFT), 'erros' => 'Limite de crédito zerado'],
+            ];
+            foreach ($erros as $e) {
+                PartnerError::create([
+                    'empresa_id' => $empresa->id,
+                    'cpf'        => $e['cpf'],
+                    'nome'       => $e['nome'],
+                    'matricula'  => null,
+                    'limcred'    => 0,
+                    'bloqueado'  => false,
+                    'erros'      => $e['erros'],
                 ]);
             }
         }
-
-        // Erros de importação para demonstrar a tela de erros
-        $erros = [
-            ['nome' => 'JOSE WILLIAN BRITO', 'cpf' => '00000000000', 'matricula' => null, 'limcred' => 50000, 'bloqueado' => false, 'erros' => 'CPF inválido'],
-            ['nome' => 'MARIA JOSE SANTOS',  'cpf' => '11111111111', 'matricula' => 2001,  'limcred' => 30000, 'bloqueado' => false, 'erros' => 'CPF já cadastrado'],
-            ['nome' => 'PEDRO ALVES',         'cpf' => '22222222222', 'matricula' => null,  'limcred' => 0,     'bloqueado' => true,  'erros' => 'Matrícula ausente; Limite zerado'],
-            ['nome' => 'LUCIA FERREIRA',      'cpf' => '33333333333', 'matricula' => 2004,  'limcred' => 20000, 'bloqueado' => false, 'erros' => 'CPF inválido'],
-            ['nome' => 'FRANCISCO LIMA',      'cpf' => '44444444444', 'matricula' => 2005,  'limcred' => 45000, 'bloqueado' => false, 'erros' => 'Matrícula duplicada na planilha'],
-        ];
-
-        foreach ($erros as $e) {
-            PartnerError::firstOrCreate(
-                ['cpf' => $e['cpf'], 'empresa_id' => $baratao->id],
-                [
-                    'nome'      => $e['nome'],
-                    'matricula' => $e['matricula'],
-                    'limcred'   => $e['limcred'],
-                    'bloqueado' => $e['bloqueado'],
-                    'erros'     => $e['erros'],
-                ]
-            );
-        }
-    }
-
-    private function cpf(int $n): string
-    {
-        return str_pad((string) $n, 11, '0', STR_PAD_LEFT);
-    }
-
-    private function sortearLimite(): int
-    {
-        // Retorna o limite em centavos (inteiro), valores típicos: R$200 a R$1.500
-        $opcoes = [20000, 30000, 40000, 50000, 60000, 75000, 100000, 120000, 150000];
-
-        return $opcoes[array_rand($opcoes)];
     }
 }

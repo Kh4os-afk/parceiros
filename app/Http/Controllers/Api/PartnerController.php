@@ -34,7 +34,7 @@ class PartnerController extends Controller
 
         $order = $request->get('order') === 'desc' ? 'desc' : 'asc';
 
-        $partners = $query->orderBy($sortBy, $order)->paginate(10);
+        $partners = $query->with('empresa')->orderBy($sortBy, $order)->paginate(10);
 
         return response()->json($partners);
     }

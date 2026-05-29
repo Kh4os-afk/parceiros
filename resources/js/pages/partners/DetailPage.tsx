@@ -10,6 +10,8 @@ import {
     Ban,
     ExternalLink,
     Store,
+    ChevronUp,
+    ChevronDown,
 } from "lucide-react";
 import api from "@/lib/axios";
 import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
@@ -76,6 +78,11 @@ export default function PartnerDetailPage() {
     const [sales, setSales] = useState<Sale[]>([]);
     const [loading, setLoading] = useState(true);
     const [salesPage, setSalesPage] = useState(1);
+    const [filterMonth, setFilterMonth] = useState<string | null>(null);
+    const [sortField, setSortField] = useState<
+        "dtsaida" | "filial" | "numnota" | "vltotal" | "status"
+    >("dtsaida");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
     const PER_PAGE = 10;
 
@@ -206,11 +213,68 @@ export default function PartnerDetailPage() {
           )
         : null;
 
-    const totalSalesPages = Math.max(1, Math.ceil(sales.length / PER_PAGE));
-    const pagedSales = useMemo(
-        () => sales.slice((salesPage - 1) * PER_PAGE, salesPage * PER_PAGE),
-        [sales, salesPage, PER_PAGE],
+    // Meses disponíveis para filtro — crescente (mais antigo → mais recente)
+    const availableMonths = useMemo(() => {
+        const seen = new Set<string>();
+        sales.forEach((s) => seen.add(s.dtsaida.slice(0, 7)));
+        return Array.from(seen).sort();
+    }, [sales]);
+
+    // Filtro por mês
+    const filteredSales = useMemo(
+        () =>
+            filterMonth
+                ? sales.filter((s) => s.dtsaida.slice(0, 7) === filterMonth)
+                : sales,
+        [sales, filterMonth],
     );
+
+    // Ordenação
+    const sortedSales = useMemo(() => {
+        return [...filteredSales].sort((a, b) => {
+            let va: string | number;
+            let vb: string | number;
+            if (sortField === "dtsaida") {
+                va = a.dtsaida;
+                vb = b.dtsaida;
+            } else if (sortField === "filial") {
+                va = a.filial?.filial ?? "";
+                vb = b.filial?.filial ?? "";
+            } else if (sortField === "numnota") {
+                va = Number(a.numnota);
+                vb = Number(b.numnota);
+            } else if (sortField === "vltotal") {
+                va = Number(a.vltotal);
+                vb = Number(b.vltotal);
+            } else {
+                va = a.dtcancel ? 2 : a.dtdevol ? 1 : 0;
+                vb = b.dtcancel ? 2 : b.dtdevol ? 1 : 0;
+            }
+            if (va < vb) return sortOrder === "asc" ? -1 : 1;
+            if (va > vb) return sortOrder === "asc" ? 1 : -1;
+            return 0;
+        });
+    }, [filteredSales, sortField, sortOrder]);
+
+    const totalSalesPages = Math.max(
+        1,
+        Math.ceil(sortedSales.length / PER_PAGE),
+    );
+
+    const totalSorted = useMemo(
+        () => sortedSales.filter((s) => !s.dtcancel).reduce((sum, s) => sum + Number(s.vltotal), 0),
+        [sortedSales],
+    );
+    const pagedSales = useMemo(
+        () =>
+            sortedSales.slice((salesPage - 1) * PER_PAGE, salesPage * PER_PAGE),
+        [sortedSales, salesPage],
+    );
+    // Reset da página ao mudar filtro/ordenação
+    useEffect(() => {
+        setSalesPage(1);
+    }, [filterMonth, sortField, sortOrder]);
+
     const nowKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
 
     const initials = partner
@@ -249,7 +313,6 @@ export default function PartnerDetailPage() {
         <div className="flex flex-col gap-5 animate-[fade-in_0.2s_ease-out]">
             {/* ── Header ────────────────────────────────────────────────────── */}
             <div className="relative bg-card border border-(--border) overflow-hidden">
-
                 {/* Dot grid decorativo */}
                 <div
                     className="absolute inset-0 pointer-events-none"
@@ -488,7 +551,7 @@ export default function PartnerDetailPage() {
                                     <CountUp
                                         value={number}
                                         decimals={decimals}
-                                        duration={1.4}
+                                        duration={0.5}
                                         delay={80}
                                     />
                                 </p>
@@ -503,29 +566,52 @@ export default function PartnerDetailPage() {
                 {/* ── Barra de utilização ── */}
                 {partner.limcred > 0 && (
                     <div className="relative px-4 md:px-8 py-3 border-t border-(--border)">
-                        <div className="flex justify-between mb-1.5">
-                            <span className="text-(--muted-foreground) text-[0.44rem] uppercase tracking-[0.25em]">
+                        <div className="flex justify-between mb-2">
+                            <span className="text-(--muted-foreground) text-[0.60rem] uppercase tracking-[0.25em]">
                                 Utilização do limite de crédito
                             </span>
                             <span
-                                className={`text-[0.44rem] font-black tracking-wider ${pct > 85 ? "text-red-500" : pct > 60 ? "text-amber-500" : "text-(--primary)"}`}
+                                className={`text-[0.80rem] font-black tracking-wider ${pct > 85 ? "text-red-500" : pct > 60 ? "text-amber-500" : "text-(--primary)"}`}
                             >
-                                {Math.round(pct)}%
+                                <CountUp
+                                    value={pct}
+                                    decimals={0}
+                                    duration={0.5}
+                                    delay={80}
+                                />
+                                %
                             </span>
                         </div>
-                        <div className="h-0.5 bg-(--border) w-full">
+                        <div className="h-1.5 bg-(--border) w-full overflow-hidden">
                             <div
-                                className="h-full transition-all duration-700"
+                                className="h-full relative overflow-hidden transition-all duration-700"
                                 style={{
                                     width: `${pct}%`,
                                     background:
                                         pct > 85
-                                            ? "var(--destructive)"
+                                            ? "linear-gradient(90deg, oklch(0.5 0.22 27) 0%, var(--destructive) 100%)"
                                             : pct > 60
-                                              ? "#f59e0b"
-                                              : "var(--primary)",
+                                              ? "linear-gradient(90deg, #d97706 0%, #f59e0b 100%)"
+                                              : "linear-gradient(90deg, color-mix(in oklch, var(--primary) 70%, black) 0%, var(--primary) 100%)",
+                                    boxShadow:
+                                        pct > 85
+                                            ? "0 0 8px color-mix(in oklch, var(--destructive) 70%, transparent)"
+                                            : pct > 60
+                                              ? "0 0 8px rgba(245,158,11,0.6)"
+                                              : "0 0 8px color-mix(in oklch, var(--primary) 60%, transparent)",
                                 }}
-                            />
+                            >
+                                {/* Shimmer sweep */}
+                                <div
+                                    className="absolute inset-0 w-1/3"
+                                    style={{
+                                        background:
+                                            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%)",
+                                        animation:
+                                            "bar-shimmer 2.8s ease-in-out infinite",
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
                 )}
@@ -544,17 +630,58 @@ export default function PartnerDetailPage() {
                                 {[
                                     {
                                         label: "Total 12m",
-                                        value: compactMoney(total12m),
+                                        value: (
+                                            <>
+                                                <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                    R$
+                                                </span>
+                                                <CountUp
+                                                    value={total12m}
+                                                    decimals={2}
+                                                    duration={1.2}
+                                                    delay={80}
+                                                />
+                                            </>
+                                        ),
                                     },
                                     {
                                         label: "Média/mês",
-                                        value: compactMoney(mediaMensal),
+                                        value: (
+                                            <>
+                                                <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                    R$
+                                                </span>
+                                                <CountUp
+                                                    value={mediaMensal}
+                                                    decimals={2}
+                                                    duration={1.2}
+                                                    delay={80}
+                                                />
+                                            </>
+                                        ),
                                     },
                                     ...(melhorMes && melhorMes.total > 0
                                         ? [
                                               {
                                                   label: "Melhor mês",
-                                                  value: `${melhorMes.label} · ${compactMoney(melhorMes.total)}`,
+                                                  value: (
+                                                      <>
+                                                          <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                              R$
+                                                          </span>
+                                                          <CountUp
+                                                              value={
+                                                                  melhorMes.total
+                                                              }
+                                                              decimals={2}
+                                                              duration={1.2}
+                                                              delay={80}
+                                                          />{" "}
+                                                          <span className="ml-1 text-[0.45em] font-bold uppercase tracking-wide">
+                                                              {melhorMes.label}
+                                                          </span>
+                                                      </>
+                                                  ),
                                                   highlight: true,
                                               },
                                           ]
@@ -670,7 +797,15 @@ export default function PartnerDetailPage() {
                                             </span>
                                         </div>
                                         <span className="text-[0.65rem] font-black text-(--primary) shrink-0 tabular-nums">
-                                            {compactMoney(f.total)}
+                                            <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                R$
+                                            </span>
+                                            <CountUp
+                                                value={f.total}
+                                                decimals={2}
+                                                duration={1.2}
+                                                delay={80}
+                                            />
                                         </span>
                                     </div>
                                     <div className="h-0.5 bg-(--border) w-full overflow-hidden">
@@ -686,7 +821,12 @@ export default function PartnerDetailPage() {
                                     <span className="text-[0.44rem] uppercase tracking-[0.12em] text-(--muted-foreground)">
                                         {f.count} compra
                                         {f.count !== 1 ? "s" : ""} ·{" "}
-                                        {compactMoney(f.total / f.count)} médio
+                                        <CountUp
+                                            value={f.total / f.count}
+                                            decimals={2}
+                                            duration={1.2}
+                                            delay={80}
+                                        /> {" "} médio
                                     </span>
                                 </div>
                             ))
@@ -697,44 +837,133 @@ export default function PartnerDetailPage() {
 
             {/* ── Tabela de compras ─────────────────────────────────────────── */}
             <div className="bg-card border border-(--border)">
-                <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between">
-                    <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
-                        Histórico Completo
-                    </span>
-                    <span className="text-[0.52rem] uppercase tracking-[0.15em] text-(--muted-foreground)">
-                        {sales.length} registro{sales.length !== 1 ? "s" : ""}
-                    </span>
+                <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex flex-wrap items-center gap-3 justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                            Histórico Completo
+                        </span>
+                        <span className="text-[0.52rem] uppercase tracking-[0.15em] text-(--muted-foreground)">
+                            · {sortedSales.length}
+                            {sales.length !== sortedSales.length
+                                ? ` de ${sales.length}`
+                                : ""}{" "}
+                            registro{sales.length !== 1 ? "s" : ""}
+                        </span>
+                    </div>
+                    {availableMonths.length > 1 && (
+                        <select
+                            value={filterMonth ?? ""}
+                            onChange={(e) =>
+                                setFilterMonth(e.target.value || null)
+                            }
+                            className="border border-(--border) bg-card text-(--foreground) px-2 py-1 text-[0.56rem] font-black uppercase tracking-widest outline-none focus:border-(--primary) cursor-pointer transition-colors"
+                        >
+                            <option value="">Todos os meses</option>
+                            {availableMonths.map((m) => {
+                                const [y, mo] = m.split("-");
+                                return (
+                                    <option key={m} value={m}>
+                                        {MESES[parseInt(mo) - 1]} {y}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    )}
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-max border-collapse">
                         <thead>
                             <tr className="bg-muted border-b border-(--border)">
-                                {[
-                                    "Data",
-                                    "Loja",
-                                    "Nº Nota",
-                                    "Valor",
-                                    "NFC-e",
-                                    "Status",
-                                ].map((h) => (
+                                {(
+                                    [
+                                        ["dtsaida", "Data"],
+                                        ["filial", "Loja"],
+                                        ["numnota", "Nº Nota"],
+                                        ["vltotal", "Valor"],
+                                    ] as [typeof sortField, string][]
+                                ).map(([field, label]) => (
                                     <th
-                                        key={h}
-                                        className="px-5 py-3 text-left text-[0.52rem] font-black uppercase tracking-[0.18em] text-(--muted-foreground) whitespace-nowrap"
+                                        key={field}
+                                        onClick={() => {
+                                            if (sortField === field)
+                                                setSortOrder((o) =>
+                                                    o === "asc"
+                                                        ? "desc"
+                                                        : "asc",
+                                                );
+                                            else {
+                                                setSortField(field);
+                                                setSortOrder("asc");
+                                            }
+                                        }}
+                                        className="px-5 py-3 text-left select-none cursor-pointer whitespace-nowrap group"
                                     >
-                                        {h}
+                                        <span
+                                            className={`flex items-center gap-1 text-[0.52rem] font-black uppercase tracking-[0.18em] transition-colors ${sortField === field ? "text-(--primary)" : "text-(--muted-foreground) group-hover:text-(--primary)"}`}
+                                        >
+                                            {label}
+                                            {sortField === field ? (
+                                                sortOrder === "asc" ? (
+                                                    <ChevronUp size={9} />
+                                                ) : (
+                                                    <ChevronDown size={9} />
+                                                )
+                                            ) : (
+                                                <ChevronUp
+                                                    size={9}
+                                                    className="opacity-0 group-hover:opacity-30"
+                                                />
+                                            )}
+                                        </span>
                                     </th>
                                 ))}
+                                <th className="px-5 py-3 text-left text-[0.52rem] font-black uppercase tracking-[0.18em] text-(--muted-foreground) whitespace-nowrap">
+                                    NFC-e
+                                </th>
+                                <th
+                                    onClick={() => {
+                                        if (sortField === "status")
+                                            setSortOrder((o) =>
+                                                o === "asc" ? "desc" : "asc",
+                                            );
+                                        else {
+                                            setSortField("status");
+                                            setSortOrder("asc");
+                                        }
+                                    }}
+                                    className="px-5 py-3 text-left select-none cursor-pointer whitespace-nowrap group"
+                                >
+                                    <span
+                                        className={`flex items-center gap-1 text-[0.52rem] font-black uppercase tracking-[0.18em] transition-colors ${sortField === "status" ? "text-(--primary)" : "text-(--muted-foreground) group-hover:text-(--primary)"}`}
+                                    >
+                                        Status
+                                        {sortField === "status" ? (
+                                            sortOrder === "asc" ? (
+                                                <ChevronUp size={9} />
+                                            ) : (
+                                                <ChevronDown size={9} />
+                                            )
+                                        ) : (
+                                            <ChevronUp
+                                                size={9}
+                                                className="opacity-0 group-hover:opacity-30"
+                                            />
+                                        )}
+                                    </span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sales.length === 0 ? (
+                            {sortedSales.length === 0 ? (
                                 <tr>
                                     <td
                                         colSpan={6}
                                         className="text-center py-10 text-sm text-(--muted-foreground)"
                                     >
-                                        Nenhuma compra registrada.
+                                        {sales.length === 0
+                                            ? "Nenhuma compra registrada."
+                                            : "Nenhuma compra neste mês."}
                                     </td>
                                 </tr>
                             ) : (
@@ -769,7 +998,13 @@ export default function PartnerDetailPage() {
                                             <span
                                                 className={`text-[0.82rem] font-black tabular-nums ${sale.dtcancel ? "text-(--muted-foreground) line-through" : "text-(--primary)"}`}
                                             >
-                                                {formatMoney(sale.vltotal)}
+                                                <span className="text-[0.5em] font-bold opacity-50 mr-0.5">R$</span>
+                                                <CountUp
+                                                    value={sale.vltotal}
+                                                    decimals={2}
+                                                    duration={0.5}
+                                                    delay={80}
+                                                />
                                             </span>
                                         </td>
                                         <td className="px-5 py-3">
@@ -811,6 +1046,27 @@ export default function PartnerDetailPage() {
                                 ))
                             )}
                         </tbody>
+                        {sortedSales.length > 0 && (
+                            <tfoot>
+                                <tr className="border-t-2 border-(--border) bg-muted">
+                                    <td colSpan={3} className="px-5 py-3">
+                                        <span className="text-[0.5rem] font-black uppercase tracking-[0.18em] text-(--muted-foreground)">
+                                            {filterMonth ? "Total do mês" : "Total geral"}
+                                            {sortedSales.some(s => s.dtcancel) && (
+                                                <span className="ml-1 opacity-50">(excl. cancelados)</span>
+                                            )}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-3">
+                                        <span className="text-[0.82rem] font-black text-(--primary) tabular-nums">
+                                            <span className="text-[0.5em] font-bold opacity-50 mr-0.5">R$</span>
+                                            <CountUp value={totalSorted} decimals={2} duration={0.8} delay={0} />
+                                        </span>
+                                    </td>
+                                    <td colSpan={2} />
+                                </tr>
+                            </tfoot>
+                        )}
                     </table>
                 </div>
 
@@ -818,8 +1074,9 @@ export default function PartnerDetailPage() {
                     <div className="flex items-center justify-between px-6 py-3 border-t border-(--border) bg-muted">
                         <span className="text-[0.5rem] uppercase tracking-[0.18em] text-(--muted-foreground)">
                             {(salesPage - 1) * PER_PAGE + 1}–
-                            {Math.min(salesPage * PER_PAGE, sales.length)} de{" "}
-                            {sales.length} registros
+                            {Math.min(salesPage * PER_PAGE, sortedSales.length)}{" "}
+                            de {sortedSales.length} registro
+                            {sortedSales.length !== 1 ? "s" : ""}
                         </span>
                         <div className="flex gap-1">
                             {Array.from(
