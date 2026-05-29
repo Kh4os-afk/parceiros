@@ -1,9 +1,9 @@
-import { useLocation, NavLink } from 'react-router-dom'
+import { useLocation, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import {
     LayoutDashboard, Users, Upload, AlertCircle,
     CalendarRange, LogOut, ChevronsUpDown,
-    Building2, UserCog, Search,
+    Building2, UserCog, Search, Settings,
 } from 'lucide-react'
 import {
     Sidebar,
@@ -68,6 +68,7 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementTyp
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { user, logout, isAdmin } = useAuth()
+    const navigate = useNavigate()
 
     const adminGroup = {
         label: 'Administração',
@@ -148,6 +149,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 align="end"
                                 sideOffset={4}
                             >
+                                <DropdownMenuItem
+                                    onClick={() => navigate('/configuracoes')}
+                                    className="cursor-pointer gap-2"
+                                >
+                                    <Settings className="size-3.5" />
+                                    <span className="text-[0.72rem] font-semibold uppercase tracking-wide">Configurações</span>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem
                                     onClick={logout}
                                     className="text-destructive focus:text-destructive focus:bg-destructive/8 cursor-pointer gap-2"

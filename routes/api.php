@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\EmpresaController;
 use App\Http\Controllers\Api\FilialController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\PartnerErrorController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -18,9 +19,11 @@ Route::get('/saldo', [SaleController::class, 'saldoPublico']); // ?cpf=
 // Rotas protegidas por Sanctum (Bearer token ou sessão SPA)
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
+    // Auth e perfil do usuário logado
     Route::get('/user',    [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::put('/profile',          [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 
     // Funcionários (Partners)
     Route::get('/partners',              [PartnerController::class, 'index']);   // ?search=&sort_by=&order=&page=

@@ -39,6 +39,8 @@ function useBreadcrumbs(): Crumb[] {
     if (pathname === '/compras/periodo')     return [dash, { label: 'Relatórios' }, { label: 'Extrato por Período' }]
     if (pathname === '/consulta')            return [dash, { label: 'Relatórios' }, { label: 'Consulta de Saldo' }]
 
+    if (pathname === '/configuracoes')     return [dash, { label: 'Configurações' }]
+
     if (pathname === '/admin/empresas')  return [dash, { label: 'Administração' }, { label: 'Empresas' }]
     if (pathname === '/admin/usuarios')  return [dash, { label: 'Administração' }, { label: 'Usuários' }]
 

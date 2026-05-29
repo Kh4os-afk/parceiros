@@ -20,6 +20,7 @@ import ConsultaPage from '@/pages/consulta/ConsultaPage'
 import SaldoPage from '@/pages/saldo/SaldoPage'
 import EmpresasPage from '@/pages/admin/EmpresasPage'
 import UsuariosPage from '@/pages/admin/UsuariosPage'
+import SettingsPage from '@/pages/settings/SettingsPage'
 
 export const router = createBrowserRouter([
     {
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
             { path: '/compras/funcionario', element: <SalesByPartnerPage /> },
             { path: '/compras/periodo', element: <SalesByPeriodPage /> },
             { path: '/consulta', element: <ConsultaPage /> },
+            { path: '/configuracoes', element: <SettingsPage /> },
             // Rotas exclusivas de admin
             { path: '/admin/empresas', element: <AdminRoute><EmpresasPage /></AdminRoute> },
             { path: '/admin/usuarios', element: <AdminRoute><UsuariosPage /></AdminRoute> },
