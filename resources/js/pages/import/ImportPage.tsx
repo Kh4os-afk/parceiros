@@ -6,12 +6,11 @@ import {
 } from 'lucide-react'
 import api from '@/lib/axios'
 
-const MODELO_CSV = 'NOME;CPF;MATRICULA;LIMCRED;BLOQUEADO\r\n'
+const MODELO_CSV = 'NOME;CPF;LIMCRED;BLOQUEADO\r\n'
 
 const COLUNAS = [
     { col: 'NOME',      desc: 'Nome completo',             obs: 'obrigatório'  },
     { col: 'CPF',       desc: '11 dígitos, sem pontuação', obs: 'obrigatório'  },
-    { col: 'MATRICULA', desc: 'Número inteiro',            obs: 'opcional'     },
     { col: 'LIMCRED',   desc: 'Limite mensal em R$',       obs: 'obrigatório'  },
     { col: 'BLOQUEADO', desc: '0 = ativo  /  1 = bloqueado', obs: 'obrigatório' },
 ]
