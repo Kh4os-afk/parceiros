@@ -144,14 +144,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
-                                className="w-(--radix-dropdown-menu-trigger-width) min-w-48 rounded-none"
+                                className="w-(--radix-dropdown-menu-trigger-width) min-w-48 rounded-none bg-white p-1"
                                 side="top"
                                 align="end"
                                 sideOffset={4}
                             >
                                 <DropdownMenuItem
                                     onClick={() => navigate('/configuracoes')}
-                                    className="cursor-pointer gap-2"
+                                    className="text-destructive focus:text-destructive focus:bg-destructive/8 cursor-pointer gap-2"
                                 >
                                     <Settings className="size-3.5" />
                                     <span className="text-[0.72rem] font-semibold uppercase tracking-wide">Configurações</span>
