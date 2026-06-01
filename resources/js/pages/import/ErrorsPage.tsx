@@ -95,10 +95,10 @@ export default function ErrorsPage() {
 
                 <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 md:px-7 pt-5 md:pt-6 pb-4 md:pb-5">
                     <div>
-                        <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Importação</p>
+                        <p className="text-[0.74rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Importação</p>
                         <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Erros de Importação</h1>
                         {meta && (
-                            <p className="text-[0.58rem] text-(--muted-foreground) mt-1.5">
+                            <p className="text-[0.74rem] text-(--muted-foreground) mt-1.5">
                                 <strong className={`font-black ${meta.total > 0 ? 'text-amber-500' : 'text-green-600'}`}>
                                     {meta.total}
                                 </strong>
@@ -129,11 +129,11 @@ export default function ErrorsPage() {
             {/* ── Tabela ── */}
             <div className="bg-card border border-(--border)">
                 <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between">
-                    <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                    <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                         Registros com Falha
                     </span>
                     {meta && meta.total > 0 && (
-                        <span className="text-[0.52rem] uppercase tracking-[0.15em] text-amber-500 font-black">
+                        <span className="text-[0.74rem] uppercase tracking-[0.15em] text-amber-500 font-black">
                             {meta.total} pendente{meta.total !== 1 ? 's' : ''}
                         </span>
                     )}
@@ -144,11 +144,11 @@ export default function ErrorsPage() {
                         <thead>
                             <tr className="bg-muted border-b border-(--border)">
                                 {['Matrícula', 'Nome', 'CPF', 'Motivo do Erro'].map(h => (
-                                    <th key={h} className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap">
+                                    <th key={h} className="px-5 py-3 text-left text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap">
                                         {h}
                                     </th>
                                 ))}
-                                <th className="px-5 py-3 text-right text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                <th className="px-5 py-3 text-right text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                     Ações
                                 </th>
                             </tr>
@@ -185,19 +185,19 @@ export default function ErrorsPage() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-3">
-                                        <span className="text-[0.78rem] font-semibold text-(--foreground) group-hover:text-(--primary) transition-colors">
+                                        <span className="text-[0.78rem] uppercase font-black text-(--foreground) group-hover:text-(--primary) transition-colors">
                                             {toTitleCase(err.nome)}
                                         </span>
                                     </td>
                                     <td className="px-5 py-3">
-                                        <span className="text-[0.68rem] font-mono text-(--muted-foreground) tracking-wider">
+                                        <span className="text-[0.74rem] font-black text-(--muted-foreground) tracking-wider">
                                             {formatCPF(err.cpf)}
                                         </span>
                                     </td>
                                     <td className="px-5 py-3 max-w-xs">
                                         <div className="flex items-start gap-2">
                                             <AlertCircle size={11} className="text-amber-500 shrink-0 mt-0.5" />
-                                            <span className="text-[0.65rem] text-amber-500 leading-snug">{err.erros}</span>
+                                            <span className="text-[0.74rem] font-black text-amber-500 leading-snug">{err.erros}</span>
                                         </div>
                                     </td>
                                     <td className="px-5 py-3 text-right">

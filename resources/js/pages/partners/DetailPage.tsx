@@ -357,15 +357,15 @@ export default function PartnerDetailPage() {
                     <div className="flex-1 min-w-0">
                         {/* Linha de classificação */}
                         <div className="flex items-center gap-3 mb-2">
-                            <span className="text-[0.44rem] uppercase tracking-[0.4em] text-(--muted-foreground)">
+                            <span className="text-[0.64rem] uppercase tracking-[0.4em] text-(--muted-foreground)">
                                 Funcionário // Registro
                             </span>
                             {partner.bloqueado ? (
-                                <span className="flex items-center gap-1 px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-500 text-[0.44rem] font-black uppercase tracking-[0.2em]">
+                                <span className="flex items-center gap-1 px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-500 text-[0.64rem] font-black uppercase tracking-[0.2em]">
                                     <Ban size={7} /> Bloqueado
                                 </span>
                             ) : (
-                                <span className="flex items-center gap-1 px-2 py-0.5 bg-(--primary)/8 border border-(--primary)/20 text-(--primary) text-[0.44rem] font-black uppercase tracking-[0.2em]">
+                                <span className="flex items-center gap-1 px-2 py-0.5 bg-(--primary)/8 border border-(--primary)/20 text-(--primary) text-[0.64rem] font-black uppercase tracking-[0.2em]">
                                     <span className="w-1 h-1 bg-(--primary) animate-pulse" />{" "}
                                     Ativo
                                 </span>
@@ -536,7 +536,7 @@ export default function PartnerDetailPage() {
                                         size={8}
                                         className={`transition-colors duration-200 ${highlight ? "text-(--primary)" : "text-(--muted-foreground) opacity-50 group-hover:opacity-100 group-hover:text-(--primary)"}`}
                                     />
-                                    <p className="text-[0.44rem] uppercase tracking-[0.22em] text-(--muted-foreground)">
+                                    <p className="text-[0.64rem] uppercase tracking-[0.22em] text-(--muted-foreground)">
                                         {label}
                                     </p>
                                 </div>
@@ -771,7 +771,7 @@ export default function PartnerDetailPage() {
                             Lojas Frequentadas
                         </span>
                         {topFiliais.length > 0 && (
-                            <span className="text-[0.44rem] uppercase tracking-[0.15em] text-(--muted-foreground)">
+                            <span className="text-[0.64rem] uppercase tracking-[0.15em] text-(--muted-foreground)">
                                 {topFiliais.length} lojas
                             </span>
                         )}
@@ -789,7 +789,7 @@ export default function PartnerDetailPage() {
                                 >
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="flex items-center gap-2 min-w-0">
-                                            <span className="text-[0.44rem] font-black text-(--primary) opacity-40 shrink-0 tabular-nums">
+                                            <span className="text-[0.64rem] font-black text-(--primary) opacity-40 shrink-0 tabular-nums">
                                                 #{i + 1}
                                             </span>
                                             <span className="text-[0.72rem] font-semibold text-(--foreground) truncate group-hover:text-(--primary) transition-colors">
@@ -818,7 +818,7 @@ export default function PartnerDetailPage() {
                                             }}
                                         />
                                     </div>
-                                    <span className="text-[0.44rem] uppercase tracking-[0.12em] text-(--muted-foreground)">
+                                    <span className="text-[0.64rem] uppercase tracking-[0.12em] text-(--muted-foreground)">
                                         {f.count} compra
                                         {f.count !== 1 ? "s" : ""} ·{" "}
                                         <CountUp

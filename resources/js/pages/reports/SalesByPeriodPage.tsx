@@ -9,6 +9,7 @@ import {
     ReceiptText,
     Loader2,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import api from "@/lib/axios";
 import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
@@ -80,26 +81,19 @@ export default function SalesByPeriodPage() {
         }
     }
 
-    function exportCsv() {
+    function exportarExcel() {
         if (results.length === 0) return;
-        const rows = [
-            ["CPF", "Nome", "Qtd Compras", "Total"],
-            ...results.map((r) => [
-                r.cpf,
-                r.nome,
-                String(r.quantidade),
-                String(r.total),
-            ]),
-        ];
-        const blob = new Blob([rows.map((r) => r.join(";")).join("\n")], {
-            type: "text/csv;charset=utf-8;",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `compras_periodo_${startDate}_${endDate}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const dados = results.map((r) => ({
+            CPF: formatCPF(r.cpf),
+            Nome: toTitleCase(r.nome),
+            "Qtd Compras": r.quantidade,
+            "Total (R$)": Number(r.total),
+        }));
+        const ws = XLSX.utils.json_to_sheet(dados);
+        ws["!cols"] = [{ wch: 16 }, { wch: 35 }, { wch: 14 }, { wch: 14 }];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Extrato por Período");
+        XLSX.writeFile(wb, `compras_${startDate}_${endDate}.xlsx`);
     }
 
     const grandTotal = useMemo(
@@ -128,10 +122,10 @@ export default function SalesByPeriodPage() {
         <div className="flex flex-col gap-5 animate-[fade-in_0.2s_ease-out]">
             {/* ── Título ── */}
             <div>
-                <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
+                <p className="text-[0.74rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
                     Relatórios
                 </p>
-                <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">
+                <h1 className="text-[1.25rem] font-black uppercase tracking-[0.08em] text-(--foreground)">
                     Extrato por Período
                 </h1>
             </div>
@@ -157,7 +151,7 @@ export default function SalesByPeriodPage() {
                 ))}
 
                 <div className="relative px-4 md:px-7 py-5">
-                    <p className="text-[0.48rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-4">
+                    <p className="text-[0.68rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-4">
                         Selecionar Período
                     </p>
                     <form
@@ -181,7 +175,7 @@ export default function SalesByPeriodPage() {
                             },
                         ].map(({ id, label, value, set, err }) => (
                             <div key={id} className="flex flex-col gap-1.5">
-                                <label className="text-[0.48rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
+                                <label className="text-[0.58rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
                                     {label}
                                 </label>
                                 <input
@@ -275,7 +269,7 @@ export default function SalesByPeriodPage() {
                                                 size={9}
                                                 className={`transition-colors duration-200 ${highlight ? "text-(--primary)" : "text-(--muted-foreground) group-hover:text-(--primary)"}`}
                                             />
-                                            <p className="text-[0.44rem] uppercase tracking-[0.22em] text-(--muted-foreground)">
+                                            <p className="text-[0.74rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
                                                 {label}
                                             </p>
                                         </div>
@@ -293,7 +287,7 @@ export default function SalesByPeriodPage() {
                                                 duration={1.5}
                                             />
                                         </p>
-                                        <p className="text-[0.44rem] uppercase tracking-[0.12em] text-(--muted-foreground) truncate">
+                                        <p className="text-[0.64rem]  uppercase tracking-[0.12em] text-(--muted-foreground) truncate">
                                             {sub}
                                         </p>
                                     </div>
@@ -305,17 +299,17 @@ export default function SalesByPeriodPage() {
                     {/* Tabela */}
                     <div className="bg-card border border-(--border)">
                         <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between">
-                            <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                            <span className="text-[0.66rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 {results.length > 0
                                     ? `${results.length} funcionário${results.length !== 1 ? "s" : ""} · ordenado por valor`
                                     : "Nenhum resultado"}
                             </span>
                             {results.length > 0 && (
                                 <button
-                                    onClick={exportCsv}
+                                    onClick={exportarExcel}
                                     className="flex items-center gap-1.5 border border-(--border) px-3 py-1.5 text-[0.52rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground) hover:text-(--primary) hover:border-(--primary) transition-colors"
                                 >
-                                    <Download size={10} /> Exportar CSV
+                                    <Download size={10} /> Exportar Excel
                                 </button>
                             )}
                         </div>
@@ -331,22 +325,22 @@ export default function SalesByPeriodPage() {
                                 <table className="w-full min-w-max border-collapse">
                                     <thead>
                                         <tr className="bg-muted border-b border-(--border)">
-                                            <th className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) w-8">
+                                            <th className="px-5 py-3 text-left text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) w-8">
                                                 #
                                             </th>
-                                            <th className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                            <th className="px-5 py-3 text-left text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                                 Funcionário
                                             </th>
-                                            <th className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                            <th className="px-5 py-3 text-left text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                                 CPF
                                             </th>
-                                            <th className="px-5 py-3 text-center text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                            <th className="px-5 py-3 text-center text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                                 Compras
                                             </th>
-                                            <th className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                            <th className="px-5 py-3 text-left text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                                 Participação
                                             </th>
-                                            <th className="px-5 py-3 text-right text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                            <th className="px-5 py-3 text-right text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                                 Total
                                             </th>
                                         </tr>
@@ -375,7 +369,7 @@ export default function SalesByPeriodPage() {
                                                 >
                                                     <td className="px-5 py-3">
                                                         <span
-                                                            className={`text-[0.52rem] font-black tabular-nums ${idx < 3 ? "text-(--primary)" : "text-(--muted-foreground) opacity-40"}`}
+                                                            className={`text-[0.74rem] font-black tabular-nums ${idx < 3 ? "text-(--primary)" : "text-(--muted-foreground) opacity-40"}`}
                                                         >
                                                             {String(
                                                                 idx + 1,
@@ -383,19 +377,19 @@ export default function SalesByPeriodPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-5 py-3">
-                                                        <span className="text-[0.78rem] font-semibold text-(--foreground) group-hover:text-(--primary) transition-colors">
+                                                        <span className="text-[0.74rem] font-black text-(--foreground) group-hover:text-(--primary) transition-colors">
                                                             {toTitleCase(
                                                                 r.nome,
                                                             )}
                                                         </span>
                                                     </td>
                                                     <td className="px-5 py-3">
-                                                        <span className="text-[0.65rem] text-(--muted-foreground) font-mono tracking-wider">
+                                                        <span className="text-[0.74rem] font-black text-(--muted-foreground) tracking-wider">
                                                             {formatCPF(r.cpf)}
                                                         </span>
                                                     </td>
                                                     <td className="px-5 py-3 text-center">
-                                                        <span className="text-[0.72rem] font-black text-(--foreground) tabular-nums">
+                                                        <span className="text-[0.74rem] font-black text-(--foreground) tabular-nums">
                                                             <CountUp
                                                                 value={
                                                                     r.quantidade
@@ -415,7 +409,7 @@ export default function SalesByPeriodPage() {
                                                                     }}
                                                                 />
                                                             </div>
-                                                            <span className="text-[0.48rem] font-black text-(--muted-foreground) tabular-nums w-8 text-right shrink-0">
+                                                            <span className="text-[0.74rem] font-black text-(--muted-foreground) tabular-nums w-8 text-right shrink-0">
                                                                 <CountUp
                                                                     value={pct}
                                                                     decimals={0}
@@ -449,7 +443,7 @@ export default function SalesByPeriodPage() {
                                         <tr className="border-t-2 border-(--border) bg-muted">
                                             <td colSpan={3} />
                                             <td className="px-5 py-3 text-center">
-                                                <span className="text-[0.6rem] font-black text-(--foreground) tabular-nums">
+                                                <span className="text-[0.74rem] font-black text-(--foreground) tabular-nums">
                                                     <CountUp
                                                         value={totalCompras}
                                                         decimals={0}
@@ -458,7 +452,7 @@ export default function SalesByPeriodPage() {
                                                 </span>
                                             </td>
                                             <td className="px-5 py-3">
-                                                <span className="text-[0.48rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground)">
+                                                <span className="text-[0.74rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground)">
                                                     100%
                                                 </span>
                                             </td>

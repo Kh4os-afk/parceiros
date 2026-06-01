@@ -99,9 +99,9 @@ export default function ImportPage() {
                     <div key={i} className={`absolute w-5 h-5 border-(--primary)/30 ${cls}`} />
                 ))}
                 <div className="relative px-4 md:px-7 py-5">
-                    <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Importação</p>
+                    <p className="text-[0.74rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Importação</p>
                     <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Importar CSV</h1>
-                    <p className="text-[0.62rem] text-(--muted-foreground) mt-1.5">
+                    <p className="text-[0.74rem] font-normal text-(--muted-foreground) mt-1.5">
                         Importe em massa funcionários e limites de crédito a partir de uma planilha CSV.
                     </p>
                 </div>
@@ -114,7 +114,7 @@ export default function ImportPage() {
                 <div className="lg:col-span-2 bg-card border border-(--border) flex flex-col">
                     <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center gap-2">
                         <Upload size={11} className="text-(--primary) opacity-70" />
-                        <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Arquivo CSV</span>
+                        <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Arquivo CSV</span>
                     </div>
 
                     <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 flex-1">
@@ -227,16 +227,16 @@ export default function ImportPage() {
                     <div className="bg-card border border-(--border) flex flex-col">
                         <div className="px-5 py-3.5 border-b border-(--border) bg-muted flex items-center gap-2">
                             <Table2 size={11} className="text-(--primary) opacity-70" />
-                            <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Estrutura do Arquivo</span>
+                            <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Estrutura do Arquivo</span>
                         </div>
                         <div className="divide-y divide-(--border)">
                             {COLUNAS.map(({ col, desc, obs }) => (
                                 <div key={col} className="px-5 py-3 flex items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                        <p className="text-[0.65rem] font-black text-(--foreground) font-mono">{col}</p>
-                                        <p className="text-[0.58rem] text-(--muted-foreground) mt-0.5">{desc}</p>
+                                        <p className="text-[0.74rem] font-black text-(--muted-foreground)">{col}</p>
+                                        <p className="text-[0.74rem] text-(--muted-foreground) mt-0.5">{desc}</p>
                                     </div>
-                                    <span className={`shrink-0 text-[0.48rem] font-black uppercase tracking-[0.12em] px-1.5 py-0.5 ${
+                                    <span className={`shrink-0 text-[0.58rem] font-black uppercase tracking-[0.12em] px-1.5 py-0.5 ${
                                         obs === 'obrigatório'
                                             ? 'bg-(--primary)/10 text-(--primary) border border-(--primary)/20'
                                             : 'bg-muted text-(--muted-foreground) border border-(--border)'
@@ -247,7 +247,7 @@ export default function ImportPage() {
                             ))}
                         </div>
                         <div className="px-5 py-2.5 border-t border-(--border) bg-muted">
-                            <p className="text-[0.5rem] uppercase tracking-[0.15em] text-(--muted-foreground)">Separador: ponto-e-vírgula <span className="font-mono font-bold text-(--foreground)">;</span></p>
+                            <p className="text-[0.74rem] uppercase tracking-[0.15em] text-(--muted-foreground)">Separador: ponto-e-vírgula <span className="font-mono font-bold text-(--foreground)">;</span></p>
                         </div>
                     </div>
 
@@ -255,16 +255,16 @@ export default function ImportPage() {
                     <div className="bg-card border border-(--border)">
                         <div className="px-5 py-3.5 border-b border-(--border) bg-muted flex items-center gap-2">
                             <Download size={11} className="text-(--primary) opacity-70" />
-                            <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Modelo Pronto</span>
+                            <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Modelo Pronto</span>
                         </div>
                         <div className="p-5 flex flex-col gap-3">
-                            <p className="text-[0.65rem] text-(--muted-foreground)">
+                            <p className="text-[0.74rem] text-(--muted-foreground)">
                                 Baixe a planilha modelo, preencha no Excel ou Google Sheets e importe.
                             </p>
                             <button
                                 type="button"
                                 onClick={downloadModelo}
-                                className="flex items-center justify-center gap-2 border border-(--primary) text-(--primary) px-4 py-2.5 text-[0.58rem] font-black uppercase tracking-[0.15em] hover:bg-(--primary) hover:text-white transition-colors w-full"
+                                className="flex items-center justify-center gap-2 border border-(--primary) text-(--primary) px-4 py-2.5 text-[0.74rem] font-black uppercase tracking-[0.15em] hover:bg-(--primary) hover:text-white transition-colors w-full"
                             >
                                 <Download size={12} /> Baixar modelo_importacao.csv
                             </button>

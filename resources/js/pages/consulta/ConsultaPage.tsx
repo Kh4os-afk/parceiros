@@ -178,13 +178,13 @@ export default function ConsultaPage() {
                 ))}
 
                 <div className="relative px-4 md:px-7 py-5">
-                    <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
+                    <p className="text-[0.74rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
                         Convênio
                     </p>
-                    <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">
+                    <h1 className="text-[1.25rem] font-black uppercase tracking-[0.08em] text-(--foreground)">
                         Consulta de Saldo
                     </h1>
-                    <p className="text-[0.62rem] text-(--muted-foreground) mt-1.5">
+                    <p className="text-[0.74rem] text-(--muted-foreground) mt-1.5">
                         Consulte o limite disponível e o histórico de compras
                         pelo CPF do funcionário.
                     </p>
@@ -195,7 +195,7 @@ export default function ConsultaPage() {
                         className="flex flex-col sm:flex-row sm:items-end gap-3 mt-5"
                     >
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[0.5rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
+                            <label className="text-[0.74rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
                                 CPF do Funcionário
                             </label>
                             <input
@@ -216,7 +216,7 @@ export default function ConsultaPage() {
                                 }}
                                 placeholder="000.000.000-00"
                                 maxLength={14}
-                                className="w-full sm:w-52 border border-(--border) px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-40 transition-colors font-mono tracking-widest"
+                                className="w-full sm:w-52 border border-(--border) px-3 py-1 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-40 transition-colors font-mono tracking-widest"
                             />
                         </div>
                         <button
@@ -272,18 +272,18 @@ export default function ConsultaPage() {
                             <div className="relative z-10">
                                 <div className="flex items-start justify-between mb-6">
                                     <div>
-                                        <p className="text-[0.48rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
+                                        <p className="text-[0.58rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
                                             Funcionário
                                         </p>
-                                        <h2 className="text-[1.2rem] font-black uppercase tracking-wide text-(--foreground) leading-tight">
+                                        <h2 className="text-[0.94rem] font-black uppercase tracking-wide text-(--foreground) leading-tight">
                                             {toTitleCase(partner.nome)}
                                         </h2>
                                         <div className="flex items-center gap-3 mt-1.5">
-                                            <span className="text-[0.6rem] font-mono text-(--muted-foreground) tracking-widest">
+                                            <span className="text-[0.74rem] font-mono text-(--muted-foreground) tracking-widest">
                                                 {formatCPF(partner.cpf)}
                                             </span>
                                             {partner.matricula && (
-                                                <span className="text-[0.6rem] text-(--muted-foreground)">
+                                                <span className="text-[0.58rem] text-(--muted-foreground)">
                                                     Mat. {partner.matricula}
                                                 </span>
                                             )}
@@ -294,7 +294,7 @@ export default function ConsultaPage() {
                                             <Ban size={8} /> Bloqueado
                                         </span>
                                     ) : (
-                                        <span className="flex items-center gap-1.5 px-2 py-1 bg-(--primary)/10 border border-(--primary)/25 text-(--primary) text-[0.48rem] font-black uppercase tracking-widest">
+                                        <span className="flex items-center gap-1.5 px-2 py-1 bg-(--primary)/10 border border-(--primary)/25 text-(--primary) text-[0.58rem] font-black uppercase tracking-widest">
                                             <span className="w-1.5 h-1.5 bg-(--primary) rounded-full" />{" "}
                                             Ativo
                                         </span>
@@ -303,7 +303,7 @@ export default function ConsultaPage() {
 
                                 {/* Valor disponível — mega destaque */}
                                 <div className="mb-6">
-                                    <p className="text-[0.48rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-2">
+                                    <p className="text-[0.68rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-2">
                                         {partner.bloqueado
                                             ? "Conta Bloqueada"
                                             : isCurrentMonth
@@ -316,7 +316,7 @@ export default function ConsultaPage() {
                                         </p>
                                     ) : (
                                         <p
-                                            className={`text-[2rem] md:text-[2.8rem] font-black tabular-nums leading-none ${
+                                            className={`text-[4.5rem] font-black tabular-nums leading-none ${
                                                 disponivel === 0
                                                     ? "text-amber-500"
                                                     : "text-(--primary)"
@@ -344,7 +344,7 @@ export default function ConsultaPage() {
                                 {!partner.bloqueado && (
                                     <div>
                                         <div className="flex justify-between mb-1.5">
-                                            <span className="text-[0.60rem] uppercase tracking-[0.18em] text-(--muted-foreground)">
+                                            <span className="text-[0.74rem] uppercase tracking-[0.18em] text-(--muted-foreground)">
                                                 R$
                                                 <CountUp
                                                     value={gastoMes}
@@ -467,7 +467,7 @@ export default function ConsultaPage() {
                                         <Icon size={14} />
                                     </div>
                                     <div>
-                                        <p className="text-[0.47rem] uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                        <p className="text-[0.74rem] uppercase tracking-[0.2em] text-(--muted-foreground)">
                                             {label}
                                         </p>
                                         <p className="text-[0.9rem] font-black text-(--foreground) tabular-nums">
@@ -475,7 +475,7 @@ export default function ConsultaPage() {
                                                 value
                                             ) : (
                                                 <>
-                                                    <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                    <span className="text-[0.74rem] font-bold opacity-50 mr-0.5">
                                                         R$
                                                     </span>{" "}
                                                     {value}{" "}
@@ -507,16 +507,16 @@ export default function ConsultaPage() {
                                         }`}
                                     >
                                         <span
-                                            className={`text-[0.5rem] font-black uppercase tracking-[0.18em] ${isSel ? "text-(--primary)" : isCurr ? "text-(--foreground)" : "text-(--muted-foreground)"}`}
+                                            className={`text-[0.74rem] font-black uppercase tracking-[0.18em] ${isSel ? "text-(--primary)" : isCurr ? "text-(--foreground)" : "text-(--muted-foreground)"}`}
                                         >
                                             {m.label}
                                             {isCurr ? " ●" : ""}
                                         </span>
                                         {total > 0 ? (
                                             <span
-                                                className={`text-[0.62rem] font-black tabular-nums mt-0.5 ${isSel ? "text-(--primary)" : "text-(--muted-foreground)"}`}
+                                                className={`text-[0.74rem] font-black tabular-nums mt-0.5 ${isSel ? "text-(--primary)" : "text-(--muted-foreground)"}`}
                                             >
-                                                <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                <span className="text-[0.74rem] font-bold opacity-50 mr-0.5">
                                                     R$
                                                 </span>
                                                 <CountUp
@@ -527,7 +527,7 @@ export default function ConsultaPage() {
                                                 />
                                             </span>
                                         ) : (
-                                            <span className="text-[0.55rem] text-(--muted-foreground) opacity-40 mt-0.5">
+                                            <span className="text-[0.74rem] text-(--muted-foreground) opacity-40 mt-0.5">
                                                 sem compras
                                             </span>
                                         )}
@@ -538,7 +538,7 @@ export default function ConsultaPage() {
 
                         {/* Header da tabela */}
                         <div className="px-6 py-3 border-b border-(--border) flex items-center justify-between">
-                            <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                            <span className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 Compras — {selectedMonthLabel}
                             </span>
                             <span className="text-[0.5rem] uppercase tracking-[0.15em] text-(--muted-foreground)">
@@ -573,7 +573,7 @@ export default function ConsultaPage() {
                                             ].map((h) => (
                                                 <th
                                                     key={h}
-                                                    className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap"
+                                                    className="px-5 py-3 text-left text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap"
                                                 >
                                                     {h}
                                                 </th>
@@ -594,7 +594,7 @@ export default function ConsultaPage() {
                                                                 background: `hsl(${(sale.codfilial * 47) % 360}, 55%, 50%)`,
                                                             }}
                                                         />
-                                                        <span className="text-[0.7rem] text-(--muted-foreground) tabular-nums">
+                                                        <span className="text-[0.74rem] font-black text-(--muted-foreground) tabular-nums">
                                                             {formatDateFull(
                                                                 sale.dtsaida,
                                                             )}
@@ -602,13 +602,13 @@ export default function ConsultaPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-3">
-                                                    <span className="text-[0.75rem] font-semibold text-(--foreground)">
+                                                    <span className="text-[0.74rem] uppercase font-semibold text-(--foreground)">
                                                         {sale.filial?.filial ??
                                                             `Filial ${sale.codfilial}`}
                                                     </span>
                                                 </td>
                                                 <td className="px-5 py-3">
-                                                    <span className="text-[0.68rem] font-mono text-(--muted-foreground)">
+                                                    <span className="text-[0.74rem] font-black text-(--muted-foreground)">
                                                         {sale.numnota}
                                                     </span>
                                                 </td>
@@ -616,7 +616,7 @@ export default function ConsultaPage() {
                                                     <span
                                                         className={`text-[0.82rem] font-black tabular-nums ${sale.dtcancel ? "text-(--muted-foreground) line-through" : "text-(--primary)"}`}
                                                     >
-                                                        <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                        <span className="text-[0.74rem] font-bold opacity-50 mr-0.5">
                                                             R$
                                                         </span>
                                                         <CountUp
@@ -638,7 +638,7 @@ export default function ConsultaPage() {
                                                             }
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1 text-[0.6rem] font-semibold text-(--muted-foreground) hover:text-(--primary) transition-colors uppercase tracking-wider"
+                                                            className="inline-flex items-center gap-1 text-[0.74rem] font-black text-(--muted-foreground) hover:text-(--primary) transition-colors uppercase tracking-wider"
                                                         >
                                                             <ExternalLink
                                                                 size={10}
@@ -646,19 +646,19 @@ export default function ConsultaPage() {
                                                             Ver nota
                                                         </a>
                                                     ) : (
-                                                        <span className="text-(--muted-foreground) opacity-25">
+                                                        <span className="text-[0.74rem] text-(--muted-foreground) opacity-25">
                                                             —
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td className="px-5 py-3">
                                                     {sale.dtcancel ? (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[0.5rem] font-black uppercase tracking-[0.15em] bg-red-500/10 text-red-500 border border-red-500/20">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[0.74rem] font-black uppercase tracking-[0.15em] bg-red-500/10 text-red-500 border border-red-500/20">
                                                             <Ban size={7} />{" "}
                                                             Cancelado
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[0.5rem] font-black uppercase tracking-[0.2em] text-green-600">
+                                                        <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-green-600">
                                                             OK
                                                         </span>
                                                     )}

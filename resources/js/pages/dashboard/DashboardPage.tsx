@@ -194,7 +194,7 @@ export default function DashboardPage() {
                                         size={9}
                                         className={`transition-colors ${color === "amber" ? "text-amber-500" : highlight ? "text-(--primary)" : "text-(--muted-foreground) group-hover:text-(--primary)"}`}
                                     />
-                                    <p className="text-[0.44rem] uppercase tracking-[0.22em] text-(--muted-foreground)">
+                                    <p className="text-[0.84rem] font-bold uppercase tracking-[0.22em] text-(--muted-foreground)">
                                         {label}
                                     </p>
                                 </div>
@@ -222,7 +222,7 @@ export default function DashboardPage() {
                                     )}
                                 </p>
 
-                                <p className="text-[0.43rem] text-(--muted-foreground) mt-2 uppercase tracking-[0.15em]">
+                                <p className="text-[0.63rem] font-bold text-(--muted-foreground) mt-2 uppercase tracking-[0.15em]">
                                     {sub}
                                 </p>
 
@@ -241,12 +241,12 @@ export default function DashboardPage() {
                 {/* Ranking do mês — 2/3 */}
                 <div className="lg:col-span-2 bg-card border border-(--border) flex flex-col">
                     <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between">
-                        <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                        <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                             Maiores Compradores — {mesAtualLabel()}
                         </span>
                         <button
                             onClick={() => navigate("/compras/periodo")}
-                            className="flex items-center gap-1 text-[0.48rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground) hover:text-(--primary) transition-colors"
+                            className="flex items-center gap-1 text-[0.74rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground) hover:text-(--primary) transition-colors"
                         >
                             Ver tudo <ArrowRight size={9} />
                         </button>
@@ -328,7 +328,7 @@ export default function DashboardPage() {
                     {/* Lojas */}
                     <div className="bg-card border border-(--border) flex-1">
                         <div className="px-5 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between">
-                            <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                            <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 Lojas — {mesAtualLabel()}
                             </span>
                             <Store
@@ -402,7 +402,7 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="px-4 py-2.5 border-t border-(--border) bg-muted">
-                            <p className="text-[0.44rem] uppercase tracking-[0.2em] text-(--muted-foreground)">
+                            <p className="text-[0.74rem] font-bold uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 {filiais.length} loja
                                 {filiais.length !== 1 ? "s" : ""} com movimento
                                 no mês
@@ -413,7 +413,7 @@ export default function DashboardPage() {
                     {/* Atalhos */}
                     <div className="bg-card border border-(--border)">
                         <div className="px-5 py-3.5 border-b border-(--border) bg-muted">
-                            <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                            <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
                                 Acesso Rápido
                             </span>
                         </div>

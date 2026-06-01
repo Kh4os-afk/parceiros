@@ -12,7 +12,9 @@ import {
     ShieldOff,
     ShieldCheck,
     CreditCard,
+    FileDown,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import api from "@/lib/axios";
 import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
@@ -54,6 +56,7 @@ export default function ListPage() {
     const [order, setOrder] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [exporting, setExporting] = useState(false);
     const [summary, setSummary] = useState({
         total: 0,
         ativos: 0,
@@ -83,12 +86,40 @@ export default function ListPage() {
     }, [search]);
 
     useEffect(() => {
-        api.get("/partners/summary", {
-            params: { search: search || undefined },
-        })
+        api.get("/partners/summary")
             .then((r) => setSummary(r.data))
             .catch(() => {});
-    }, [search]);
+    }, []);
+
+    async function exportarExcel() {
+        setExporting(true);
+        try {
+            const res = await api.get("/partners", {
+                params: { search, sort_by: sortBy, order, per_page: 99999, page: 1 },
+            });
+            const rows: Partner[] = res.data.data;
+            const dados = rows.map((p) => ({
+                Matrícula: p.matricula || "",
+                Nome: toTitleCase(p.nome),
+                CPF: formatCPF(p.cpf),
+                "Lim. Mensal (R$)": Number(p.limcred),
+                Status: p.bloqueado ? "Bloqueado" : "Ativo",
+            }));
+            const ws = XLSX.utils.json_to_sheet(dados);
+            ws["!cols"] = [
+                { wch: 12 },
+                { wch: 35 },
+                { wch: 16 },
+                { wch: 18 },
+                { wch: 12 },
+            ];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Funcionários");
+            XLSX.writeFile(wb, "funcionarios.xlsx");
+        } finally {
+            setExporting(false);
+        }
+    }
 
     function toggleSort(field: SortField) {
         if (sortBy === field) setOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -221,7 +252,7 @@ export default function ListPage() {
                                     }
                                 `}
                                 />
-                                <p className="text-[0.44rem] uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                <p className="text-[0.74rem] font-bold uppercase tracking-[0.2em] text-(--muted-foreground)">
                                     {label}
                                 </p>
                             </div>
@@ -248,7 +279,7 @@ export default function ListPage() {
                                     delay={80}
                                 />
                             </p>
-                            <p className="text-[0.43rem] text-(--muted-foreground) mt-1 uppercase tracking-[0.12em]">
+                            <p className="text-[0.54rem] font-bold text-(--muted-foreground) mt-1 uppercase tracking-[0.12em]">
                                 {sub}
                             </p>
                         </div>
@@ -272,11 +303,14 @@ export default function ListPage() {
                             className="w-full pl-8 pr-3 py-2 text-[0.72rem] border border-(--border) bg-card text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-50 transition-colors"
                         />
                     </div>
-                    {meta && (
-                        <span className="text-[0.5rem] uppercase tracking-[0.18em] text-(--muted-foreground) ml-auto">
-                            {meta.total} registro{meta.total !== 1 ? "s" : ""}
-                        </span>
-                    )}
+                    <button
+                        onClick={exportarExcel}
+                        disabled={exporting}
+                        className="ml-auto flex items-center gap-1.5 border border-(--border) bg-[#b1ffd2]  px-3 py-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground) hover:text-(--primary) hover:border-(--primary) transition-colors disabled:opacity-40"
+                    >
+                        <FileDown size={11} />
+                        {exporting ? "Exportando…" : "Exportar Excel"}
+                    </button>
                 </div>
 
                 {/* Table */}
@@ -299,7 +333,7 @@ export default function ListPage() {
                                         className="px-5 py-3 text-left select-none cursor-pointer whitespace-nowrap group"
                                     >
                                         <span
-                                            className={`flex items-center gap-1 text-[0.5rem] font-black uppercase tracking-[0.2em] transition-colors ${sortBy === field ? "text-(--primary)" : "text-(--muted-foreground) group-hover:text-(--primary)"}`}
+                                            className={`flex items-center gap-1 text-[0.74rem] font-bold uppercase tracking-[0.2em] transition-colors ${sortBy === field ? "text-(--primary)" : "text-(--muted-foreground) group-hover:text-(--primary)"}`}
                                         >
                                             {label}
                                             {sortBy === field ? (
@@ -318,11 +352,11 @@ export default function ListPage() {
                                     </th>
                                 ))}
                                 {isAdmin && (
-                                    <th className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap">
+                                    <th className="px-5 py-3 text-left text-[0.74rem] font-bold uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap">
                                         Empresa
                                     </th>
                                 )}
-                                <th className="px-5 py-3 text-right text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                <th className="px-5 py-3 text-right text-[0.74rem] font-bold uppercase tracking-[0.2em] text-(--muted-foreground)">
                                     Ações
                                 </th>
                             </tr>
@@ -361,23 +395,23 @@ export default function ListPage() {
                                             <div
                                                 className={`absolute left-0 top-2 bottom-2 w-0.5 transition-opacity ${p.bloqueado ? "bg-red-500 opacity-60" : "bg-(--primary) opacity-0 group-hover:opacity-40"}`}
                                             />
-                                            <span className="text-[0.68rem] font-mono text-(--muted-foreground) tabular-nums">
+                                            <span className="text-[0.74rem] font-mono text-(--muted-foreground) tabular-nums">
                                                 {p.matricula || "—"}
                                             </span>
                                         </td>
                                         <td className="px-5 py-3">
-                                            <span className="text-[0.8rem] font-semibold text-(--foreground) group-hover:text-(--primary) transition-colors">
+                                            <span className="text-[0.74rem] uppercase font-semibold text-(--foreground) group-hover:text-(--primary) transition-colors">
                                                 {toTitleCase(p.nome)}
                                             </span>
                                         </td>
                                         <td className="px-5 py-3">
-                                            <span className="text-[0.68rem] font-mono text-(--muted-foreground) tracking-wider">
+                                            <span className="text-[0.74rem] font-black text-(--muted-foreground) tracking-wider">
                                                 {formatCPF(p.cpf)}
                                             </span>
                                         </td>
                                         <td className="px-5 py-3">
                                             <span className="text-[0.75rem] font-black text-(--primary) tabular-nums">
-                                                <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                <span className="text-[0.65em] font-bold opacity-50 mr-0.5">
                                                     R$
                                                 </span>
                                                 <CountUp
@@ -391,20 +425,26 @@ export default function ListPage() {
                                         </td>
                                         <td className="px-5 py-3">
                                             {p.bloqueado ? (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[0.5rem] font-black uppercase tracking-[0.15em] bg-red-500/10 text-red-500 border border-red-500/20">
-                                                    <ShieldOff size={8} />{" "}
+                                                <span className="inline-flex items-center gap-1.5  text-[0.74rem] font-black uppercase tracking-[0.15em] text-red-500">
+                                                    <span className="relative flex h-1.5 w-1.5">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+                                                    </span>
                                                     Bloqueado
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1.5 text-[0.5rem] font-black uppercase tracking-[0.15em] text-green-600">
-                                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />{" "}
+                                                <span className="inline-flex items-center gap-1.5 text-[0.74rem] font-black uppercase tracking-[0.15em] text-green-600">
+                                                    <span className="relative flex h-1.5 w-1.5">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                                    </span>
                                                     Ativo
                                                 </span>
                                             )}
                                         </td>
                                         {isAdmin && (
                                             <td className="px-5 py-3">
-                                                <span className="text-[0.68rem] text-(--muted-foreground) whitespace-nowrap">
+                                                <span className="text-[0.74rem] font-black text-(--muted-foreground) whitespace-nowrap">
                                                     {p.empresa?.nome ?? "—"}
                                                 </span>
                                             </td>
@@ -445,7 +485,7 @@ export default function ListPage() {
                 {/* Paginação */}
                 {meta && meta.last_page > 1 && (
                     <div className="flex items-center justify-between px-5 py-3 border-t border-(--border) bg-muted">
-                        <span className="text-[0.5rem] uppercase tracking-[0.18em] text-(--muted-foreground)">
+                        <span className="text-[0.74rem] uppercase tracking-[0.18em] text-(--muted-foreground)">
                             {(meta.current_page - 1) * meta.per_page + 1}–
                             {Math.min(
                                 meta.current_page * meta.per_page,
