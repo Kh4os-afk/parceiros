@@ -38,8 +38,34 @@ interface Partner {
     compras: Sale[];
 }
 
-const MESES_LABEL = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-const MESES_FULL  = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const MESES_LABEL = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
+];
+const MESES_FULL = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+];
 
 function nowKey() {
     const d = new Date();
@@ -74,18 +100,21 @@ function maskCPF(raw: string): string {
 const GRADIENT = "linear-gradient(42deg, #ff2222, #00c245f0)";
 
 export default function SaldoPage() {
-    const [cpfInput,      setCpfInput]      = useState("");
-    const [partner,       setPartner]       = useState<Partner | null>(null);
-    const [loading,       setLoading]       = useState(false);
-    const [notFound,      setNotFound]      = useState(false);
+    const [cpfInput, setCpfInput] = useState("");
+    const [partner, setPartner] = useState<Partner | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [notFound, setNotFound] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(nowKey());
     const resultRef = useRef<HTMLDivElement>(null);
-    const months    = useMemo(() => last6Months(), []);
+    const months = useMemo(() => last6Months(), []);
 
     // ── Animação do valor disponível ──────────────────────────────────────
     const displayAmount = useMotionValue(0);
     const roundedAmount = useTransform(displayAmount, (v) =>
-        v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        v.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }),
     );
 
     function handleCPF(e: React.ChangeEvent<HTMLInputElement>) {
@@ -117,15 +146,27 @@ export default function SaldoPage() {
     }
 
     const salesMonth = useMemo(
-        () => (partner?.compras ?? []).filter((s) => s.dtsaida.slice(0, 7) === selectedMonth),
+        () =>
+            (partner?.compras ?? []).filter(
+                (s) => s.dtsaida.slice(0, 7) === selectedMonth,
+            ),
         [partner, selectedMonth],
     );
-    const activeSalesMonth = useMemo(() => salesMonth.filter((s) => !s.dtcancel), [salesMonth]);
-    const gastoMes   = useMemo(() => activeSalesMonth.reduce((s, c) => s + Number(c.vltotal), 0), [activeSalesMonth]);
+    const activeSalesMonth = useMemo(
+        () => salesMonth.filter((s) => !s.dtcancel),
+        [salesMonth],
+    );
+    const gastoMes = useMemo(
+        () => activeSalesMonth.reduce((s, c) => s + Number(c.vltotal), 0),
+        [activeSalesMonth],
+    );
     const disponivel = partner ? Math.max(partner.limcred - gastoMes, 0) : 0;
-    const pct        = partner && partner.limcred > 0 ? Math.min((gastoMes / partner.limcred) * 100, 100) : 0;
+    const pct =
+        partner && partner.limcred > 0
+            ? Math.min((gastoMes / partner.limcred) * 100, 100)
+            : 0;
     const isCurrentMonth = selectedMonth === nowKey();
-    const cpfOk          = stripCPF(cpfInput).length === 11;
+    const cpfOk = stripCPF(cpfInput).length === 11;
 
     const monthTotals = useMemo(() => {
         const map: Record<string, number> = {};
@@ -142,18 +183,24 @@ export default function SaldoPage() {
         months.find((m) => m.key === selectedMonth)?.full ??
         `${MESES_FULL[new Date().getMonth()]} ${new Date().getFullYear()}`;
 
-    const availColor = partner?.bloqueado ? "#ef4444" : pct > 85 ? "#f59e0b" : "var(--primary)";
+    const availColor = partner?.bloqueado
+        ? "#ef4444"
+        : pct > 85
+          ? "#f59e0b"
+          : "var(--primary)";
 
     // Anima o contador sempre que o valor disponível muda
     useEffect(() => {
-        const controls = animate(displayAmount, disponivel, { duration: 1.2, ease: "easeOut" });
+        const controls = animate(displayAmount, disponivel, {
+            duration: 1.2,
+            ease: "easeOut",
+        });
         return controls.stop;
     }, [disponivel]);
 
     return (
         <div style={{ height: "100dvh", overflow: "hidden" }}>
             <AnimatePresence mode="wait">
-
                 {/* ══════════ HERO / BUSCA ══════════ */}
                 {!partner && (
                     <motion.div
@@ -162,36 +209,53 @@ export default function SaldoPage() {
                         style={{ height: "100dvh", background: GRADIENT }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        exit={{ opacity: 0, y: -30, transition: { duration: 0.25 } }}
+                        exit={{
+                            opacity: 0,
+                            y: -30,
+                            transition: { duration: 0.25 },
+                        }}
                         transition={{ duration: 0.35 }}
                     >
                         {/* Dot grid */}
                         <div
                             className="absolute inset-0 pointer-events-none"
                             style={{
-                                backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)",
+                                backgroundImage:
+                                    "radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)",
                                 backgroundSize: "20px 20px",
                             }}
                         />
 
                         {/* Cantos decorativos */}
-                        {["top-3 left-3 border-t-2 border-l-2","top-3 right-3 border-t-2 border-r-2",
-                          "bottom-3 left-3 border-b-2 border-l-2","bottom-3 right-3 border-b-2 border-r-2",
+                        {[
+                            "top-3 left-3 border-t-2 border-l-2",
+                            "top-3 right-3 border-t-2 border-r-2",
+                            "bottom-3 left-3 border-b-2 border-l-2",
+                            "bottom-3 right-3 border-b-2 border-r-2",
                         ].map((cls, i) => (
-                            <div key={i} className={`absolute w-6 h-6 border-white/20 ${cls}`} />
+                            <div
+                                key={i}
+                                className={`absolute w-6 h-6 border-white/20 ${cls}`}
+                            />
                         ))}
 
                         <div className="relative flex flex-col flex-1 max-w-md mx-auto w-full px-6 py-10">
-
                             {/* Brand */}
                             <motion.div
                                 className="flex items-center gap-3 mb-auto"
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1, duration: 0.5, ease: "easeOut" }}
+                                transition={{
+                                    delay: 0.1,
+                                    duration: 0.5,
+                                    ease: "easeOut",
+                                }}
                             >
                                 <div className="w-10 h-10 bg-white/15 border border-white/25 flex items-center justify-center">
-                                    <ShoppingBag size={18} className="text-white" />
+                                    <ShoppingBag
+                                        size={18}
+                                        className="text-white"
+                                    />
                                 </div>
                                 <div>
                                     <p className="text-white/60 text-[0.42rem] uppercase tracking-[0.4em]">
@@ -208,13 +272,20 @@ export default function SaldoPage() {
                                 className="mt-10 mb-8"
                                 initial={{ opacity: 0, y: 28 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+                                transition={{
+                                    delay: 0.2,
+                                    duration: 0.6,
+                                    ease: "easeOut",
+                                }}
                             >
                                 <h1 className="text-white font-black text-[2rem] uppercase leading-none tracking-wide mb-3">
-                                    Consulte<br />seu saldo
+                                    Consulte
+                                    <br />
+                                    seu saldo
                                 </h1>
                                 <p className="text-white/60 text-[0.65rem] leading-relaxed max-w-xs">
-                                    Digite seu CPF para ver o limite disponível e o histórico de compras do mês.
+                                    Digite seu CPF para ver o limite disponível
+                                    e o histórico de compras do mês.
                                 </p>
                             </motion.div>
 
@@ -224,7 +295,11 @@ export default function SaldoPage() {
                                 className="flex flex-col gap-3"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.35, duration: 0.5, ease: "easeOut" }}
+                                transition={{
+                                    delay: 0.35,
+                                    duration: 0.5,
+                                    ease: "easeOut",
+                                }}
                             >
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-white/60 text-[0.68rem] uppercase tracking-[0.25em] font-bold">
@@ -244,7 +319,8 @@ export default function SaldoPage() {
                                             animate={{ opacity: 1, y: 0 }}
                                             className="text-white/90 text-[0.65rem] font-semibold bg-black/20 px-3 py-2"
                                         >
-                                            ✕ CPF não encontrado na base de funcionários.
+                                            ✕ CPF não encontrado na base de
+                                            funcionários.
                                         </motion.p>
                                     )}
                                 </div>
@@ -256,9 +332,17 @@ export default function SaldoPage() {
                                     style={{ color: "#cc1111" }}
                                 >
                                     {loading ? (
-                                        <><Loader2 size={15} className="animate-spin" /> Consultando…</>
+                                        <>
+                                            <Loader2
+                                                size={15}
+                                                className="animate-spin"
+                                            />{" "}
+                                            Consultando…
+                                        </>
                                     ) : (
-                                        <><Search size={14} /> Consultar Saldo</>
+                                        <>
+                                            <Search size={14} /> Consultar Saldo
+                                        </>
                                     )}
                                 </button>
                             </motion.form>
@@ -270,7 +354,8 @@ export default function SaldoPage() {
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.6 }}
                                 >
-                                    Baratão da Carne · {new Date().getFullYear()}
+                                    Baratão da Carne ·{" "}
+                                    {new Date().getFullYear()}
                                 </motion.p>
                             )}
                         </div>
@@ -315,7 +400,6 @@ export default function SaldoPage() {
                         </div>
 
                         <div className="bg-muted flex flex-col gap-0 max-w-md mx-auto w-full">
-
                             {/* Identificação */}
                             <motion.div
                                 className="bg-card border-b border-(--border) px-5 py-4 flex items-center justify-between gap-3"
@@ -332,7 +416,9 @@ export default function SaldoPage() {
                                     </p>
                                     <p className="text-[0.58rem] font-mono text-(--muted-foreground) tracking-widest mt-0.5">
                                         {maskCPF(partner.cpf)}
-                                        {partner.matricula ? ` · Mat. ${partner.matricula}` : ""}
+                                        {partner.matricula
+                                            ? ` · Mat. ${partner.matricula}`
+                                            : ""}
                                     </p>
                                 </div>
                                 {partner.bloqueado ? (
@@ -341,7 +427,8 @@ export default function SaldoPage() {
                                     </span>
                                 ) : (
                                     <span className="shrink-0 flex items-center gap-1.5 text-[0.5rem] font-black uppercase tracking-widest text-green-600">
-                                        <span className="w-2 h-2 bg-green-500 rounded-full" /> Ativo
+                                        <span className="w-2 h-2 bg-green-500 rounded-full" />{" "}
+                                        Ativo
                                     </span>
                                 )}
                             </motion.div>
@@ -351,7 +438,11 @@ export default function SaldoPage() {
                                 className="bg-card px-5 py-8 text-center border-b border-(--border)"
                                 initial={{ opacity: 0, scale: 0.92 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.2, duration: 0.45, ease: "easeOut" }}
+                                transition={{
+                                    delay: 0.2,
+                                    duration: 0.45,
+                                    ease: "easeOut",
+                                }}
                             >
                                 <p className="text-[0.48rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-4">
                                     {partner.bloqueado
@@ -366,9 +457,25 @@ export default function SaldoPage() {
                                         Acesso suspenso
                                     </p>
                                 ) : (
-                                    <p className="font-black tabular-nums leading-none" style={{ fontSize: "3rem", color: availColor }}>
-                                        <span style={{ fontSize: "0.28em", opacity: 0.5, marginRight: 4 }}>R$</span>
-                                        <motion.span>{roundedAmount}</motion.span>
+                                    <p
+                                        className="font-black tabular-nums leading-none"
+                                        style={{
+                                            fontSize: "3rem",
+                                            color: availColor,
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                fontSize: "0.28em",
+                                                opacity: 0.5,
+                                                marginRight: 4,
+                                            }}
+                                        >
+                                            R$
+                                        </span>
+                                        <motion.span>
+                                            {roundedAmount}
+                                        </motion.span>
                                     </p>
                                 )}
 
@@ -379,13 +486,31 @@ export default function SaldoPage() {
                                                 className="h-full"
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${pct}%` }}
-                                                transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
-                                                style={{ background: availColor }}
+                                                transition={{
+                                                    delay: 0.4,
+                                                    duration: 1,
+                                                    ease: "easeOut",
+                                                }}
+                                                style={{
+                                                    background: availColor,
+                                                }}
                                             />
                                         </div>
                                         <div className="flex justify-between text-[0.55rem] text-(--muted-foreground)">
-                                            <span>Gasto: <strong className="text-(--foreground)">{formatMoney(gastoMes)}</strong></span>
-                                            <span>Limite: <strong className="text-(--foreground)">{formatMoney(partner.limcred)}</strong></span>
+                                            <span>
+                                                Gasto:{" "}
+                                                <strong className="text-(--foreground)">
+                                                    {formatMoney(gastoMes)}
+                                                </strong>
+                                            </span>
+                                            <span>
+                                                Limite:{" "}
+                                                <strong className="text-(--foreground)">
+                                                    {formatMoney(
+                                                        partner.limcred,
+                                                    )}
+                                                </strong>
+                                            </span>
                                         </div>
                                     </div>
                                 )}
@@ -398,22 +523,38 @@ export default function SaldoPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3, duration: 0.4 }}
                             >
-                                <div className="flex overflow-x-auto border-b border-(--border)" style={{ scrollbarWidth: "none" }}>
+                                <div
+                                    className="flex overflow-x-auto border-b border-(--border)"
+                                    style={{ scrollbarWidth: "none" }}
+                                >
                                     {months.map((m) => {
                                         const total = monthTotals[m.key] ?? 0;
-                                        const isSel  = m.key === selectedMonth;
+                                        const isSel = m.key === selectedMonth;
                                         const isCurr = m.key === nowKey();
                                         return (
                                             <button
                                                 key={m.key}
-                                                onClick={() => setSelectedMonth(m.key)}
+                                                onClick={() =>
+                                                    setSelectedMonth(m.key)
+                                                }
                                                 className={`flex-1 min-w-[68px] flex flex-col items-center py-3 px-2 border-b-2 transition-all ${isSel ? "border-b-(--primary) bg-card" : "border-b-transparent bg-muted"}`}
                                             >
-                                                <span className={`text-[0.5rem] font-black uppercase tracking-[0.12em] ${isSel ? "text-(--primary)" : isCurr ? "text-(--foreground)" : "text-(--muted-foreground)"}`}>
-                                                    {m.label}{isCurr ? " ●" : ""}
+                                                <span
+                                                    className={`text-[0.5rem] font-black uppercase tracking-[0.12em] ${isSel ? "text-(--primary)" : isCurr ? "text-(--foreground)" : "text-(--muted-foreground)"}`}
+                                                >
+                                                    {m.label}
+                                                    {isCurr ? " ●" : ""}
                                                 </span>
-                                                <span className={`text-[0.56rem] tabular-nums mt-0.5 ${isSel ? "text-(--primary) font-black" : "text-(--muted-foreground)"}`}>
-                                                    {total > 0 ? `R$${total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}` : <span className="opacity-30">—</span>}
+                                                <span
+                                                    className={`text-[0.56rem] tabular-nums mt-0.5 ${isSel ? "text-(--primary) font-black" : "text-(--muted-foreground)"}`}
+                                                >
+                                                    {total > 0 ? (
+                                                        `R$${total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                                    ) : (
+                                                        <span className="opacity-30">
+                                                            —
+                                                        </span>
+                                                    )}
                                                 </span>
                                             </button>
                                         );
@@ -424,7 +565,10 @@ export default function SaldoPage() {
                                         {selectedLabel}
                                     </span>
                                     <span className="text-[0.5rem] text-(--muted-foreground)">
-                                        {activeSalesMonth.length} compra{activeSalesMonth.length !== 1 ? "s" : ""}
+                                        {activeSalesMonth.length} compra
+                                        {activeSalesMonth.length !== 1
+                                            ? "s"
+                                            : ""}
                                     </span>
                                 </div>
                             </motion.div>
@@ -438,7 +582,10 @@ export default function SaldoPage() {
                                         animate={{ opacity: 1 }}
                                         transition={{ delay: 0.35 }}
                                     >
-                                        <ShoppingBag size={30} className="text-(--muted-foreground) opacity-15" />
+                                        <ShoppingBag
+                                            size={30}
+                                            className="text-(--muted-foreground) opacity-15"
+                                        />
                                         <p className="text-[0.72rem] text-(--muted-foreground)">
                                             Sem compras em {selectedLabel}.
                                         </p>
@@ -449,35 +596,64 @@ export default function SaldoPage() {
                                             key={sale.id}
                                             className={`flex items-center gap-3 px-4 py-4 ${sale.dtcancel ? "opacity-40" : ""}`}
                                             initial={{ opacity: 0, x: -16 }}
-                                            animate={{ opacity: sale.dtcancel ? 0.4 : 1, x: 0 }}
-                                            transition={{ delay: 0.35 + index * 0.05, duration: 0.35 }}
+                                            animate={{
+                                                opacity: sale.dtcancel
+                                                    ? 0.4
+                                                    : 1,
+                                                x: 0,
+                                            }}
+                                            transition={{
+                                                delay: 0.35 + index * 0.05,
+                                                duration: 0.35,
+                                            }}
                                         >
                                             <div
                                                 className="w-0.5 h-11 shrink-0 rounded-full"
-                                                style={{ background: `hsl(${(sale.codfilial * 47) % 360}, 55%, 50%)`, opacity: 0.7 }}
+                                                style={{
+                                                    background: `hsl(${(sale.codfilial * 47) % 360}, 55%, 50%)`,
+                                                    opacity: 0.7,
+                                                }}
                                             />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-[0.78rem] font-semibold text-(--foreground) truncate">
-                                                    {sale.filial?.filial ?? `Filial ${sale.codfilial}`}
+                                                    {sale.filial?.filial ??
+                                                        `Filial ${sale.codfilial}`}
                                                 </p>
                                                 <p className="text-[0.6rem] text-(--muted-foreground) mt-0.5">
-                                                    {formatDateFull(sale.dtsaida)} · Nota {sale.numnota}
+                                                    {formatDateFull(
+                                                        sale.dtsaida,
+                                                    )}{" "}
+                                                    · Nota {sale.numnota}
                                                 </p>
                                             </div>
                                             <div className="flex flex-col items-end gap-1 shrink-0">
-                                                <span className={`text-[0.9rem] font-black tabular-nums ${sale.dtcancel ? "text-(--muted-foreground) line-through" : "text-(--primary)"}`}>
+                                                <span
+                                                    className={`text-[0.9rem] font-black tabular-nums ${sale.dtcancel ? "text-(--muted-foreground) line-through" : "text-(--primary)"}`}
+                                                >
                                                     {formatMoney(sale.vltotal)}
                                                 </span>
                                                 {sale.dtcancel ? (
-                                                    <span className="text-[0.46rem] font-black uppercase text-red-500">Cancelado</span>
+                                                    <span className="text-[0.46rem] font-black uppercase text-red-500">
+                                                        Cancelado
+                                                    </span>
                                                 ) : sale.qrcodenfce ? (
-                                                    <a href={sale.qrcodenfce} target="_blank" rel="noopener noreferrer"
-                                                        className="flex items-center gap-0.5 text-[0.5rem] text-(--muted-foreground)">
-                                                        <ExternalLink size={9} /> NFC-e
+                                                    <a
+                                                        href={sale.qrcodenfce}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-0.5 text-[0.5rem] text-(--muted-foreground)"
+                                                    >
+                                                        <ExternalLink
+                                                            size={9}
+                                                        />{" "}
+                                                        NFC-e
                                                     </a>
                                                 ) : null}
                                             </div>
-                                            <ChevronRight size={13} className="text-(--muted-foreground) opacity-20 shrink-0" />
+                                            <ChevronRight
+                                                size={13}
+                                                className="text-(--muted-foreground) opacity-20 shrink-0"
+                                            />
                                         </motion.div>
                                     ))
                                 )}
@@ -487,12 +663,18 @@ export default function SaldoPage() {
                                         className="flex items-center justify-between px-4 py-4 bg-muted"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        transition={{ delay: 0.35 + salesMonth.length * 0.05 }}
+                                        transition={{
+                                            delay:
+                                                0.35 + salesMonth.length * 0.05,
+                                        }}
                                     >
                                         <span className="text-[0.52rem] font-black uppercase tracking-[0.18em] text-(--muted-foreground)">
                                             Total do mês
                                         </span>
-                                        <span className="text-[0.9rem] font-black tabular-nums" style={{ color: availColor }}>
+                                        <span
+                                            className="text-[0.9rem] font-black tabular-nums"
+                                            style={{ color: availColor }}
+                                        >
                                             {formatMoney(gastoMes)}
                                         </span>
                                     </motion.div>
@@ -505,7 +687,6 @@ export default function SaldoPage() {
                         </div>
                     </motion.div>
                 )}
-
             </AnimatePresence>
         </div>
     );

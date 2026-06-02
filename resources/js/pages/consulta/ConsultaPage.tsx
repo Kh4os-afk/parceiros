@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { motion } from "motion/react";
 import {
     Search,
     ExternalLink,
@@ -8,8 +9,39 @@ import {
     CreditCard,
 } from "lucide-react";
 import api from "@/lib/axios";
-import { formatCPF, formatMoney, stripCPF, toTitleCase } from "@/lib/utils";
+import { formatCPF, stripCPF, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
+
+const T = {
+    bg: "#f4f5f8",
+    border: "#e8eaef",
+    cyan: "#0099cc",
+    purple: "#7c3aed",
+    green: "#059669",
+    amber: "#d97706",
+    red: "#dc2626",
+};
+
+const cardStyle: React.CSSProperties = {
+    background: "#ffffff",
+    border: `1px solid ${T.border}`,
+    boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+};
+
+const rise: any = {
+    hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
+    visible: {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    },
+};
+
+const stagger = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+};
 
 interface Sale {
     id: number;
@@ -85,13 +117,6 @@ function last6Months() {
     });
 }
 
-const corners = [
-    "top-0 left-0 border-t-2 border-l-2",
-    "top-0 right-0 border-t-2 border-r-2",
-    "bottom-0 left-0 border-b-2 border-l-2",
-    "bottom-0 right-0 border-b-2 border-r-2",
-];
-
 export default function ConsultaPage() {
     const [cpfInput, setCpfInput] = useState("");
     const [partner, setPartner] = useState<Partner | null>(null);
@@ -119,7 +144,6 @@ export default function ConsultaPage() {
         }
     }
 
-    // Compras do mês selecionado (sem canceladas)
     const salesMonth = useMemo(
         () =>
             (partner?.compras ?? []).filter(
@@ -142,7 +166,6 @@ export default function ConsultaPage() {
             : 0;
     const isCurrentMonth = selectedMonth === nowKey();
 
-    // Totais por mês para os tabs
     const monthTotals = useMemo(() => {
         const map: Record<string, number> = {};
         (partner?.compras ?? [])
@@ -158,44 +181,50 @@ export default function ConsultaPage() {
         months.find((m) => m.key === selectedMonth)?.full ??
         MESES_FULL[new Date().getMonth()] + " " + new Date().getFullYear();
 
-    return (
-        <div className="flex flex-col gap-5 animate-[fade-in_0.2s_ease-out]">
-            {/* ── Header ── */}
-            <div className="relative bg-card border border-(--border) overflow-hidden">
-                <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                        backgroundImage:
-                            "radial-gradient(circle, color-mix(in oklch, currentColor 6%, transparent) 1px, transparent 1px)",
-                        backgroundSize: "20px 20px",
-                    }}
-                />
-                {corners.map((cls, i) => (
-                    <div
-                        key={i}
-                        className={`absolute z-10 w-5 h-5 border-(--primary)/30 ${cls}`}
-                    />
-                ))}
+    const barColor =
+        pct > 85
+            ? `linear-gradient(90deg, #b91c1c 0%, ${T.red} 100%)`
+            : pct > 60
+              ? `linear-gradient(90deg, #b45309 0%, ${T.amber} 100%)`
+              : `linear-gradient(90deg, #0077aa 0%, ${T.cyan} 100%)`;
 
-                <div className="relative px-4 md:px-7 py-5">
-                    <p className="text-[0.74rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
-                        Convênio
-                    </p>
-                    <h1 className="text-[1.25rem] font-black uppercase tracking-[0.08em] text-(--foreground)">
+    const barShadow =
+        pct > 85
+            ? `0 0 8px rgba(220,38,38,0.5)`
+            : pct > 60
+              ? `0 0 8px rgba(217,119,6,0.5)`
+              : `0 0 8px rgba(0,153,204,0.4)`;
+
+    return (
+        <motion.div
+            variants={stagger}
+            initial="hidden"
+            animate="visible"
+            style={{ background: T.bg }}
+            className="-m-4 md:-m-6 p-4 md:p-6 min-h-screen flex flex-col gap-4"
+        >
+            {/* ── Header card ── */}
+            <motion.div variants={rise} style={cardStyle} className="rounded-lg overflow-hidden">
+                <div className="px-5 md:px-7 py-5">
+                    <h1
+                        className="text-lg font-bold tracking-tight mb-0.5"
+                        style={{ color: "#111827" }}
+                    >
                         Consulta de Saldo
                     </h1>
-                    <p className="text-[0.74rem] text-(--muted-foreground) mt-1.5">
-                        Consulte o limite disponível e o histórico de compras
-                        pelo CPF do funcionário.
+                    <p className="text-sm mb-5" style={{ color: "#6b7280" }}>
+                        Consulte o limite disponível e o histórico de compras pelo CPF do funcionário.
                     </p>
 
-                    {/* Busca por CPF */}
                     <form
                         onSubmit={handleSearch}
-                        className="flex flex-col sm:flex-row sm:items-end gap-3 mt-5"
+                        className="flex flex-col sm:flex-row sm:items-end gap-3"
                     >
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[0.74rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
+                            <label
+                                className="text-xs font-semibold uppercase tracking-widest"
+                                style={{ color: "#6b7280" }}
+                            >
                                 CPF do Funcionário
                             </label>
                             <input
@@ -216,15 +245,25 @@ export default function ConsultaPage() {
                                 }}
                                 placeholder="000.000.000-00"
                                 maxLength={14}
-                                className="w-full sm:w-52 border border-(--border) px-3 py-1 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-40 transition-colors font-mono tracking-widest"
+                                className="w-full sm:w-52 py-1.5 px-3 text-sm font-mono tracking-widest rounded-md outline-none transition-colors"
+                                style={{
+                                    border: `1px solid ${T.border}`,
+                                    background: "#fafbfc",
+                                    color: "#111827",
+                                }}
+                                onFocus={(e) =>
+                                    (e.currentTarget.style.borderColor = T.cyan)
+                                }
+                                onBlur={(e) =>
+                                    (e.currentTarget.style.borderColor = T.border)
+                                }
                             />
                         </div>
                         <button
                             type="submit"
-                            disabled={
-                                loading || stripCPF(cpfInput).length !== 11
-                            }
-                            className="flex items-center gap-2 bg-(--primary) text-white px-5 py-2 text-[0.58rem] font-black uppercase tracking-[0.2em] hover:opacity-90 disabled:opacity-50 transition-opacity"
+                            disabled={loading || stripCPF(cpfInput).length !== 11}
+                            className="flex items-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-opacity disabled:opacity-40"
+                            style={{ background: T.cyan, color: "#ffffff" }}
                         >
                             <Search size={12} />
                             {loading ? "Buscando…" : "Consultar"}
@@ -232,182 +271,222 @@ export default function ConsultaPage() {
                     </form>
 
                     {notFound && (
-                        <p className="mt-3 text-[0.65rem] text-red-500 font-semibold">
+                        <p
+                            className="mt-3 text-xs font-semibold"
+                            style={{ color: T.red }}
+                        >
                             CPF não encontrado na base de funcionários.
                         </p>
                     )}
                 </div>
-            </div>
+            </motion.div>
 
             {partner && (
                 <>
-                    {/* ── Card de destaque ── */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        {/* Disponível — destaque principal */}
-                        <div
-                            className={`lg:col-span-2 relative border overflow-hidden flex flex-col justify-between p-5 md:p-8 ${
-                                partner.bloqueado
-                                    ? "bg-red-500/5 border-red-500/20"
+                    {/* ── Grid principal ── */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:items-start">
+                        {/* Card principal 2/3 */}
+                        <motion.div
+                            variants={rise}
+                            style={{
+                                ...cardStyle,
+                                ...(partner.bloqueado
+                                    ? {
+                                          border: `1px solid rgba(220,38,38,0.3)`,
+                                          background: "rgba(254,242,242,0.6)",
+                                      }
                                     : disponivel === 0
-                                      ? "bg-amber-500/5 border-amber-500/20"
-                                      : "bg-(--primary)/5 border-(--primary)/20"
-                            }`}
+                                      ? {
+                                            border: `1px solid rgba(217,119,6,0.25)`,
+                                            background: "rgba(255,251,235,0.6)",
+                                        }
+                                      : {}),
+                            }}
+                            className="lg:col-span-2 rounded-lg overflow-hidden p-5 md:p-8"
                         >
-                            {/* Dot grid */}
-                            <div
-                                className="absolute inset-0 pointer-events-none opacity-[0.04]"
-                                style={{
-                                    backgroundImage:
-                                        "radial-gradient(circle, currentColor 1px, transparent 1px)",
-                                    backgroundSize: "18px 18px",
-                                }}
-                            />
-                            {corners.map((cls, i) => (
-                                <div
-                                    key={i}
-                                    className={`absolute z-10 w-4 h-4 ${partner.bloqueado ? "border-red-500/30" : "border-(--primary)/25"} ${cls}`}
-                                />
-                            ))}
-
-                            <div className="relative z-10">
-                                <div className="flex items-start justify-between mb-6">
-                                    <div>
-                                        <p className="text-[0.58rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">
-                                            Funcionário
-                                        </p>
-                                        <h2 className="text-[0.94rem] font-black uppercase tracking-wide text-(--foreground) leading-tight">
-                                            {toTitleCase(partner.nome)}
-                                        </h2>
-                                        <div className="flex items-center gap-3 mt-1.5">
-                                            <span className="text-[0.74rem] font-mono text-(--muted-foreground) tracking-widest">
-                                                {formatCPF(partner.cpf)}
-                                            </span>
-                                            {partner.matricula && (
-                                                <span className="text-[0.58rem] text-(--muted-foreground)">
-                                                    Mat. {partner.matricula}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {partner.bloqueado ? (
-                                        <span className="flex items-center gap-1 px-2 py-1 bg-red-500/10 border border-red-500/25 text-red-500 text-[0.48rem] font-black uppercase tracking-widest">
-                                            <Ban size={8} /> Bloqueado
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center gap-1.5 px-2 py-1 bg-(--primary)/10 border border-(--primary)/25 text-(--primary) text-[0.58rem] font-black uppercase tracking-widest">
-                                            <span className="w-1.5 h-1.5 bg-(--primary) rounded-full" />{" "}
-                                            Ativo
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Valor disponível — mega destaque */}
-                                <div className="mb-6">
-                                    <p className="text-[0.68rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-2">
-                                        {partner.bloqueado
-                                            ? "Conta Bloqueada"
-                                            : isCurrentMonth
-                                              ? "Disponível para Compra"
-                                              : `Disponível em ${selectedMonthLabel}`}
+                            {/* Identidade */}
+                            <div className="flex items-start justify-between mb-6">
+                                <div>
+                                    <p
+                                        className="text-xs uppercase tracking-widest mb-1"
+                                        style={{ color: "#9ca3af" }}
+                                    >
+                                        Funcionário
                                     </p>
-                                    {partner.bloqueado ? (
-                                        <p className="text-2xl font-black text-red-500 uppercase tracking-wide">
-                                            Acesso suspenso
-                                        </p>
-                                    ) : (
-                                        <p
-                                            className={`text-[4.5rem] font-black tabular-nums leading-none ${
-                                                disponivel === 0
-                                                    ? "text-amber-500"
-                                                    : "text-(--primary)"
-                                            }`}
+                                    <h2
+                                        className="text-base font-bold tracking-wide leading-tight"
+                                        style={{ color: "#111827" }}
+                                    >
+                                        {toTitleCase(partner.nome)}
+                                    </h2>
+                                    <div className="flex items-center gap-3 mt-1.5">
+                                        <span
+                                            className="text-sm font-mono tracking-widest"
+                                            style={{ color: "#6b7280" }}
                                         >
-                                            <span className="text-[0.3em] font-bold opacity-60 mr-1">
-                                                R$
+                                            {formatCPF(partner.cpf)}
+                                        </span>
+                                        {partner.matricula && (
+                                            <span
+                                                className="text-xs"
+                                                style={{ color: "#9ca3af" }}
+                                            >
+                                                Mat. {partner.matricula}
                                             </span>
+                                        )}
+                                    </div>
+                                </div>
+                                {partner.bloqueado ? (
+                                    <span
+                                        className="flex items-center gap-1 px-2 py-1 rounded text-xs font-bold uppercase tracking-widest"
+                                        style={{
+                                            background: "rgba(220,38,38,0.1)",
+                                            border: `1px solid rgba(220,38,38,0.25)`,
+                                            color: T.red,
+                                        }}
+                                    >
+                                        <Ban size={10} /> Bloqueado
+                                    </span>
+                                ) : (
+                                    <span
+                                        className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-bold uppercase tracking-widest"
+                                        style={{
+                                            background: `rgba(0,153,204,0.08)`,
+                                            border: `1px solid rgba(0,153,204,0.2)`,
+                                            color: T.cyan,
+                                        }}
+                                    >
+                                        <span
+                                            className="w-1.5 h-1.5 rounded-full"
+                                            style={{ background: T.cyan }}
+                                        />{" "}
+                                        Ativo
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Disponível — destaque */}
+                            <div className="mb-6">
+                                <p
+                                    className="text-xs uppercase tracking-widest mb-2"
+                                    style={{ color: "#9ca3af" }}
+                                >
+                                    {partner.bloqueado
+                                        ? "Conta Bloqueada"
+                                        : isCurrentMonth
+                                          ? "Disponível para Compra"
+                                          : `Disponível em ${selectedMonthLabel}`}
+                                </p>
+                                {partner.bloqueado ? (
+                                    <p
+                                        className="text-2xl font-black uppercase tracking-wide"
+                                        style={{ color: T.red }}
+                                    >
+                                        Acesso suspenso
+                                    </p>
+                                ) : (
+                                    <p
+                                        className="text-6xl font-black tabular-nums leading-none"
+                                        style={{
+                                            background:
+                                                disponivel === 0
+                                                    ? `linear-gradient(135deg, ${T.amber} 0%, #b45309 100%)`
+                                                    : `linear-gradient(135deg, ${T.cyan} 0%, ${T.purple} 100%)`,
+                                            WebkitBackgroundClip: "text",
+                                            WebkitTextFillColor: "transparent",
+                                            backgroundClip: "text",
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                fontSize: "0.5em",
+                                                opacity: 0.7,
+                                                marginRight: "0.15em",
+                                            }}
+                                        >
+                                            R$
+                                        </span>
+                                        <CountUp
+                                            value={disponivel}
+                                            decimals={2}
+                                            duration={0.5}
+                                            delay={80}
+                                        />
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Barra de utilização */}
+                            {!partner.bloqueado && (
+                                <div>
+                                    <div className="flex justify-between mb-1.5">
+                                        <span
+                                            className="text-xs tracking-wide"
+                                            style={{ color: "#9ca3af" }}
+                                        >
+                                            R$
                                             <CountUp
-                                                value={disponivel}
+                                                value={gastoMes}
+                                                decimals={2}
+                                                duration={0.5}
+                                                delay={80}
+                                            />{" "}
+                                            usados de R$
+                                            <CountUp
+                                                value={partner.limcred}
                                                 decimals={2}
                                                 duration={0.5}
                                                 delay={80}
                                             />
-                                            {/*
-                                            {disponivel.toLocaleString(
-                                                "pt-BR",
-                                                { minimumFractionDigits: 2 },
-                                            )} */}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Barra de utilização */}
-                                {!partner.bloqueado && (
-                                    <div>
-                                        <div className="flex justify-between mb-1.5">
-                                            <span className="text-[0.74rem] uppercase tracking-[0.18em] text-(--muted-foreground)">
-                                                R$
-                                                <CountUp
-                                                    value={gastoMes}
-                                                    decimals={2}
-                                                    duration={0.5}
-                                                    delay={80}
-                                                />{" "}
-                                                usados de R$
-                                                <CountUp
-                                                    value={partner.limcred}
-                                                    decimals={2}
-                                                    duration={0.5}
-                                                    delay={80}
-                                                />
-                                            </span>
-                                            <span
-                                                className={`text-[0.80rem] font-black ${pct > 85 ? "text-red-500" : pct > 60 ? "text-amber-500" : "text-(--primary)"}`}
-                                            >
-                                                <CountUp
-                                                    value={pct}
-                                                    decimals={0}
-                                                    duration={0.5}
-                                                    delay={80}
-                                                />
-                                                %
-                                            </span>
-                                        </div>
-                                        <div className="h-1.5 bg-(--border) w-full overflow-hidden">
+                                        </span>
+                                        <span
+                                            className="text-sm font-black"
+                                            style={{
+                                                color:
+                                                    pct > 85
+                                                        ? T.red
+                                                        : pct > 60
+                                                          ? T.amber
+                                                          : T.cyan,
+                                            }}
+                                        >
+                                            <CountUp
+                                                value={pct}
+                                                decimals={0}
+                                                duration={0.5}
+                                                delay={80}
+                                            />
+                                            %
+                                        </span>
+                                    </div>
+                                    <div
+                                        className="h-1.5 w-full overflow-hidden rounded-full"
+                                        style={{ background: T.border }}
+                                    >
+                                        <div
+                                            className="h-full relative overflow-hidden rounded-full transition-all duration-700"
+                                            style={{
+                                                width: `${pct}%`,
+                                                background: barColor,
+                                                boxShadow: barShadow,
+                                            }}
+                                        >
                                             <div
-                                                className="h-full relative overflow-hidden transition-all duration-700"
+                                                className="absolute inset-0 w-1/3"
                                                 style={{
-                                                    width: `${pct}%`,
                                                     background:
-                                                        pct > 85
-                                                            ? "linear-gradient(90deg, oklch(0.5 0.22 27) 0%, var(--destructive) 100%)"
-                                                            : pct > 60
-                                                              ? "linear-gradient(90deg, #d97706 0%, #f59e0b 100%)"
-                                                              : "linear-gradient(90deg, color-mix(in oklch, var(--primary) 70%, black) 0%, var(--primary) 100%)",
-                                                    boxShadow:
-                                                        pct > 85
-                                                            ? "0 0 8px color-mix(in oklch, var(--destructive) 70%, transparent)"
-                                                            : pct > 60
-                                                              ? "0 0 8px rgba(245,158,11,0.6)"
-                                                              : "0 0 8px color-mix(in oklch, var(--primary) 60%, transparent)",
+                                                        "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%)",
+                                                    animation:
+                                                        "bar-shimmer 2.8s ease-in-out infinite",
                                                 }}
-                                            >
-                                                <div
-                                                    className="absolute inset-0 w-1/3"
-                                                    style={{
-                                                        background:
-                                                            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%)",
-                                                        animation:
-                                                            "bar-shimmer 2.8s ease-in-out infinite",
-                                                    }}
-                                                />
-                                            </div>
+                                            />
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        </div>
+                                </div>
+                            )}
+                        </motion.div>
 
-                        {/* Info lateral */}
+                        {/* Sidebar 1/3 */}
                         <div className="flex flex-col gap-3">
                             {[
                                 {
@@ -421,7 +500,8 @@ export default function ConsultaPage() {
                                         />
                                     ),
                                     icon: CreditCard,
-                                    color: "default",
+                                    isMoney: true,
+                                    accent: T.cyan,
                                 },
                                 {
                                     label: "Gasto no Mês",
@@ -434,10 +514,11 @@ export default function ConsultaPage() {
                                         />
                                     ),
                                     icon: ShoppingBag,
-                                    color:
+                                    isMoney: true,
+                                    accent:
                                         gastoMes > partner.limcred
-                                            ? "red"
-                                            : "default",
+                                            ? T.red
+                                            : T.cyan,
                                 },
                                 {
                                     label: "Compras no Mês",
@@ -450,48 +531,68 @@ export default function ConsultaPage() {
                                         />
                                     ),
                                     icon: CalendarDays,
-                                    color: "default",
+                                    isMoney: false,
+                                    accent: T.purple,
                                 },
-                            ].map(({ label, value, icon: Icon, color }) => (
-                                <div
+                            ].map(({ label, value, icon: Icon, isMoney, accent }) => (
+                                <motion.div
                                     key={label}
-                                    className="bg-card border border-(--border) px-5 py-4 flex items-center gap-3"
+                                    variants={rise}
+                                    style={cardStyle}
+                                    className="rounded-lg px-5 py-4 flex items-center gap-3"
                                 >
                                     <div
-                                        className={`w-9 h-9 flex items-center justify-center border shrink-0 ${
-                                            color === "red"
-                                                ? "bg-red-500/10 border-red-500/20 text-red-500"
-                                                : "bg-(--primary)/8 border-(--primary)/20 text-(--primary)"
-                                        }`}
+                                        className="w-9 h-9 flex items-center justify-center rounded-md shrink-0"
+                                        style={{
+                                            background: `${accent}15`,
+                                            border: `1px solid ${accent}30`,
+                                            color: accent,
+                                        }}
                                     >
-                                        <Icon size={14} />
+                                        <Icon size={15} />
                                     </div>
                                     <div>
-                                        <p className="text-[0.74rem] uppercase tracking-[0.2em] text-(--muted-foreground)">
+                                        <p
+                                            className="text-xs uppercase tracking-widest"
+                                            style={{ color: "#9ca3af" }}
+                                        >
                                             {label}
                                         </p>
-                                        <p className="text-[0.9rem] font-black text-(--foreground) tabular-nums">
-                                            {label === "Compras no Mês" ? (
-                                                value
-                                            ) : (
+                                        <p
+                                            className="text-sm font-black tabular-nums"
+                                            style={{ color: "#111827" }}
+                                        >
+                                            {isMoney ? (
                                                 <>
-                                                    <span className="text-[0.74rem] font-bold opacity-50 mr-0.5">
+                                                    <span
+                                                        className="text-xs font-bold mr-0.5"
+                                                        style={{ opacity: 0.5 }}
+                                                    >
                                                         R$
-                                                    </span>{" "}
-                                                    {value}{" "}
+                                                    </span>
+                                                    {value}
                                                 </>
+                                            ) : (
+                                                value
                                             )}
                                         </p>
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                     </div>
 
-                    {/* ── Seletor de mês + tabela ── */}
-                    <div className="bg-card border border-(--border)">
-                        {/* Tabs de mês */}
-                        <div className="flex border-b border-(--border) bg-muted overflow-x-auto">
+                    {/* ── Tabs de mês + tabela ── */}
+                    <motion.div
+                        variants={rise}
+                        style={cardStyle}
+                        className="rounded-lg overflow-hidden"
+                    >
+                        {/* Tabs */}
+                        <div
+                            className="flex border-b overflow-x-auto"
+                            style={{ borderColor: T.border, background: "#fafbfc" }}
+                        >
                             {months.map((m) => {
                                 const total = monthTotals[m.key] ?? 0;
                                 const isSel = m.key === selectedMonth;
@@ -500,23 +601,38 @@ export default function ConsultaPage() {
                                     <button
                                         key={m.key}
                                         onClick={() => setSelectedMonth(m.key)}
-                                        className={`flex flex-col items-center px-5 py-3 border-b-2 transition-all shrink-0 ${
-                                            isSel
-                                                ? "border-b-(--primary) bg-card"
-                                                : "border-b-transparent hover:bg-card/60"
-                                        }`}
+                                        className="flex flex-col items-center px-5 py-3 shrink-0 transition-all"
+                                        style={{
+                                            borderBottom: isSel
+                                                ? `2px solid ${T.cyan}`
+                                                : "2px solid transparent",
+                                            background: isSel ? "#ffffff" : "transparent",
+                                        }}
                                     >
                                         <span
-                                            className={`text-[0.74rem] font-black uppercase tracking-[0.18em] ${isSel ? "text-(--primary)" : isCurr ? "text-(--foreground)" : "text-(--muted-foreground)"}`}
+                                            className="text-xs font-bold uppercase tracking-widest"
+                                            style={{
+                                                color: isSel
+                                                    ? T.cyan
+                                                    : isCurr
+                                                      ? "#374151"
+                                                      : "#9ca3af",
+                                            }}
                                         >
                                             {m.label}
                                             {isCurr ? " ●" : ""}
                                         </span>
                                         {total > 0 ? (
                                             <span
-                                                className={`text-[0.74rem] font-black tabular-nums mt-0.5 ${isSel ? "text-(--primary)" : "text-(--muted-foreground)"}`}
+                                                className="text-xs font-bold tabular-nums mt-0.5"
+                                                style={{
+                                                    color: isSel ? T.cyan : "#9ca3af",
+                                                }}
                                             >
-                                                <span className="text-[0.74rem] font-bold opacity-50 mr-0.5">
+                                                <span
+                                                    className="font-bold mr-0.5"
+                                                    style={{ opacity: 0.5 }}
+                                                >
                                                     R$
                                                 </span>
                                                 <CountUp
@@ -527,7 +643,10 @@ export default function ConsultaPage() {
                                                 />
                                             </span>
                                         ) : (
-                                            <span className="text-[0.74rem] text-(--muted-foreground) opacity-40 mt-0.5">
+                                            <span
+                                                className="text-xs mt-0.5"
+                                                style={{ color: "#d1d5db" }}
+                                            >
                                                 sem compras
                                             </span>
                                         )}
@@ -537,11 +656,20 @@ export default function ConsultaPage() {
                         </div>
 
                         {/* Header da tabela */}
-                        <div className="px-6 py-3 border-b border-(--border) flex items-center justify-between">
-                            <span className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
+                        <div
+                            className="px-6 py-3 border-b flex items-center justify-between"
+                            style={{ borderColor: T.border }}
+                        >
+                            <span
+                                className="text-xs font-bold uppercase tracking-widest"
+                                style={{ color: "#6b7280" }}
+                            >
                                 Compras — {selectedMonthLabel}
                             </span>
-                            <span className="text-[0.5rem] uppercase tracking-[0.15em] text-(--muted-foreground)">
+                            <span
+                                className="text-xs"
+                                style={{ color: "#9ca3af" }}
+                            >
                                 {salesMonth.length} registro
                                 {salesMonth.length !== 1 ? "s" : ""}
                             </span>
@@ -552,9 +680,9 @@ export default function ConsultaPage() {
                             <div className="flex flex-col items-center justify-center py-14 gap-2">
                                 <ShoppingBag
                                     size={26}
-                                    className="text-(--muted-foreground) opacity-20"
+                                    style={{ color: "#d1d5db" }}
                                 />
-                                <p className="text-[0.78rem] text-(--muted-foreground)">
+                                <p className="text-sm" style={{ color: "#9ca3af" }}>
                                     Nenhuma compra em {selectedMonthLabel}.
                                 </p>
                             </div>
@@ -562,7 +690,7 @@ export default function ConsultaPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-max border-collapse">
                                     <thead>
-                                        <tr className="bg-muted border-b border-(--border)">
+                                        <tr style={{ background: "#fafbfc", borderBottom: `1px solid ${T.border}` }}>
                                             {[
                                                 "Data",
                                                 "Loja",
@@ -573,7 +701,8 @@ export default function ConsultaPage() {
                                             ].map((h) => (
                                                 <th
                                                     key={h}
-                                                    className="px-5 py-3 text-left text-[0.74rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap"
+                                                    className="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest whitespace-nowrap"
+                                                    style={{ color: "#9ca3af" }}
                                                 >
                                                     {h}
                                                 </th>
@@ -584,45 +713,73 @@ export default function ConsultaPage() {
                                         {salesMonth.map((sale) => (
                                             <tr
                                                 key={sale.id}
-                                                className={`group border-b border-(--border) last:border-0 hover:bg-muted transition-colors ${sale.dtcancel ? "opacity-40" : ""}`}
+                                                className="group transition-colors"
+                                                style={{
+                                                    borderBottom: `1px solid ${T.border}`,
+                                                    opacity: sale.dtcancel ? 0.45 : 1,
+                                                }}
+                                                onMouseEnter={(e) =>
+                                                    (e.currentTarget.style.background =
+                                                        "#f9fafb")
+                                                }
+                                                onMouseLeave={(e) =>
+                                                    (e.currentTarget.style.background =
+                                                        "transparent")
+                                                }
                                             >
                                                 <td className="px-5 py-3">
                                                     <div className="flex items-center gap-2.5">
                                                         <div
-                                                            className="w-0.5 h-5 shrink-0 opacity-60"
+                                                            className="w-0.5 h-5 shrink-0 rounded-full opacity-60"
                                                             style={{
                                                                 background: `hsl(${(sale.codfilial * 47) % 360}, 55%, 50%)`,
                                                             }}
                                                         />
-                                                        <span className="text-[0.74rem] font-black text-(--muted-foreground) tabular-nums">
-                                                            {formatDateFull(
-                                                                sale.dtsaida,
-                                                            )}
+                                                        <span
+                                                            className="text-xs font-bold tabular-nums"
+                                                            style={{ color: "#6b7280" }}
+                                                        >
+                                                            {formatDateFull(sale.dtsaida)}
                                                         </span>
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-3">
-                                                    <span className="text-[0.74rem] uppercase font-semibold text-(--foreground)">
+                                                    <span
+                                                        className="text-xs font-semibold uppercase"
+                                                        style={{ color: "#374151" }}
+                                                    >
                                                         {sale.filial?.filial ??
                                                             `Filial ${sale.codfilial}`}
                                                     </span>
                                                 </td>
                                                 <td className="px-5 py-3">
-                                                    <span className="text-[0.74rem] font-black text-(--muted-foreground)">
+                                                    <span
+                                                        className="text-xs font-bold"
+                                                        style={{ color: "#9ca3af" }}
+                                                    >
                                                         {sale.numnota}
                                                     </span>
                                                 </td>
                                                 <td className="px-5 py-3">
                                                     <span
-                                                        className={`text-[0.82rem] font-black tabular-nums ${sale.dtcancel ? "text-(--muted-foreground) line-through" : "text-(--primary)"}`}
+                                                        className="text-sm font-black tabular-nums"
+                                                        style={{
+                                                            color: sale.dtcancel
+                                                                ? "#9ca3af"
+                                                                : T.cyan,
+                                                            textDecoration: sale.dtcancel
+                                                                ? "line-through"
+                                                                : "none",
+                                                        }}
                                                     >
-                                                        <span className="text-[0.74rem] font-bold opacity-50 mr-0.5">
+                                                        <span
+                                                            className="text-xs font-bold mr-0.5"
+                                                            style={{ opacity: 0.5 }}
+                                                        >
                                                             R$
                                                         </span>
                                                         <CountUp
-                                                            value={Number(
-                                                                sale.vltotal,
-                                                            )}
+                                                            value={Number(sale.vltotal)}
                                                             decimals={2}
                                                             duration={0.5}
                                                             delay={80}
@@ -630,35 +787,48 @@ export default function ConsultaPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-5 py-3">
-                                                    {sale.qrcodenfce &&
-                                                    !sale.dtcancel ? (
+                                                    {sale.qrcodenfce && !sale.dtcancel ? (
                                                         <a
-                                                            href={
-                                                                sale.qrcodenfce
-                                                            }
+                                                            href={sale.qrcodenfce}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1 text-[0.74rem] font-black text-(--muted-foreground) hover:text-(--primary) transition-colors uppercase tracking-wider"
+                                                            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide transition-colors"
+                                                            style={{ color: "#9ca3af" }}
+                                                            onMouseEnter={(e) =>
+                                                                (e.currentTarget.style.color =
+                                                                    T.cyan)
+                                                            }
+                                                            onMouseLeave={(e) =>
+                                                                (e.currentTarget.style.color =
+                                                                    "#9ca3af")
+                                                            }
                                                         >
-                                                            <ExternalLink
-                                                                size={10}
-                                                            />{" "}
-                                                            Ver nota
+                                                            <ExternalLink size={10} /> Ver nota
                                                         </a>
                                                     ) : (
-                                                        <span className="text-[0.74rem] text-(--muted-foreground) opacity-25">
+                                                        <span style={{ color: "#d1d5db" }}>
                                                             —
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td className="px-5 py-3">
                                                     {sale.dtcancel ? (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[0.74rem] font-black uppercase tracking-[0.15em] bg-red-500/10 text-red-500 border border-red-500/20">
-                                                            <Ban size={7} />{" "}
-                                                            Cancelado
+                                                        <span
+                                                            className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase tracking-wide rounded"
+                                                            style={{
+                                                                background:
+                                                                    "rgba(220,38,38,0.1)",
+                                                                border: `1px solid rgba(220,38,38,0.2)`,
+                                                                color: T.red,
+                                                            }}
+                                                        >
+                                                            <Ban size={8} /> Cancelado
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[0.74rem] font-black uppercase tracking-[0.2em] text-green-600">
+                                                        <span
+                                                            className="text-xs font-bold uppercase tracking-wide"
+                                                            style={{ color: T.green }}
+                                                        >
                                                             OK
                                                         </span>
                                                     )}
@@ -668,11 +838,22 @@ export default function ConsultaPage() {
                                     </tbody>
                                     {activeSalesMonth.length > 0 && (
                                         <tfoot>
-                                            <tr className="border-t-2 border-(--border) bg-muted">
+                                            <tr
+                                                style={{
+                                                    borderTop: `2px solid ${T.border}`,
+                                                    background: "#fafbfc",
+                                                }}
+                                            >
                                                 <td colSpan={3} />
                                                 <td className="px-5 py-3">
-                                                    <span className="text-[0.82rem] font-black text-(--primary) tabular-nums">
-                                                        <span className="text-[0.5em] font-bold opacity-50 mr-0.5">
+                                                    <span
+                                                        className="text-sm font-black tabular-nums"
+                                                        style={{ color: T.cyan }}
+                                                    >
+                                                        <span
+                                                            className="text-xs font-bold mr-0.5"
+                                                            style={{ opacity: 0.5 }}
+                                                        >
                                                             R$
                                                         </span>
                                                         <CountUp
@@ -690,9 +871,9 @@ export default function ConsultaPage() {
                                 </table>
                             </div>
                         )}
-                    </div>
+                    </motion.div>
                 </>
             )}
-        </div>
+        </motion.div>
     );
 }

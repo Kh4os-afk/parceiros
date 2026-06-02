@@ -3,40 +3,34 @@ import { useAuth } from '@/contexts/AuthContext'
 import {
     LayoutDashboard, Users, Upload, AlertCircle,
     CalendarRange, LogOut, ChevronsUpDown,
-    Building2, UserCog, Search, Settings,
+    Building2, UserCog, Search, Settings, ShoppingCart,
 } from 'lucide-react'
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarRail,
-    useSidebar,
+    Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
+    SidebarHeader, SidebarMenu, SidebarMenuButton,
+    SidebarMenuItem, SidebarRail, useSidebar,
 } from '@/components/ui/sidebar'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+    DropdownMenu, DropdownMenuContent,
+    DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+
+// Design tokens — sincronizados com o design system V2
+const CYAN   = '#0099cc'
+const BORDER = '#e8eaef'
 
 const navGroups = [
     {
         label: 'Geral',
         items: [
-            { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { to: '/dashboard',      icon: LayoutDashboard, label: 'Dashboard'          },
         ],
     },
     {
         label: 'Cadastros',
         items: [
-            { to: '/funcionarios', icon: Users, label: 'Funcionários' },
-            { to: '/importar/csv', icon: Upload, label: 'Importar CSV' },
+            { to: '/funcionarios',   icon: Users,       label: 'Funcionários'        },
+            { to: '/importar/csv',   icon: Upload,      label: 'Importar CSV'        },
             { to: '/importar/erros', icon: AlertCircle, label: 'Erros de Importação' },
         ],
     },
@@ -50,16 +44,28 @@ const navGroups = [
 ]
 
 function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementType; label: string }) {
-    const { pathname } = useLocation()
+    const { pathname }    = useLocation()
     const { setOpenMobile } = useSidebar()
     const isActive = pathname === to || (to !== '/dashboard' && pathname.startsWith(to))
 
     return (
         <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip={label} isActive={isActive}>
-                <NavLink to={to} end onClick={() => setOpenMobile(false)}>
-                    <Icon />
-                    <span>{label}</span>
+            <SidebarMenuButton asChild tooltip={label} isActive={isActive}
+                className={[
+                    'relative h-8 rounded-none transition-all duration-150',
+                    isActive
+                        ? 'bg-[#0099cc08] text-[#0099cc] font-bold'
+                        : 'text-[#64748b] hover:bg-[#f4f5f8] hover:text-[#334155] font-medium',
+                ].join(' ')}
+            >
+                <NavLink to={to} end onClick={() => setOpenMobile(false)} className="flex items-center gap-2.5 px-2">
+                    {/* Indicador lateral ativo */}
+                    <span
+                        className="absolute left-0 top-1 bottom-1 w-[2.5px] rounded-r transition-all duration-200"
+                        style={{ background: isActive ? CYAN : 'transparent' }}
+                    />
+                    <Icon size={14} />
+                    <span className="text-[0.7rem] tracking-[0.04em]">{label}</span>
                 </NavLink>
             </SidebarMenuButton>
         </SidebarMenuItem>
@@ -74,7 +80,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         label: 'Administração',
         items: [
             { to: '/admin/empresas', icon: Building2, label: 'Empresas' },
-            { to: '/admin/usuarios', icon: UserCog, label: 'Usuários' },
+            { to: '/admin/usuarios', icon: UserCog,   label: 'Usuários' },
         ],
     }
 
@@ -83,36 +89,46 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         .map(n => n[0])
         .slice(0, 2)
         .join('')
-        .toUpperCase() ?? 'TI'
+        .toUpperCase() ?? '—'
 
     return (
-        <Sidebar collapsible="offcanvas" {...props}>
-            {/* ── Brand ── */}
-            <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <NavLink to="/dashboard">
-                                <div className="flex aspect-square size-8 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground text-[0.55rem] font-black tracking-widest shrink-0">
-                                    BDC
-                                </div>
-                                <div className="flex flex-col leading-tight">
-                                    <span className="text-[0.68rem] font-medium tracking-[0.16em] uppercase text-sidebar-foreground/50">
-                                        Sistema de Convênio
-                                    </span>
-                                </div>
-                            </NavLink>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+        <Sidebar collapsible="offcanvas" {...props}
+            className="border-r-0"
+            style={{ '--sidebar': '#ffffff', '--sidebar-border': BORDER } as React.CSSProperties}
+        >
+            {/* ── Brand ─────────────────────────────────────────────── */}
+            <SidebarHeader className="px-4 py-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+                <NavLink to="/dashboard" className="flex items-center gap-3 group">
+                    {/* Logo mark */}
+                    <div
+                        className="w-8 h-8 shrink-0 flex items-center justify-center"
+                        style={{ background: `${CYAN}12`, border: `1px solid ${CYAN}30` }}
+                    >
+                        <ShoppingCart size={14} style={{ color: CYAN }} />
+                    </div>
+                    {/* Brand text */}
+                    <div className="flex flex-col leading-none min-w-0">
+                        <span className="text-[0.55rem] font-black uppercase tracking-[0.3em] text-muted-foreground mb-0.5">
+                            Sistema de Convênio
+                        </span>
+                        <span className="text-[0.75rem] font-black uppercase tracking-[0.08em] text-foreground truncate">
+                            Baratão da Carne
+                        </span>
+                    </div>
+                </NavLink>
             </SidebarHeader>
 
-            {/* ── Nav ── */}
-            <SidebarContent>
-                {[...navGroups, ...(isAdmin ? [adminGroup] : [])].map(group => (
-                    <SidebarGroup key={group.label}>
-                        <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-                        <SidebarMenu>
+            {/* ── Nav ───────────────────────────────────────────────── */}
+            <SidebarContent className="px-2 py-3 gap-0">
+                {[...navGroups, ...(isAdmin ? [adminGroup] : [])].map((group, gi) => (
+                    <SidebarGroup key={group.label} className={gi > 0 ? 'mt-4' : ''}>
+                        {/* Group label */}
+                        <div className="px-2 mb-1">
+                            <span className="text-[0.52rem] font-black uppercase tracking-[0.25em] text-muted-foreground/60">
+                                {group.label}
+                            </span>
+                        </div>
+                        <SidebarMenu className="gap-0.5">
                             {group.items.map(item => (
                                 <NavItem key={item.to} {...item} />
                             ))}
@@ -121,47 +137,60 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 ))}
             </SidebarContent>
 
-            {/* ── User footer ── */}
-            <SidebarFooter>
+            {/* ── User footer ───────────────────────────────────────── */}
+            <SidebarFooter className="px-3 py-3" style={{ borderTop: `1px solid ${BORDER}` }}>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuButton
                                     size="lg"
-                                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                                    className="rounded-none h-auto py-2 px-2 hover:bg-[#f4f5f8] transition-colors"
                                 >
-                                    <div className="flex size-8 shrink-0 items-center justify-center bg-sidebar-primary/10 border border-sidebar-primary/25 text-[0.6rem] font-black text-sidebar-primary">
+                                    {/* Avatar */}
+                                    <div
+                                        className="flex size-8 shrink-0 items-center justify-center text-[0.58rem] font-black"
+                                        style={{
+                                            background: `${CYAN}10`,
+                                            border: `1.5px solid ${CYAN}25`,
+                                            color: CYAN,
+                                        }}
+                                    >
                                         {initials}
                                     </div>
-                                    <div className="grid flex-1 text-left leading-tight">
-                                        <span className="truncate font-semibold text-[0.78rem]">{user?.name}</span>
-                                        <span className="truncate text-[0.6rem] text-sidebar-foreground/55">
+                                    {/* Info */}
+                                    <div className="grid flex-1 text-left leading-tight min-w-0">
+                                        <span className="truncate text-[0.7rem] font-semibold text-foreground">
+                                            {user?.name}
+                                        </span>
+                                        <span className="truncate text-[0.58rem] text-muted-foreground">
                                             {isAdmin ? 'Administrador' : (user?.empresa?.nome ?? user?.email)}
                                         </span>
                                     </div>
-                                    <ChevronsUpDown className="ml-auto size-3.5 text-sidebar-foreground/50" />
+                                    <ChevronsUpDown size={13} className="ml-auto text-muted-foreground/50 shrink-0" />
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
+
                             <DropdownMenuContent
-                                className="w-(--radix-dropdown-menu-trigger-width) min-w-48 rounded-none bg-white p-1"
+                                className="w-(--radix-dropdown-menu-trigger-width) min-w-48 rounded-none bg-white p-1 shadow-lg"
+                                style={{ border: `1px solid ${BORDER}` }}
                                 side="top"
                                 align="end"
                                 sideOffset={4}
                             >
                                 <DropdownMenuItem
                                     onClick={() => navigate('/configuracoes')}
-                                    className="text-destructive focus:text-destructive focus:bg-destructive/8 cursor-pointer gap-2"
+                                    className="rounded-none cursor-pointer gap-2.5 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground focus:text-foreground hover:bg-[#f4f5f8] focus:bg-[#f4f5f8]"
                                 >
-                                    <Settings className="size-3.5" />
-                                    <span className="text-[0.72rem] font-semibold uppercase tracking-wide">Configurações</span>
+                                    <Settings size={13} />
+                                    Configurações
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     onClick={logout}
-                                    className="text-destructive focus:text-destructive focus:bg-destructive/8 cursor-pointer gap-2"
+                                    className="rounded-none cursor-pointer gap-2.5 text-[0.68rem] font-semibold uppercase tracking-wider text-red-500 hover:text-red-600 focus:text-red-600 hover:bg-red-50 focus:bg-red-50"
                                 >
-                                    <LogOut className="size-3.5" />
-                                    <span className="text-[0.72rem] font-semibold uppercase tracking-wide">Sair</span>
+                                    <LogOut size={13} />
+                                    Sair
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

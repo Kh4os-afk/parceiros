@@ -1,11 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Users, ArrowLeft } from 'lucide-react'
+import { motion } from 'motion/react'
 import api from '@/lib/axios'
 import { maskCPF, maskMoney, parseMoney, stripCPF } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface Errors { [key: string]: string[] }
+
+const T = { bg: "#f4f5f8", border: "#e8eaef", cyan: "#0099cc", purple: "#7c3aed", green: "#059669", amber: "#d97706", red: "#dc2626" }
+const cardStyle = { background: "#ffffff", border: `1px solid ${T.border}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const stagger = (d = 0): any => ({ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: d } } })
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const rise: any = { hidden: { opacity: 0, y: 20, filter: "blur(8px)" }, visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } }
 
 export default function CreatePage() {
     const navigate = useNavigate()
@@ -43,74 +51,163 @@ export default function CreatePage() {
     }
 
     return (
-        <div className="flex flex-col gap-4 animate-[fade-in_0.2s_ease-out]">
-            <div>
-                <p className="text-[0.6rem] uppercase tracking-[0.15em] text-(--muted-foreground) mb-0.5">Cadastros</p>
-                <h1 className="text-xl font-black uppercase tracking-widest text-(--foreground)">Cadastrar Funcionário</h1>
-            </div>
+        <motion.div
+            className="-m-4 md:-m-6 p-4 md:p-6 min-h-screen"
+            style={{ background: T.bg }}
+            variants={stagger(0.04)}
+            initial="hidden"
+            animate="visible"
+        >
+            {/* Header */}
+            <motion.div variants={rise} className="flex items-center gap-3 mb-6">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate('/funcionarios')}
+                    className="rounded-none h-8 w-8 text-muted-foreground hover:text-foreground"
+                >
+                    <ArrowLeft size={16} />
+                </Button>
+                <div>
+                    <p className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-muted-foreground mb-0.5">Gestão</p>
+                    <h1 className="text-xl font-black uppercase tracking-widest" style={{ color: "#1a1d23" }}>
+                        Cadastrar Funcionário
+                    </h1>
+                </div>
+            </motion.div>
 
-            <div className="bg-card border border-(--border)">
-                <div className="px-5 py-3 border-b border-(--border) bg-muted flex items-center gap-2">
-                    <span className="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-(--foreground)">Dados do Funcionário</span>
+            {/* Form Card */}
+            <motion.div variants={rise} style={cardStyle} className="rounded-none">
+                {/* Card Header */}
+                <div
+                    className="flex items-center gap-2.5 px-5 py-3.5 border-b"
+                    style={{ borderColor: T.border, background: "#fafbfc" }}
+                >
+                    <div
+                        className="flex items-center justify-center w-7 h-7"
+                        style={{ background: `${T.cyan}15`, border: `1px solid ${T.cyan}30` }}
+                    >
+                        <Users size={14} style={{ color: T.cyan }} />
+                    </div>
+                    <span className="text-[0.72rem] font-bold uppercase tracking-[0.12em]" style={{ color: "#1a1d23" }}>
+                        Dados do Funcionário
+                    </span>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4" autoComplete="off">
+                <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5" autoComplete="off">
+                    {/* Row 1: Nome (2 cols) + Matrícula (1 col) */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="md:col-span-2 flex flex-col gap-1.5">
-                            <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Nome Completo</label>
-                            <Input
+                            <label className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                                Nome Completo
+                            </label>
+                            <input
                                 value={form.nome}
                                 onChange={e => set('nome', e.target.value)}
                                 placeholder="Antonio da Silva"
-                                className={fieldError('nome') ? 'border-(--destructive)' : ''}
+                                className="border px-3 py-2 text-sm outline-none bg-white w-full transition-colors"
+                                style={{
+                                    borderColor: fieldError('nome') ? T.red : T.border,
+                                    color: "#1a1d23",
+                                }}
+                                onFocus={e => { if (!fieldError('nome')) e.currentTarget.style.borderColor = T.cyan }}
+                                onBlur={e => { if (!fieldError('nome')) e.currentTarget.style.borderColor = T.border }}
                             />
-                            {fieldError('nome') && <p className="text-[0.68rem] text-(--destructive)">{fieldError('nome')}</p>}
+                            {fieldError('nome') && (
+                                <p className="text-[0.62rem] mt-1" style={{ color: T.red }}>{fieldError('nome')}</p>
+                            )}
                         </div>
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Matrícula <span className="font-normal normal-case tracking-normal">(opcional)</span></label>
-                            <Input
+                            <label className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                                Matrícula{' '}
+                                <span className="font-normal normal-case tracking-normal opacity-60">(opcional)</span>
+                            </label>
+                            <input
                                 value={form.matricula}
                                 onChange={e => set('matricula', e.target.value)}
                                 placeholder="00142"
-                                className={fieldError('matricula') ? 'border-(--destructive) tracking-wider' : 'tracking-wider'}
+                                className="border px-3 py-2 text-sm outline-none bg-white w-full tracking-wider transition-colors"
+                                style={{
+                                    borderColor: fieldError('matricula') ? T.red : T.border,
+                                    color: "#1a1d23",
+                                }}
+                                onFocus={e => { if (!fieldError('matricula')) e.currentTarget.style.borderColor = T.cyan }}
+                                onBlur={e => { if (!fieldError('matricula')) e.currentTarget.style.borderColor = T.border }}
                             />
-                            {fieldError('matricula') && <p className="text-[0.68rem] text-(--destructive)">{fieldError('matricula')}</p>}
+                            {fieldError('matricula') && (
+                                <p className="text-[0.62rem] mt-1" style={{ color: T.red }}>{fieldError('matricula')}</p>
+                            )}
                         </div>
                     </div>
 
+                    {/* Row 2: CPF (1 col) + Limite (1 col) + Status (1 col) */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">CPF</label>
-                            <Input
+                            <label className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                                CPF
+                            </label>
+                            <input
                                 value={form.cpf}
                                 onChange={e => set('cpf', maskCPF(e.target.value))}
                                 placeholder="000.000.000-00"
                                 inputMode="numeric"
                                 maxLength={14}
-                                className={fieldError('cpf') ? 'border-(--destructive) tracking-widest' : 'tracking-widest'}
+                                className="border px-3 py-2 text-sm outline-none bg-white w-full tracking-widest transition-colors"
+                                style={{
+                                    borderColor: fieldError('cpf') ? T.red : T.border,
+                                    color: "#1a1d23",
+                                }}
+                                onFocus={e => { if (!fieldError('cpf')) e.currentTarget.style.borderColor = T.cyan }}
+                                onBlur={e => { if (!fieldError('cpf')) e.currentTarget.style.borderColor = T.border }}
                             />
-                            {fieldError('cpf') && <p className="text-[0.68rem] text-(--destructive)">{fieldError('cpf')}</p>}
+                            {fieldError('cpf') && (
+                                <p className="text-[0.62rem] mt-1" style={{ color: T.red }}>{fieldError('cpf')}</p>
+                            )}
                         </div>
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Limite de Crédito (R$)</label>
+                            <label className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                                Limite de Crédito (R$)
+                            </label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[0.72rem] text-(--muted-foreground) pointer-events-none">R$</span>
-                                <Input
+                                <span
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[0.72rem] pointer-events-none select-none"
+                                    style={{ color: "#94a3b8" }}
+                                >
+                                    R$
+                                </span>
+                                <input
                                     value={form.limcred}
                                     onChange={e => set('limcred', maskMoney(e.target.value))}
                                     placeholder="0,00"
                                     inputMode="decimal"
-                                    className={`pl-9 ${fieldError('limcred') ? 'border-(--destructive)' : ''}`}
+                                    className="border pl-9 pr-3 py-2 text-sm outline-none bg-white w-full transition-colors"
+                                    style={{
+                                        borderColor: fieldError('limcred') ? T.red : T.border,
+                                        color: "#1a1d23",
+                                    }}
+                                    onFocus={e => { if (!fieldError('limcred')) e.currentTarget.style.borderColor = T.cyan }}
+                                    onBlur={e => { if (!fieldError('limcred')) e.currentTarget.style.borderColor = T.border }}
                                 />
                             </div>
-                            {fieldError('limcred') && <p className="text-[0.68rem] text-(--destructive)">{fieldError('limcred')}</p>}
+                            {fieldError('limcred') && (
+                                <p className="text-[0.62rem] mt-1" style={{ color: T.red }}>{fieldError('limcred')}</p>
+                            )}
                         </div>
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-(--muted-foreground)">Status</label>
+                            <label className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                                Status
+                            </label>
                             <select
                                 value={form.bloqueado}
                                 onChange={e => set('bloqueado', e.target.value)}
-                                className="border border-(--border) px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) cursor-pointer h-9"
+                                className="border px-3 py-2 text-sm outline-none bg-white w-full cursor-pointer h-9 transition-colors"
+                                style={{
+                                    borderColor: T.border,
+                                    color: "#1a1d23",
+                                }}
+                                onFocus={e => { e.currentTarget.style.borderColor = T.cyan }}
+                                onBlur={e => { e.currentTarget.style.borderColor = T.border }}
                             >
                                 <option value="0">Ativo</option>
                                 <option value="1">Bloqueado</option>
@@ -118,25 +215,33 @@ export default function CreatePage() {
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2 border-t border-(--border) mt-1">
-                        <button
+                    {/* Actions */}
+                    <div
+                        className="flex justify-end gap-2 pt-4 mt-1 border-t"
+                        style={{ borderColor: T.border }}
+                    >
+                        <Button
                             type="button"
+                            variant="outline"
+                            rounded-none
                             onClick={() => navigate('/funcionarios')}
-                            className="border border-(--border) px-5 py-2 text-[0.68rem] font-bold uppercase tracking-wider text-(--muted-foreground) hover:text-(--foreground) transition-colors"
+                            className="rounded-none border px-5 py-2 text-[0.68rem] font-bold uppercase tracking-wider h-9"
+                            style={{ borderColor: T.border, color: "#64748b" }}
                         >
                             Cancelar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
                             disabled={loading}
-                            className="flex items-center gap-1.5 bg-(--primary) text-white px-5 py-2 text-[0.68rem] font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-60 transition-opacity"
+                            className="rounded-none flex items-center gap-1.5 px-5 py-2 text-[0.68rem] font-bold uppercase tracking-wider h-9 text-white disabled:opacity-60 transition-opacity"
+                            style={{ background: T.cyan, border: `1px solid ${T.cyan}` }}
                         >
                             {loading && <Loader2 size={12} className="animate-spin" />}
                             Cadastrar Funcionário
-                        </button>
+                        </Button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     )
 }

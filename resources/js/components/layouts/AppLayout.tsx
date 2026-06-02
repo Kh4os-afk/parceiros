@@ -57,7 +57,8 @@ export default function AppLayout() {
 
             <SidebarInset>
                 {/* ── Header sticky ── */}
-                <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-4 sticky top-0 z-10 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+                <header className="flex h-12 shrink-0 items-center gap-2 px-4 sticky top-0 z-10 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10"
+                        style={{ background: '#f4f5f8', borderBottom: '1px solid #e8eaef' }}>
                     <SidebarTrigger className="-ml-1" />
                     <Separator orientation="vertical" className="mx-1 h-4" />
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Pencil, Plus, Loader2, Building2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import api from '@/lib/axios'
 
 interface Empresa { id: number; nome: string; slug: string; ativo: boolean }
@@ -7,12 +8,26 @@ interface Errors  { [key: string]: string[] }
 
 const empty = { nome: '', ativo: true }
 
-const corners = [
-    'top-0 left-0 border-t-2 border-l-2',
-    'top-0 right-0 border-t-2 border-r-2',
-    'bottom-0 left-0 border-b-2 border-l-2',
-    'bottom-0 right-0 border-b-2 border-r-2',
-]
+const T = {
+    bg:     "#f4f5f8",
+    border: "#e8eaef",
+    cyan:   "#0099cc",
+    purple: "#7c3aed",
+    green:  "#059669",
+    amber:  "#d97706",
+    red:    "#dc2626",
+}
+
+const rise: any = {
+    hidden:  { opacity: 0, y: 20, filter: "blur(8px)" },
+    visible: { opacity: 1, y: 0,  filter: "blur(0px)", transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const rowVariants: any = {
+    hidden:  { opacity: 0, x: -8 },
+    visible: (i: number) => ({ opacity: 1, x: 0, transition: { delay: i * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] } }),
+}
 
 export default function EmpresasPage() {
     const [empresas, setEmpresas] = useState<Empresa[]>([])
@@ -62,162 +77,318 @@ export default function EmpresasPage() {
     const inativas = empresas.filter(e => !e.ativo).length
 
     return (
-        <div className="flex flex-col gap-5 animate-[fade-in_0.2s_ease-out]">
-
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+            style={{ background: T.bg }}
+            className="-m-4 md:-m-6 p-4 md:p-6 min-h-screen flex flex-col gap-5"
+        >
             {/* ── Header ── */}
-            <div className="relative bg-card border border-(--border) overflow-hidden">
-                <div className="absolute inset-0 pointer-events-none"
-                    style={{ backgroundImage: 'radial-gradient(circle, color-mix(in oklch, currentColor 6%, transparent) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-                {corners.map((cls, i) => (
-                    <div key={i} className={`absolute w-5 h-5 border-(--primary)/30 ${cls}`} />
-                ))}
+            <motion.div variants={rise}>
+                <div
+                    className="rounded-xl overflow-hidden"
+                    style={{ background: "#fff", border: `1px solid ${T.border}`, boxShadow: "0 1px 4px 0 rgba(0,0,0,0.06)" }}
+                >
+                    {/* accent bar */}
+                    <div style={{ height: 3, background: `linear-gradient(90deg, ${T.cyan} 0%, ${T.purple} 100%)` }} />
 
-                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 md:px-7 pt-5 md:pt-6 pb-4 md:pb-5">
-                    <div>
-                        <p className="text-[0.5rem] uppercase tracking-[0.3em] text-(--muted-foreground) mb-1">Administração</p>
-                        <h1 className="text-xl font-black uppercase tracking-[0.08em] text-(--foreground)">Empresas</h1>
-                        {!loading && (
-                            <div className="flex items-center gap-3 mt-1.5">
-                                <span className="text-[0.55rem] text-(--muted-foreground)">
-                                    <strong className="text-(--foreground)">{empresas.length}</strong> cadastradas
-                                </span>
-                                {ativas > 0 && <>
-                                    <span className="text-(--muted-foreground) opacity-30">·</span>
-                                    <span className="flex items-center gap-1 text-[0.55rem] text-green-600">
-                                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full" /> {ativas} ativas
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-5 md:px-7 pt-5 pb-5">
+                        <div>
+                            <p style={{ color: T.cyan }} className="text-[0.55rem] font-semibold uppercase tracking-[0.3em] mb-0.5">
+                                Administração
+                            </p>
+                            <h1 className="text-xl font-black uppercase tracking-[0.06em]" style={{ color: "#1a1d23" }}>
+                                Empresas
+                            </h1>
+                            {!loading && (
+                                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                    <span className="text-[0.62rem]" style={{ color: "#6b7280" }}>
+                                        <strong style={{ color: "#1a1d23" }}>{empresas.length}</strong> cadastradas
                                     </span>
-                                </>}
-                                {inativas > 0 && <>
-                                    <span className="text-(--muted-foreground) opacity-30">·</span>
-                                    <span className="text-[0.55rem] text-red-500">{inativas} inativas</span>
-                                </>}
-                            </div>
-                        )}
+                                    {ativas > 0 && (
+                                        <>
+                                            <span style={{ color: "#d1d5db" }}>·</span>
+                                            <span className="flex items-center gap-1 text-[0.62rem]" style={{ color: T.green }}>
+                                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.green }} />
+                                                {ativas} ativas
+                                            </span>
+                                        </>
+                                    )}
+                                    {inativas > 0 && (
+                                        <>
+                                            <span style={{ color: "#d1d5db" }}>·</span>
+                                            <span className="text-[0.62rem]" style={{ color: T.red }}>
+                                                {inativas} inativas
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={openCreate}
+                            className="flex items-center gap-1.5 self-start sm:self-auto px-4 py-2 rounded-lg text-white text-[0.62rem] font-bold uppercase tracking-[0.12em] transition-opacity"
+                            style={{ background: `linear-gradient(135deg, ${T.cyan} 0%, #007aaa 100%)`, boxShadow: `0 2px 8px 0 ${T.cyan}44` }}
+                        >
+                            <Plus size={12} /> Nova Empresa
+                        </motion.button>
                     </div>
-                    <button
-                        onClick={openCreate}
-                        className="flex items-center gap-1.5 bg-(--primary) text-white px-4 py-2 text-[0.58rem] font-black uppercase tracking-[0.15em] hover:opacity-90 transition-opacity"
-                    >
-                        <Plus size={11} /> Nova Empresa
-                    </button>
                 </div>
-            </div>
+            </motion.div>
 
             {/* ── Tabela ── */}
-            <div className="bg-card border border-(--border)">
-                <div className="px-6 py-3.5 border-b border-(--border) bg-muted flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Building2 size={11} className="text-(--primary) opacity-70" />
-                        <span className="text-[0.56rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
-                            Empresas Cadastradas
-                        </span>
-                    </div>
-                    <span className="text-[0.5rem] uppercase tracking-[0.18em] text-(--muted-foreground)">
-                        {empresas.length} registro{empresas.length !== 1 ? 's' : ''}
-                    </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-max border-collapse">
-                        <thead>
-                            <tr className="bg-muted border-b border-(--border)">
-                                {['Nome', 'Slug', 'Status'].map(h => (
-                                    <th key={h} className="px-5 py-3 text-left text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground) whitespace-nowrap">
-                                        {h}
-                                    </th>
-                                ))}
-                                <th className="px-5 py-3 text-right text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">
-                                    Ações
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {loading ? (
-                                <tr><td colSpan={4} className="text-center py-14 text-[0.75rem] text-(--muted-foreground)">Carregando…</td></tr>
-                            ) : empresas.map(e => (
-                                <tr key={e.id} className="group border-b border-(--border) last:border-0 hover:bg-muted transition-colors">
-                                    <td className="px-5 py-3">
-                                        <span className="text-[0.8rem] font-semibold text-(--foreground) group-hover:text-(--primary) transition-colors">
-                                            {e.nome}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-3">
-                                        <span className="text-[0.68rem] font-mono text-(--muted-foreground)">{e.slug}</span>
-                                    </td>
-                                    <td className="px-5 py-3">
-                                        {e.ativo
-                                            ? <span className="inline-flex items-center gap-1.5 text-[0.5rem] font-black uppercase tracking-[0.15em] text-green-600">
-                                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Ativa
-                                              </span>
-                                            : <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[0.5rem] font-black uppercase tracking-[0.15em] bg-red-500/10 text-red-500 border border-red-500/20">
-                                                ✕ Inativa
-                                              </span>
-                                        }
-                                    </td>
-                                    <td className="px-5 py-3 text-right">
-                                        <button
-                                            onClick={() => openEdit(e)}
-                                            className="inline-flex items-center justify-center w-7 h-7 border border-(--border) text-(--muted-foreground) hover:text-(--primary) hover:border-(--primary) transition-colors opacity-40 group-hover:opacity-100"
-                                            title="Editar"
-                                        >
-                                            <Pencil size={11} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* ── Modal criar/editar ── */}
-            {modal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="relative bg-card border border-(--border) shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
-                        <div className="h-0.5 bg-(--primary) w-full" />
-                        <div className="px-6 py-4 border-b border-(--border) bg-muted flex items-center justify-between">
-                            <span className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-(--foreground)">
-                                {modal === 'create' ? 'Nova Empresa' : 'Editar Empresa'}
+            <motion.div variants={rise}>
+                <div
+                    className="rounded-xl overflow-hidden"
+                    style={{ background: "#fff", border: `1px solid ${T.border}`, boxShadow: "0 1px 4px 0 rgba(0,0,0,0.06)" }}
+                >
+                    {/* table header */}
+                    <div
+                        className="flex items-center justify-between px-5 py-3.5"
+                        style={{ borderBottom: `1px solid ${T.border}`, background: "#fafbfc" }}
+                    >
+                        <div className="flex items-center gap-2">
+                            <div
+                                className="w-6 h-6 rounded-md flex items-center justify-center"
+                                style={{ background: `${T.cyan}15` }}
+                            >
+                                <Building2 size={13} style={{ color: T.cyan }} />
+                            </div>
+                            <span className="text-[0.6rem] font-black uppercase tracking-[0.2em]" style={{ color: "#6b7280" }}>
+                                Empresas Cadastradas
                             </span>
                         </div>
-                        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-[0.5rem] font-black uppercase tracking-[0.2em] text-(--muted-foreground)">Nome</label>
-                                <input
-                                    value={form.nome}
-                                    onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
-                                    className={`border px-3 py-2 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) transition-colors ${errors.nome ? 'border-(--destructive)' : 'border-(--border)'}`}
-                                />
-                                {errors.nome?.[0] && <p className="text-[0.62rem] text-(--destructive)">{errors.nome[0]}</p>}
-                            </div>
+                        <span
+                            className="text-[0.55rem] font-semibold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
+                            style={{ background: `${T.cyan}12`, color: T.cyan }}
+                        >
+                            {empresas.length} registro{empresas.length !== 1 ? 's' : ''}
+                        </span>
+                    </div>
 
-                            <label className="flex items-center gap-2.5 cursor-pointer group">
-                                <input
-                                    type="checkbox"
-                                    checked={form.ativo}
-                                    onChange={e => setForm(f => ({ ...f, ativo: e.target.checked }))}
-                                    className="accent-(--primary) w-3.5 h-3.5"
-                                />
-                                <span className="text-[0.65rem] text-(--foreground) group-hover:text-(--primary) transition-colors">
-                                    Empresa ativa
-                                </span>
-                            </label>
-
-                            <div className="flex justify-end gap-2 pt-3 border-t border-(--border)">
-                                <button type="button" onClick={() => setModal(false)}
-                                    className="border border-(--border) px-4 py-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground) hover:text-(--foreground) transition-colors">
-                                    Cancelar
-                                </button>
-                                <button type="submit" disabled={saving}
-                                    className="flex items-center gap-1.5 bg-(--primary) text-white px-4 py-2 text-[0.58rem] font-black uppercase tracking-[0.15em] hover:opacity-90 disabled:opacity-60 transition-opacity">
-                                    {saving && <Loader2 size={11} className="animate-spin" />}
-                                    Salvar
-                                </button>
-                            </div>
-                        </form>
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-max border-collapse">
+                            <thead>
+                                <tr style={{ borderBottom: `1px solid ${T.border}`, background: "#f7f8fa" }}>
+                                    {['Nome', 'Slug', 'Status'].map(h => (
+                                        <th
+                                            key={h}
+                                            className="px-5 py-3 text-left text-[0.52rem] font-black uppercase tracking-[0.2em] whitespace-nowrap"
+                                            style={{ color: "#9ca3af" }}
+                                        >
+                                            {h}
+                                        </th>
+                                    ))}
+                                    <th
+                                        className="px-5 py-3 text-right text-[0.52rem] font-black uppercase tracking-[0.2em]"
+                                        style={{ color: "#9ca3af" }}
+                                    >
+                                        Ações
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-14 text-[0.75rem]" style={{ color: "#9ca3af" }}>
+                                            <Loader2 size={16} className="animate-spin inline mr-2 opacity-50" />
+                                            Carregando…
+                                        </td>
+                                    </tr>
+                                ) : empresas.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-14 text-[0.75rem]" style={{ color: "#9ca3af" }}>
+                                            Nenhuma empresa cadastrada.
+                                        </td>
+                                    </tr>
+                                ) : empresas.map((e, i) => (
+                                    <motion.tr
+                                        key={e.id}
+                                        custom={i}
+                                        initial="hidden"
+                                        animate="visible"
+                                        variants={rowVariants}
+                                        className="group"
+                                        style={{ borderBottom: `1px solid ${T.border}` }}
+                                        onMouseEnter={ev => (ev.currentTarget as HTMLElement).style.background = "#fafafa"}
+                                        onMouseLeave={ev => (ev.currentTarget as HTMLElement).style.background = "transparent"}
+                                    >
+                                        <td className="px-5 py-3">
+                                            <span
+                                                className="text-[0.82rem] font-semibold transition-colors"
+                                                style={{ color: "#1a1d23" }}
+                                            >
+                                                {e.nome}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-3">
+                                            <span
+                                                className="text-[0.7rem] font-mono px-2 py-0.5 rounded"
+                                                style={{ background: "#f3f4f6", color: "#6b7280" }}
+                                            >
+                                                {e.slug}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-2">
+                                            {e.ativo ? (
+                                                <span
+                                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.52rem] font-bold uppercase tracking-[0.12em]"
+                                                    style={{ background: `${T.green}15`, color: T.green }}
+                                                >
+                                                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.green }} />
+                                                    Ativa
+                                                </span>
+                                            ) : (
+                                                <span
+                                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.52rem] font-bold uppercase tracking-[0.12em]"
+                                                    style={{ background: `${T.red}12`, color: T.red }}
+                                                >
+                                                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.red }} />
+                                                    Inativa
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-5 py-3 text-right">
+                                            <motion.button
+                                                whileHover={{ scale: 1.1 }}
+                                                whileTap={{ scale: 0.92 }}
+                                                onClick={() => openEdit(e)}
+                                                className="inline-flex items-center justify-center w-7 h-7 rounded-md transition-all"
+                                                style={{ border: `1px solid ${T.border}`, color: "#9ca3af", background: "transparent" }}
+                                                onMouseEnter={ev => {
+                                                    const el = ev.currentTarget as HTMLElement
+                                                    el.style.borderColor = T.cyan
+                                                    el.style.color = T.cyan
+                                                    el.style.background = `${T.cyan}10`
+                                                }}
+                                                onMouseLeave={ev => {
+                                                    const el = ev.currentTarget as HTMLElement
+                                                    el.style.borderColor = T.border
+                                                    el.style.color = "#9ca3af"
+                                                    el.style.background = "transparent"
+                                                }}
+                                                title="Editar"
+                                            >
+                                                <Pencil size={11} />
+                                            </motion.button>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            )}
-        </div>
+            </motion.div>
+
+            {/* ── Modal criar/editar ── */}
+            <AnimatePresence>
+                {modal && (
+                    <motion.div
+                        key="modal-backdrop"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center"
+                        style={{ background: "rgba(0,0,0,0.50)" }}
+                        onClick={e => { if (e.target === e.currentTarget) setModal(false) }}
+                    >
+                        <motion.div
+                            key="modal-panel"
+                            initial={{ opacity: 0, scale: 0.95, y: 12, filter: "blur(6px)" }}
+                            animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                            exit={{ opacity: 0, scale: 0.95, y: 8, filter: "blur(4px)" }}
+                            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                            className="w-full max-w-sm mx-4 rounded-xl overflow-hidden"
+                            style={{ background: "#fff", border: `1px solid ${T.border}`, boxShadow: "0 20px 60px 0 rgba(0,0,0,0.18)" }}
+                        >
+                            {/* cyan accent bar */}
+                            <div style={{ height: 3, background: `linear-gradient(90deg, ${T.cyan} 0%, ${T.purple} 100%)` }} />
+
+                            {/* modal header */}
+                            <div
+                                className="px-5 py-4"
+                                style={{ borderBottom: `1px solid ${T.border}`, background: "#fafbfc" }}
+                            >
+                                <span className="text-[0.62rem] font-black uppercase tracking-[0.2em]" style={{ color: "#1a1d23" }}>
+                                    {modal === 'create' ? 'Nova Empresa' : 'Editar Empresa'}
+                                </span>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
+                                {/* Nome */}
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[0.52rem] font-black uppercase tracking-[0.2em]" style={{ color: "#9ca3af" }}>
+                                        Nome
+                                    </label>
+                                    <input
+                                        value={form.nome}
+                                        onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
+                                        placeholder="Nome da empresa"
+                                        className="px-3 py-2 rounded-lg text-[0.82rem] outline-none transition-all"
+                                        style={{
+                                            border: `1px solid ${errors.nome ? T.red : T.border}`,
+                                            background: "#f7f8fa",
+                                            color: "#1a1d23",
+                                        }}
+                                        onFocus={ev => { (ev.target as HTMLElement).style.borderColor = T.cyan; (ev.target as HTMLElement).style.boxShadow = `0 0 0 3px ${T.cyan}18` }}
+                                        onBlur={ev => { (ev.target as HTMLElement).style.borderColor = errors.nome ? T.red : T.border; (ev.target as HTMLElement).style.boxShadow = "none" }}
+                                    />
+                                    {errors.nome?.[0] && (
+                                        <p className="text-[0.62rem]" style={{ color: T.red }}>{errors.nome[0]}</p>
+                                    )}
+                                </div>
+
+                                {/* Ativo */}
+                                <label className="flex items-center gap-2.5 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.ativo}
+                                        onChange={e => setForm(f => ({ ...f, ativo: e.target.checked }))}
+                                        className="w-4 h-4 rounded cursor-pointer"
+                                        style={{ accentColor: T.cyan }}
+                                    />
+                                    <span className="text-[0.72rem]" style={{ color: "#374151" }}>
+                                        Empresa ativa
+                                    </span>
+                                </label>
+
+                                {/* Buttons */}
+                                <div
+                                    className="flex justify-end gap-2 pt-3"
+                                    style={{ borderTop: `1px solid ${T.border}` }}
+                                >
+                                    <motion.button
+                                        type="button"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        onClick={() => setModal(false)}
+                                        className="px-4 py-2 rounded-lg text-[0.62rem] font-bold uppercase tracking-[0.12em] transition-colors"
+                                        style={{ border: `1px solid ${T.border}`, color: "#6b7280", background: "#f7f8fa" }}
+                                    >
+                                        Cancelar
+                                    </motion.button>
+                                    <motion.button
+                                        type="submit"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        disabled={saving}
+                                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-white text-[0.62rem] font-bold uppercase tracking-[0.12em] disabled:opacity-60 transition-opacity"
+                                        style={{ background: `linear-gradient(135deg, ${T.cyan} 0%, #007aaa 100%)`, boxShadow: `0 2px 8px 0 ${T.cyan}44` }}
+                                    >
+                                        {saving && <Loader2 size={11} className="animate-spin" />}
+                                        Salvar
+                                    </motion.button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
     )
 }
