@@ -131,28 +131,51 @@ class PartnerController extends Controller
         ini_set('max_execution_time', 600);
         set_time_limit(600);
 
-        $imported = 0;
-        $errors   = 0;
+        $imported  = 0;
+        $errors    = 0;
+        $empresaId = auth()->user()->empresa_id;
 
-        $csv = Reader::createFromPath($request->file('csv')->getRealPath(), 'r');
+        // ── Fix 1B: Remove BOM (Byte Order Mark) gerado pelo Excel ──────────
+        $csvContent = file_get_contents($request->file('csv')->getRealPath());
+        if (str_starts_with($csvContent, "\xEF\xBB\xBF")) {
+            $csvContent = substr($csvContent, 3);
+        }
+
+        $csv = Reader::createFromString($csvContent);
         $csv->setDelimiter(';');
         $csv->setHeaderOffset(0);
 
+        // ── Fix 2: Precarregar CPFs e matrículas existentes (2 queries em vez de 1.400) ──
+        $cpfsExistentes = Partner::where('empresa_id', $empresaId)
+            ->pluck('cpf')
+            ->flip()
+            ->toArray();
+
+        $matriculasExistentes = Partner::where('empresa_id', $empresaId)
+            ->whereNotNull('matricula')
+            ->pluck('matricula')
+            ->map(fn($m) => (string) $m)
+            ->flip()
+            ->toArray();
+
+        // Rastreia o que foi adicionado neste lote (detecta duplicatas dentro do próprio CSV)
+        $cpfsImportados       = [];
+        $matriculasImportadas = [];
+
         foreach ($csv->getRecords() as $record) {
-            $nome      = trim($record['NOME']      ?? '');
-            $cpf       = trim(preg_replace('/\D/', '', $record['CPF'] ?? ''));
+            $nome         = trim($record['NOME']      ?? '');
+            $cpf          = trim(preg_replace('/\D/', '', $record['CPF'] ?? ''));
             $matriculaRaw = trim($record['MATRICULA'] ?? '');
             $matricula    = $matriculaRaw !== '' ? $matriculaRaw : null;
-            $limcred   = trim($record['LIMCRED']   ?? '');
-            $bloqueado = (int) ($record['BLOQUEADO'] ?? 0);
+            $limcred      = trim($record['LIMCRED']   ?? '');
+            $bloqueado    = (int) ($record['BLOQUEADO'] ?? 0);
 
-            // ignora linhas completamente vazias
+            // Ignora linhas completamente vazias
             if ($nome === '' && $cpf === '') {
                 continue;
             }
 
-            $empresaId = auth()->user()->empresa_id;
-
+            // Validações de formato (sem Rule::unique — unicidade é checada via arrays)
             $validator = validator([
                 'matricula' => $matricula,
                 'cpf'       => $cpf,
@@ -160,19 +183,26 @@ class PartnerController extends Controller
                 'limcred'   => $limcred,
                 'bloqueado' => $bloqueado,
             ], [
-                'matricula' => ['nullable', 'integer', 'min:1', 'max:99999',
-                    \Illuminate\Validation\Rule::unique('partners', 'matricula')->where('empresa_id', $empresaId)->whereNotNull('matricula')],
-                'cpf'       => ['required', 'numeric', 'digits:11', 'cpf',
-                    \Illuminate\Validation\Rule::unique('partners', 'cpf')->where('empresa_id', $empresaId)],
+                'matricula' => ['nullable', 'integer', 'min:1', 'max:99999'],
+                'cpf'       => ['required', 'numeric', 'digits:11', 'cpf'],
                 'nome'      => ['required', 'string', 'min:3', 'max:60', 'regex:/^[\pL\s\-]+$/u'],
                 'limcred'   => ['required', 'numeric', 'min:0', 'max:999'],
                 'bloqueado' => ['required', 'integer', 'in:0,1'],
             ]);
 
+            // Checar unicidade de CPF e matrícula com os arrays em memória
+            $errosUnique = [];
+            if ($cpf !== '' && (isset($cpfsExistentes[$cpf]) || isset($cpfsImportados[$cpf]))) {
+                $errosUnique[] = "O CPF {$cpf} já existe na base de funcionários.";
+            }
+            if ($matricula !== null && (isset($matriculasExistentes[$matricula]) || isset($matriculasImportadas[$matricula]))) {
+                $errosUnique[] = "A matrícula {$matricula} já existe na base de funcionários.";
+            }
+
             DB::beginTransaction();
             try {
-                if ($validator->fails()) {
-                    $errosMsg = implode(' | ', $validator->errors()->all());
+                if ($validator->fails() || !empty($errosUnique)) {
+                    $errosMsg = implode(' | ', array_merge($validator->errors()->all(), $errosUnique));
 
                     $partnerError = PartnerError::create([
                         'empresa_id' => $empresaId,
@@ -209,12 +239,42 @@ class PartnerController extends Controller
                         'descricao' => "Funcionario Importado Via CSV {$partner->id} - {$nome} CPF: {$cpf}",
                     ]);
 
+                    // Registra nos arrays para detectar duplicatas no mesmo lote
+                    $cpfsImportados[$cpf] = true;
+                    if ($matricula !== null) {
+                        $matriculasImportadas[$matricula] = true;
+                    }
+
                     $imported++;
                 }
 
                 DB::commit();
+
             } catch (\Exception $e) {
+                // ── Fix 1A: catch não é mais silencioso ─────────────────────
                 DB::rollBack();
+                \Illuminate\Support\Facades\Log::error(
+                    "CSV import — erro inesperado [{$nome}][{$cpf}]: " . $e->getMessage()
+                );
+
+                // Registra em partner_errors para o usuário saber que o registro foi perdido
+                try {
+                    DB::beginTransaction();
+                    PartnerError::create([
+                        'empresa_id' => $empresaId,
+                        'matricula'  => $matricula,
+                        'cpf'        => $cpf,
+                        'nome'       => mb_strtoupper($nome),
+                        'limcred'    => $limcred,
+                        'bloqueado'  => $bloqueado,
+                        'erros'      => 'Erro interno ao processar registro. Tente novamente ou cadastre manualmente.',
+                    ]);
+                    DB::commit();
+                } catch (\Exception) {
+                    DB::rollBack();
+                }
+
+                $errors++;
             }
         }
 

@@ -31,7 +31,7 @@ const MODELO_CSV = 'NOME;CPF;LIMCRED;BLOQUEADO\r\n'
 const COLUNAS = [
     { col: 'NOME',      desc: 'Nome completo',                obs: 'obrigatório' },
     { col: 'CPF',       desc: '11 dígitos, sem pontuação',    obs: 'obrigatório' },
-    { col: 'LIMCRED',   desc: 'Limite mensal em R$',          obs: 'obrigatório' },
+    { col: 'LIMCRED',   desc: 'Limite mensal em R$ (máx R$ 999)', obs: 'obrigatório' },
     { col: 'BLOQUEADO', desc: '0 = ativo  /  1 = bloqueado',  obs: 'obrigatório' },
 ]
 
@@ -85,7 +85,7 @@ export default function ImportPage() {
         const data = new FormData()
         data.append('csv', file)
         try {
-            const res = await api.post('/partners/import', data)
+            const res = await api.post('/partners/import', data, { timeout: 600_000 })
             const { imported, errors } = res.data
             if (errors > 0) {
                 setStatus('error')
