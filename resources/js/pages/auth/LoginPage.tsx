@@ -1,19 +1,24 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { Loader2, ShoppingCart, LogIn, Wallet } from 'lucide-react'
+import { Loader2, LogIn, Wallet, ShoppingCart, Eye, EyeOff } from 'lucide-react'
+import { motion } from 'motion/react'
+
+const CYAN   = '#0099cc'
+const BORDER = '#e8eaef'
 
 export default function LoginPage() {
     const { login }   = useAuth()
     const navigate    = useNavigate()
 
-    const [email,    setEmail]    = useState('')
-    const [password, setPassword] = useState('')
-    const [remember, setRemember] = useState(false)
-    const [error,    setError]    = useState('')
-    const [loading,  setLoading]  = useState(false)
+    const [email,       setEmail]       = useState('')
+    const [password,    setPassword]    = useState('')
+    const [showPassword,setShowPassword]= useState(false)
+    const [remember,    setRemember]    = useState(false)
+    const [error,       setError]       = useState('')
+    const [loading,     setLoading]     = useState(false)
 
-    async function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.SyntheticEvent) {
         e.preventDefault()
         setError('')
         setLoading(true)
@@ -28,73 +33,56 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="relative w-full max-w-3xl flex shadow-2xl border border-(--border) overflow-hidden">
+        <motion.div
+            className="relative w-full mx-4"
+            style={{ maxWidth: '400px' }}
+            initial={{ opacity: 0, y: 24, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0,  scale: 1    }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+        >
+            {/* Card */}
+            <div className="bg-white overflow-hidden"
+                 style={{
+                     border: `1px solid ${BORDER}`,
+                     boxShadow: '0 24px 60px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.12)',
+                 }}>
 
-            {/* ── Painel de marca (esquerdo) ── */}
-            <div className="relative hidden md:flex flex-col justify-between w-[42%] p-10 overflow-hidden shrink-0"
-                style={{ background: 'linear-gradient(42deg, #ff2222, #00c245f0)' }}>
+                {/* Accent strip */}
+                <div className="h-[3px] w-full"
+                     style={{ background: `linear-gradient(90deg, ${CYAN} 0%, #dc2626 100%)` }} />
 
-                {/* Dot grid */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.08]"
-                    style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-
-                {/* Cantos decorativos */}
-                {[
-                    'top-0 left-0 border-t-2 border-l-2',
-                    'top-0 right-0 border-t-2 border-r-2',
-                    'bottom-0 left-0 border-b-2 border-l-2',
-                    'bottom-0 right-0 border-b-2 border-r-2',
-                ].map((cls, i) => (
-                    <div key={i} className={`absolute w-5 h-5 border-white/30 ${cls}`} />
-                ))}
-
-                {/* Topo — logo */}
-                <div className="relative z-10">
-                    <div className="w-14 h-14 bg-white/15 border border-white/25 flex items-center justify-center mb-6">
-                        <ShoppingCart size={22} className="text-white" />
+                {/* Brand */}
+                <div className="flex items-center gap-3 px-7 pt-7 pb-5"
+                     style={{ borderBottom: `1px solid ${BORDER}` }}>
+                    <div className="w-9 h-9 flex items-center justify-center shrink-0"
+                         style={{ background: `${CYAN}12`, border: `1.5px solid ${CYAN}28` }}>
+                        <ShoppingCart size={16} style={{ color: CYAN }} />
                     </div>
-                    <p className="text-white/60 text-[0.48rem] uppercase tracking-[0.4em] mb-2">
-                        Sistema de Convênio
-                    </p>
-                    <h1 className="text-white font-black uppercase text-[1.45rem] leading-tight tracking-wide">
-                        Baratão<br />da Carne
-                    </h1>
+                    <div>
+                        <p className="text-[0.52rem] font-black uppercase tracking-[0.3em] text-muted-foreground">
+                            Sistema de Convênio
+                        </p>
+                        <p className="text-[0.82rem] font-black uppercase tracking-[0.08em] text-foreground leading-none mt-0.5">
+                            Baratão da Carne
+                        </p>
+                    </div>
                 </div>
 
-                {/* Meio — descrição */}
-                <div className="relative z-10 flex flex-col gap-3 my-8">
-                    <div className="h-0.5 bg-white/15 w-full" />
-                    <p className="text-white/60 text-[0.58rem] leading-relaxed">
-                        Gestão de convênio de funcionários — controle de limites mensais, importação em massa e relatórios por período.
-                    </p>
-                </div>
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="px-7 py-6 flex flex-col gap-4" autoComplete="off">
 
-                {/* Rodapé */}
-                <div className="relative z-10">
-                    <p className="text-white/40 text-[0.5rem] uppercase tracking-[0.25em]">
-                        Baratão da Carne · {new Date().getFullYear()}
-                    </p>
-                </div>
-            </div>
+                    <div>
+                        <p className="text-[0.52rem] font-black uppercase tracking-[0.28em] text-muted-foreground mb-1">
+                            Acesso ao Sistema
+                        </p>
+                        <h2 className="text-lg font-black uppercase tracking-tight text-foreground">
+                            Bem-vindo
+                        </h2>
+                    </div>
 
-            {/* ── Formulário (direito) ── */}
-            <div className="flex-1 bg-card flex flex-col justify-center px-10 py-12">
-
-                <div className="mb-8">
-                    <p className="text-[0.48rem] uppercase tracking-[0.35em] text-(--muted-foreground) mb-2">
-                        Acesso ao Sistema
-                    </p>
-                    <h2 className="text-[1.3rem] font-black uppercase tracking-[0.06em] text-(--foreground) leading-tight">
-                        Bem-vindo
-                    </h2>
-                    <p className="text-[0.62rem] text-(--muted-foreground) mt-1.5">
-                        Insira suas credenciais para continuar.
-                    </p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4" autoComplete="off">
+                    {/* E-mail */}
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[0.5rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
+                        <label className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-muted-foreground">
                             E-mail
                         </label>
                         <input
@@ -105,34 +93,55 @@ export default function LoginPage() {
                             autoComplete="new-password"
                             required
                             autoFocus
-                            className="border border-(--border) px-3 py-2.5 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-40 transition-colors"
+                            className="w-full px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground placeholder:opacity-40"
+                            style={{ border: `1px solid ${BORDER}`, background: '#fafafa' }}
+                            onFocus={e => (e.currentTarget.style.borderColor = CYAN)}
+                            onBlur={e  => (e.currentTarget.style.borderColor = BORDER)}
                         />
                     </div>
 
+                    {/* Senha */}
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[0.5rem] font-black uppercase tracking-[0.22em] text-(--muted-foreground)">
+                        <label className="text-[0.58rem] font-black uppercase tracking-[0.2em] text-muted-foreground">
                             Senha
                         </label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            autoComplete="new-password"
-                            required
-                            className="border border-(--border) px-3 py-2.5 text-sm bg-muted text-(--foreground) outline-none focus:border-(--primary) placeholder:text-(--muted-foreground) placeholder:opacity-40 transition-colors"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                autoComplete="new-password"
+                                required
+                                className="w-full px-3 py-2.5 pr-9 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground placeholder:opacity-40"
+                                style={{ border: `1px solid ${BORDER}`, background: '#fafafa' }}
+                                onFocus={e => (e.currentTarget.style.borderColor = CYAN)}
+                                onBlur={e  => (e.currentTarget.style.borderColor = BORDER)}
+                            />
+                            {password.length > 0 && (
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    onClick={() => setShowPassword(v => !v)}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-1">
-                        <label className="flex items-center gap-2.5 cursor-pointer group">
+                    {/* Lembrar + Consultar Limite */}
+                    <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer group">
                             <input
                                 type="checkbox"
                                 checked={remember}
                                 onChange={e => setRemember(e.target.checked)}
-                                className="accent-(--primary) w-3.5 h-3.5"
+                                className="w-3.5 h-3.5"
+                                style={{ accentColor: CYAN }}
                             />
-                            <span className="text-[0.62rem] text-(--muted-foreground) group-hover:text-(--foreground) transition-colors">
+                            <span className="text-[0.62rem] text-muted-foreground group-hover:text-foreground transition-colors">
                                 Permanecer logado
                             </span>
                         </label>
@@ -140,23 +149,33 @@ export default function LoginPage() {
                         <button
                             type="button"
                             onClick={() => navigate('/saldo')}
-                            className="flex items-center gap-1.5 text-[0.58rem] font-black uppercase tracking-[0.15em] text-(--muted-foreground) hover:text-(--primary) transition-colors"
+                            className="flex items-center gap-1.5 text-[0.6rem] font-black uppercase tracking-[0.14em] transition-colors"
+                            style={{ color: '#94a3b8' }}
+                            onMouseEnter={e => (e.currentTarget.style.color = CYAN)}
+                            onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}
                         >
-                            <Wallet size={11} />
-                            Consultar Limite
+                            <Wallet size={11} /> Consultar Limite
                         </button>
                     </div>
 
+                    {/* Erro */}
                     {error && (
-                        <div className="flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 text-red-500">
-                            <span className="text-[0.68rem] font-semibold">{error}</span>
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="px-3 py-2.5 text-[0.68rem] font-semibold text-red-600"
+                            style={{ background: '#fef2f2', border: '1px solid #fecaca' }}
+                        >
+                            {error}
+                        </motion.div>
                     )}
 
+                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex items-center justify-center gap-2 bg-(--primary) text-white text-[0.58rem] font-black uppercase tracking-[0.2em] py-3 mt-2 hover:opacity-90 disabled:opacity-60 transition-opacity"
+                        className="flex items-center justify-center gap-2 py-3 text-[0.62rem] font-black uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90 disabled:opacity-60 mt-1"
+                        style={{ background: `linear-gradient(135deg, ${CYAN} 0%, #007aaa 100%)` }}
                     >
                         {loading
                             ? <Loader2 size={13} className="animate-spin" />
@@ -165,7 +184,14 @@ export default function LoginPage() {
                         {loading ? 'Autenticando…' : 'Entrar'}
                     </button>
                 </form>
+
+                {/* Footer */}
+                <div className="px-7 py-3 text-center" style={{ borderTop: `1px solid ${BORDER}`, background: '#fafafa' }}>
+                    <p className="text-[0.5rem] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                        Baratão da Carne · {new Date().getFullYear()}
+                    </p>
+                </div>
             </div>
-        </div>
+        </motion.div>
     )
 }
