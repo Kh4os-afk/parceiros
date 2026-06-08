@@ -16,6 +16,7 @@ use League\Csv\Reader;
 
 class PartnerController extends Controller
 {
+    // ── Método para listagem de funcionários com filtros, ordenação e paginação ─────────────
     public function index(Request $request): JsonResponse
     {
         $query = Partner::query();
@@ -39,6 +40,7 @@ class PartnerController extends Controller
         return response()->json($partners);
     }
 
+    // ── Novo método para exibir resumo dos funcionários (total, ativos, bloqueados, limites) ─────
     public function summary(Request $request): JsonResponse
     {
         $query = Partner::query();
@@ -60,11 +62,13 @@ class PartnerController extends Controller
         ]);
     }
 
+    // ── Novo método para exibir detalhes de um funcionário ───────────────────────────────
     public function show(Partner $partner): JsonResponse
     {
         return response()->json($partner);
     }
 
+    // ── Novo método para criação de funcionário ─────────────────────────────────────────
     public function store(StorePartnerRequest $request): JsonResponse
     {
         DB::beginTransaction();
@@ -95,6 +99,7 @@ class PartnerController extends Controller
         }
     }
 
+    // ── Novo método para atualização de funcionário ─────────────────────────────────────────
     public function update(UpdatePartnerRequest $request, Partner $partner): JsonResponse
     {
         DB::beginTransaction();
@@ -126,6 +131,7 @@ class PartnerController extends Controller
         }
     }
 
+    // ── Novo método para importação via CSV ───────────────────────────────────────────────
     public function import(ImportCsvRequest $request): JsonResponse
     {
         ini_set('max_execution_time', 600);

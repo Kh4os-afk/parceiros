@@ -18,8 +18,9 @@ class EmpresaController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'nome' => ['required', 'string', 'max:100'],
-            'ativo' => ['boolean'],
+            'nome'   => ['required', 'string', 'max:100'],
+            'codcli' => ['required', 'integer', 'min:1'],
+            'ativo'  => ['boolean'],
         ]);
 
         $data['slug'] = Str::slug($data['nome']);
@@ -37,8 +38,9 @@ class EmpresaController extends Controller
     public function update(Request $request, Empresa $empresa): JsonResponse
     {
         $data = $request->validate([
-            'nome'  => ['required', 'string', 'max:100'],
-            'ativo' => ['boolean'],
+            'nome'   => ['required', 'string', 'max:100'],
+            'codcli' => ['required', 'integer', 'min:1'],
+            'ativo'  => ['boolean'],
         ]);
 
         $data['slug'] = Str::slug($data['nome']);
