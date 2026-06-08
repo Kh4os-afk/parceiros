@@ -3,10 +3,10 @@ import { Pencil, Plus, Loader2, Building2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import api from '@/lib/axios'
 
-interface Empresa { id: number; nome: string; slug: string; ativo: boolean }
+interface Empresa { id: number; nome: string; codcli: number | null; slug: string; ativo: boolean }
 interface Errors  { [key: string]: string[] }
 
-const empty = { nome: '', ativo: true }
+const empty = { nome: '', codcli: '', ativo: true }
 
 const T = {
     bg:     "#f4f5f8",
@@ -51,7 +51,7 @@ export default function EmpresasPage() {
     useEffect(() => { load() }, [])
 
     function openCreate() { setForm(empty); setErrors({}); setEditing(null); setModal('create') }
-    function openEdit(e: Empresa) { setForm({ nome: e.nome, ativo: e.ativo }); setErrors({}); setEditing(e); setModal('edit') }
+    function openEdit(e: Empresa) { setForm({ nome: e.nome, codcli: e.codcli?.toString() ?? '', ativo: e.ativo }); setErrors({}); setEditing(e); setModal('edit') }
 
     async function handleSubmit(ev: React.FormEvent) {
         ev.preventDefault()
@@ -174,7 +174,7 @@ export default function EmpresasPage() {
                         <table className="w-full min-w-max border-collapse">
                             <thead>
                                 <tr style={{ borderBottom: `1px solid ${T.border}`, background: "#f7f8fa" }}>
-                                    {['Nome', 'Slug', 'Status'].map(h => (
+                                    {['Nome', 'Cód. Cliente', 'Slug', 'Status'].map(h => (
                                         <th
                                             key={h}
                                             className="px-5 py-3 text-left text-[0.52rem] font-black uppercase tracking-[0.2em] whitespace-nowrap"
@@ -194,14 +194,14 @@ export default function EmpresasPage() {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={4} className="text-center py-14 text-[0.75rem]" style={{ color: "#9ca3af" }}>
+                                        <td colSpan={5} className="text-center py-14 text-[0.75rem]" style={{ color: "#9ca3af" }}>
                                             <Loader2 size={16} className="animate-spin inline mr-2 opacity-50" />
                                             Carregando…
                                         </td>
                                     </tr>
                                 ) : empresas.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="text-center py-14 text-[0.75rem]" style={{ color: "#9ca3af" }}>
+                                        <td colSpan={5} className="text-center py-14 text-[0.75rem]" style={{ color: "#9ca3af" }}>
                                             Nenhuma empresa cadastrada.
                                         </td>
                                     </tr>
@@ -224,6 +224,18 @@ export default function EmpresasPage() {
                                             >
                                                 {e.nome}
                                             </span>
+                                        </td>
+                                        <td className="px-5 py-3">
+                                            {e.codcli != null ? (
+                                                <span
+                                                    className="text-[0.7rem] font-mono font-semibold px-2 py-0.5 rounded"
+                                                    style={{ background: `${T.cyan}12`, color: T.cyan }}
+                                                >
+                                                    {e.codcli}
+                                                </span>
+                                            ) : (
+                                                <span className="text-[0.65rem]" style={{ color: "#d1d5db" }}>—</span>
+                                            )}
                                         </td>
                                         <td className="px-5 py-3">
                                             <span
@@ -340,6 +352,31 @@ export default function EmpresasPage() {
                                     />
                                     {errors.nome?.[0] && (
                                         <p className="text-[0.62rem]" style={{ color: T.red }}>{errors.nome[0]}</p>
+                                    )}
+                                </div>
+
+                                {/* Cód. Cliente */}
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[0.52rem] font-black uppercase tracking-[0.2em]" style={{ color: "#9ca3af" }}>
+                                        Cód. Cliente
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={form.codcli}
+                                        onChange={e => setForm(f => ({ ...f, codcli: e.target.value }))}
+                                        placeholder="Código do cliente no sistema"
+                                        className="px-3 py-2 rounded-lg text-[0.82rem] outline-none transition-all"
+                                        style={{
+                                            border: `1px solid ${errors.codcli ? T.red : T.border}`,
+                                            background: "#f7f8fa",
+                                            color: "#1a1d23",
+                                        }}
+                                        onFocus={ev => { (ev.target as HTMLElement).style.borderColor = T.cyan; (ev.target as HTMLElement).style.boxShadow = `0 0 0 3px ${T.cyan}18` }}
+                                        onBlur={ev => { (ev.target as HTMLElement).style.borderColor = errors.codcli ? T.red : T.border; (ev.target as HTMLElement).style.boxShadow = "none" }}
+                                    />
+                                    {errors.codcli?.[0] && (
+                                        <p className="text-[0.62rem]" style={{ color: T.red }}>{errors.codcli[0]}</p>
                                     )}
                                 </div>
 
