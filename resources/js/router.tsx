@@ -18,6 +18,7 @@ import SalesByPartnerPage from '@/pages/reports/SalesByPartnerPage'
 import SalesByPeriodPage from '@/pages/reports/SalesByPeriodPage'
 import ConsultaPage from '@/pages/consulta/ConsultaPage'
 import SaldoPage from '@/pages/saldo/SaldoPage'
+import GiftCardsPage from '@/pages/giftcards/GiftCardsPage'
 import EmpresasPage from '@/pages/admin/EmpresasPage'
 import UsuariosPage from '@/pages/admin/UsuariosPage'
 import SettingsPage from '@/pages/settings/SettingsPage'
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
             { path: '/compras/funcionario', element: <SalesByPartnerPage /> },
             { path: '/compras/periodo', element: <SalesByPeriodPage /> },
             { path: '/consulta', element: <ConsultaPage /> },
+            { path: '/gift-cards', element: <GiftCardsPage /> },
             { path: '/configuracoes', element: <SettingsPage /> },
             // Rotas exclusivas de admin
             { path: '/admin/empresas', element: <AdminRoute><EmpresasPage /></AdminRoute> },

@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import {
     LayoutDashboard, Users, Upload, AlertCircle,
     CalendarRange, LogOut, ChevronsUpDown,
-    Building2, UserCog, Search, Settings, ShoppingCart,
+    Building2, UserCog, Search, Settings, ShoppingCart, Gift,
 } from 'lucide-react'
 import {
     Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
@@ -39,6 +39,7 @@ const navGroups = [
         items: [
             { to: '/compras/periodo', icon: CalendarRange, label: 'Extrato por Período' },
             { to: '/consulta',        icon: Search,        label: 'Consulta de Saldo'   },
+            { to: '/gift-cards',      icon: Gift,          label: 'Consultar Gift Card' },
         ],
     },
 ]

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmpresaController;
 use App\Http\Controllers\Api\FilialController;
+use App\Http\Controllers\Api\GiftCardController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\PartnerErrorController;
 use App\Http\Controllers\Api\ProfileController;
@@ -49,6 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Filiais
     Route::get('/filiais', [FilialController::class, 'index']);
+
+    // Gift Cards
+    Route::get('/gift-cards', [GiftCardController::class, 'index']);
 
     // Admin only
     Route::middleware('admin')->group(function () {

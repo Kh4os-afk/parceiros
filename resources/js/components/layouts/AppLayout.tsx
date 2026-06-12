@@ -38,6 +38,7 @@ function useBreadcrumbs(): Crumb[] {
     if (pathname === '/compras/funcionario') return [dash, { label: 'Relatórios' }, { label: 'Compras por Funcionário' }]
     if (pathname === '/compras/periodo')     return [dash, { label: 'Relatórios' }, { label: 'Extrato por Período' }]
     if (pathname === '/consulta')            return [dash, { label: 'Relatórios' }, { label: 'Consulta de Saldo' }]
+    if (pathname === '/gift-cards')          return [dash, { label: 'Relatórios' }, { label: 'Gift Cards' }]
 
     if (pathname === '/configuracoes')     return [dash, { label: 'Configurações' }]
 
