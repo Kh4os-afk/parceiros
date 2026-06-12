@@ -76,6 +76,7 @@ Controllers em `app/Http/Controllers/Api/`:
 | `PartnerErrorController` | Erros de importação (listar, aprovar, deletar) |
 | `SaleController` | Compras por funcionário/CPF e por período |
 | `FilialController` | Listagem de filiais |
+| `GiftCardController` | Listagem de gift cards (consulta interna) |
 | `EmpresaController` | CRUD de empresas (somente admin) |
 | `UserController` | CRUD de usuários com role e empresa_id (somente admin) |
 
@@ -102,6 +103,7 @@ Todas as tabelas principais (`partners`, `sales`, `filiais`, `partner_errors`, `
 - **PartnerError** — registros de CSV que falharam para correção manual, `empresa_id`
 - **ChangeLog** — auditoria; toda escrita bem-sucedida insere registro com `usuario`, `operacao`, `descricao`, `empresa_id`
 - **User** — autenticação Laravel/Sanctum; campos extras: `role`, `empresa_id`
+- **GiftCard** — gift cards emitidos: `codcli`, `cliente`, `numgiftcard` (único), `dtvalidade` (nullable), `valor`, `saldo`, `utilizado`. **Não tem `empresa_id`** — fica fora do multi-tenancy/`EmpresaScope`; os dados são populados externamente e a aplicação só consulta (read-only).
 
 A relação Partner ↔ Sale é via campo string `cpf`, não por chave estrangeira inteira.
 
@@ -147,6 +149,7 @@ resources/js/
     ├── errors/EditErrorPage.tsx
     ├── reports/SalesByPartnerPage.tsx, SalesByPeriodPage.tsx
     ├── consulta/ConsultaPage.tsx    # Consulta interna de compras
+    ├── giftcards/GiftCardsPage.tsx  # Consulta interna de gift cards (busca + KPIs + tabela)
     └── saldo/SaldoPage.tsx          # Página pública de saldo (usa SaldoLayout, sem auth)
 ```
 
@@ -172,6 +175,7 @@ Todas as páginas são responsivas (mobile + desktop). Padrões estabelecidos:
 - `/funcionarios` → Dashboard > Funcionários
 - `/importar/csv` → Dashboard > Funcionários > Importar CSV
 - `/compras/periodo` → Dashboard > Relatórios > Extrato por Período
+- `/gift-cards` → Dashboard > Relatórios > Gift Cards
 
 #### CountUp com valores monetários
 
@@ -184,6 +188,10 @@ Sempre passar o valor **numérico** ao `CountUp`, nunca a string do `formatMoney
 // ❌ Errado — NaN
 <CountUp value={formatMoney(grandTotal)} decimals={2} duration={1.5} />
 ```
+
+#### Design das páginas internas (V2)
+
+`ConsultaPage` e `GiftCardsPage` seguem o mesmo padrão visual: objeto de tokens `T` (bg `#f4f5f8`, border `#e8eaef`, cyan `#0099cc`, green `#059669`, amber `#d97706`, red `#dc2626`), `cardStyle` (card branco com borda e sombra leve) e variants do motion `rise` (fade + y + blur) com `stagger` no container. O wrapper da página usa `-m-4 md:-m-6 p-4 md:p-6 min-h-screen` para cobrir o padding do `AppLayout` com o fundo cinza. Novas páginas internas devem reutilizar esse padrão.
 
 #### Barra de utilização de crédito
 
