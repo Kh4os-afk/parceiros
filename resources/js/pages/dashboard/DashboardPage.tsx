@@ -214,12 +214,12 @@ export default function DashboardPage() {
                             <span className="text-xs text-muted-foreground">{filiais.length} lojas</span>
                         </div>
 
-                        <div className="flex flex-col divide-y" style={{ borderColor:T.border }}>
+                        <div className="flex flex-col divide-y max-h-82 overflow-y-auto" style={{ borderColor:T.border }}>
                             {loading ? (
                                 <p className="text-xs text-muted-foreground p-5">Carregando…</p>
                             ) : filiais.length === 0 ? (
                                 <p className="text-xs text-muted-foreground p-5 text-center">Sem compras no mês.</p>
-                            ) : filiais.slice(0, 5).map((f, i) => {
+                            ) : filiais.map((f, i) => {
                                 const maxF = filiais[0]?.total ?? 1;
                                 const barW = (Number(f.total)/maxF)*100;
                                 const rankColors = [T.cyan, T.purple, "#2563eb", "#059669", "#94a3b8"];
