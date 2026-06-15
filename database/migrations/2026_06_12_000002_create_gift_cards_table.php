@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('gift_cards')) {
+            return;
+        }
+
         Schema::create('gift_cards', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('codcli');

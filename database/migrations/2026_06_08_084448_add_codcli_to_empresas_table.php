@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('empresas', 'codcli')) {
+            return;
+        }
+
         Schema::table('empresas', function (Blueprint $table) {
             $table->unsignedInteger('codcli')->nullable()->after('nome');
         });
@@ -15,6 +19,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasColumn('empresas', 'codcli')) {
+            return;
+        }
+
         Schema::table('empresas', function (Blueprint $table) {
             $table->dropColumn('codcli');
         });
