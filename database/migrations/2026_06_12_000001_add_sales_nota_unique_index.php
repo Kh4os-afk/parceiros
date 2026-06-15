@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasIndex('sales', 'sales_nota_unique')) {
+            return;
+        }
+
         Schema::table('sales', function (Blueprint $table) {
             $table->unique(['codfilial', 'caixa', 'numnota'], 'sales_nota_unique');
         });
@@ -15,6 +19,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasIndex('sales', 'sales_nota_unique')) {
+            return;
+        }
+
         Schema::table('sales', function (Blueprint $table) {
             $table->dropUnique('sales_nota_unique');
         });
