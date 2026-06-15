@@ -72,17 +72,26 @@ Controllers em `app/Http/Controllers/Api/`:
 | Controller | Responsabilidade |
 |---|---|
 | `AuthController` | Login, logout, usuário autenticado (Sanctum SPA) |
-| `PartnerController` | CRUD de funcionários + importação CSV |
+| `ProfileController` | Atualizar nome (`PUT /profile`) e senha (`PUT /profile/password`) do usuário logado |
+| `PartnerController` | CRUD de funcionários + importação CSV + resumo (`/summary`) |
 | `PartnerErrorController` | Erros de importação (listar, aprovar, deletar) |
-| `SaleController` | Compras por funcionário/CPF e por período |
+| `SaleController` | Compras por funcionário/CPF, por período, por filial/período e saldo público |
 | `FilialController` | Listagem de filiais |
-| `GiftCardController` | Listagem de gift cards (consulta interna) |
-| `EmpresaController` | CRUD de empresas (somente admin) |
+| `GiftCardController` | Consulta de gift cards (autenticado) |
+| `EmpresaController` | CRUD de empresas (somente admin; sem `destroy`) |
 | `UserController` | CRUD de usuários com role e empresa_id (somente admin) |
 
 Form Requests em `app/Http/Requests/` para validação (CPF via `laravellegends/pt-br-validator`).
 
-Rotas em `routes/api.php` — todas protegidas por `auth:sanctum` exceto `/login` e `GET /api/saldo` (endpoint público para consulta de saldo por CPF via `?cpf=`). As rotas de empresas e usuários também exigem o middleware `AdminOnly` (retorna 403 para não-admins).
+Rotas em `routes/api.php` — todas protegidas por `auth:sanctum` exceto `POST /login` e `GET /saldo` (endpoint público de consulta de saldo por CPF via `?cpf=`). As rotas de empresas e usuários também exigem o middleware `admin` (alias de `AdminOnly`, retorna 403 para não-admins).
+
+Endpoints relevantes dentro do grupo `auth:sanctum`:
+- `GET /partners/summary` — totais (total, ativos, bloqueados, lim_medio, lim_total) por empresa
+- `GET /partners/{id}/sales` — compras de um funcionário específico
+- `GET /sales/by-cpf?cpf=` — busca compras por CPF (usada pela ConsultaPage interna)
+- `GET /sales/period?start_date=&end_date=` — extrato por período
+- `GET /sales/period/filiais?start_date=&end_date=` — extrato por filial/período
+- `PUT /profile` / `PUT /profile/password` — atualização de perfil do usuário logado
 
 `routes/web.php` → catch-all SPA: `Route::get('/{any}', fn() => view('app'))`.
 
@@ -96,7 +105,7 @@ Todas as tabelas principais (`partners`, `sales`, `filiais`, `partner_errors`, `
 
 ### Modelo de Dados
 
-- **Empresa** — empresa/tenant: `nome`, `slug` (único), `ativo`
+- **Empresa** — empresa/tenant: `nome`, `codcli` (código externo, nullable), `slug` (único), `ativo`
 - **Partner** — funcionário: `cpf` (11 dígitos, único), `matricula` (nullable), `limcred`, `bloqueado`, `alterado`, `empresa_id`
 - **Sale** — compra vinculada ao Partner via `cpf` (string, não FK inteira); campos: `codfilial`, `caixa`, `numnota`, `dtsaida`, `vltotal`, `qrcodenfce`, `dtcancel`, `dtdevol`, `empresa_id`
 - **Filial** — filiais/lojas, `empresa_id`
@@ -115,6 +124,7 @@ A relação Partner ↔ Sale é via campo string `cpf`, não por chave estrangei
 - Importação CSV usa `League\Csv\Reader`
 - `limcred` é armazenado em **reais** (decimal), não centavos — ex: `350.00` = R$ 350. A validação do CSV impõe `max:999`.
 - `PartnerController@index` faz eager load de `with('empresa')` para exibir a empresa na listagem (admin vê coluna Empresa).
+- Listas de parceiros e erros são paginadas (`.paginate(10)`); a resposta inclui metadados de paginação do Laravel.
 
 ### Frontend — React + Vite + TypeScript
 
@@ -138,7 +148,7 @@ resources/js/
 │   │   ├── ProtectedRoute.tsx       # Redireciona para /login se não autenticado
 │   │   └── AdminRoute.tsx           # Redireciona se não for admin
 │   ├── ui/                          # Componentes shadcn/ui
-│   ├── animate-ui/                  # Componentes do registro @animate-ui (ex: CountingNumber)
+│   ├── CountUp.tsx                  # Contador animado customizado (IntersectionObserver + rAF, cubic ease-out)
 │   └── PartnerDrawer.tsx            # Drawer reutilizável para ações de funcionário
 └── pages/
     ├── admin/EmpresasPage.tsx, UsuariosPage.tsx
@@ -148,12 +158,13 @@ resources/js/
     ├── import/ImportPage.tsx, ErrorsPage.tsx
     ├── errors/EditErrorPage.tsx
     ├── reports/SalesByPartnerPage.tsx, SalesByPeriodPage.tsx
-    ├── consulta/ConsultaPage.tsx    # Consulta interna de compras
-    ├── giftcards/GiftCardsPage.tsx  # Consulta interna de gift cards (busca + KPIs + tabela)
+    ├── consulta/ConsultaPage.tsx    # Consulta interna de compras por CPF
+    ├── giftcards/GiftCardsPage.tsx  # Consulta de gift cards (busca + KPIs + tabela)
+    ├── settings/SettingsPage.tsx    # Perfil do usuário: atualizar nome e senha
     └── saldo/SaldoPage.tsx          # Página pública de saldo (usa SaldoLayout, sem auth)
 ```
 
-Estado servidor gerenciado com `@tanstack/react-query` v5. Notificações toast via `sonner`.
+Estado servidor gerenciado com `@tanstack/react-query` v5. Notificações toast via `sonner`. Animações com `motion` (v12, `motion/react`).
 
 #### Padrões de responsividade
 
@@ -176,10 +187,13 @@ Todas as páginas são responsivas (mobile + desktop). Padrões estabelecidos:
 - `/importar/csv` → Dashboard > Funcionários > Importar CSV
 - `/compras/periodo` → Dashboard > Relatórios > Extrato por Período
 - `/gift-cards` → Dashboard > Relatórios > Gift Cards
+- `/configuracoes` → Dashboard > Configurações
+- `/admin/empresas` → Dashboard > Administração > Empresas
+- `/admin/usuarios` → Dashboard > Administração > Usuários
 
 #### CountUp com valores monetários
 
-Sempre passar o valor **numérico** ao `CountUp`, nunca a string do `formatMoney()`:
+`CountUp` é um componente customizado em `resources/js/components/CountUp.tsx` — não vem de nenhuma biblioteca externa. Sempre passar o valor **numérico**, nunca a string do `formatMoney()`:
 ```tsx
 // ✅ Correto
 <span className="text-[0.5em] opacity-50 mr-0.5">R$</span>
@@ -191,7 +205,7 @@ Sempre passar o valor **numérico** ao `CountUp`, nunca a string do `formatMoney
 
 #### Design das páginas internas (V2)
 
-`ConsultaPage` e `GiftCardsPage` seguem o mesmo padrão visual: objeto de tokens `T` (bg `#f4f5f8`, border `#e8eaef`, cyan `#0099cc`, green `#059669`, amber `#d97706`, red `#dc2626`), `cardStyle` (card branco com borda e sombra leve) e variants do motion `rise` (fade + y + blur) com `stagger` no container. O wrapper da página usa `-m-4 md:-m-6 p-4 md:p-6 min-h-screen` para cobrir o padding do `AppLayout` com o fundo cinza. Novas páginas internas devem reutilizar esse padrão.
+`ConsultaPage`, `GiftCardsPage`, `SettingsPage` e `DashboardPage` seguem o mesmo padrão visual: objeto de tokens `T` (bg `#f4f5f8`, border `#e8eaef`, cyan `#0099cc`, green `#059669`, amber `#d97706`, red `#dc2626`), `cardStyle` (card branco com borda e sombra leve) e variants do motion `rise` (fade + y + blur) com `stagger` no container. O wrapper da página usa `-m-4 md:-m-6 p-4 md:p-6 min-h-screen` para cobrir o padding do `AppLayout` com o fundo cinza. Novas páginas internas devem reutilizar esse padrão.
 
 #### Barra de utilização de crédito
 
@@ -199,7 +213,7 @@ Componente visual com gradiente + glow + shimmer animado. Keyframe `bar-shimmer`
 
 #### Sidebar mobile
 
-`AppSidebar` usa `useSidebar().setOpenMobile(false)` no `onClick` de cada `NavItem` para fechar automaticamente ao navegar.
+`AppSidebar` usa `useSidebar().setOpenMobile(false)` no `onClick` de cada `NavItem` para fechar automaticamente ao navegar. A página de Configurações (`/configuracoes`) é acessada pelo dropdown do usuário no rodapé da sidebar, não pelo menu de navegação principal.
 
 ### Frontend — Tailwind v4 + shadcn/ui
 
