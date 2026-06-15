@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\VisivelNoFrontendScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
@@ -17,7 +18,17 @@ class Sale extends Model
         'qrcodenfce',
         'dtcancel',
         'dtdevol',
+        'oculto',
     ];
+
+    protected $hidden = [
+        'oculto',
+    ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new VisivelNoFrontendScope());
+    }
     public function funcionario()
     {
         return $this->hasOne(Partner::class,'cpf','cpf');
