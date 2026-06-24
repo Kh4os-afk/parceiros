@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import {
     Search,
@@ -13,7 +13,10 @@ import * as XLSX from "xlsx";
 import api from "@/lib/axios";
 import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
+import PaginationBar from "@/components/PaginationBar";
 import { Button } from "@/components/ui/button";
+
+const PER_PAGE = 10;
 
 const T = {
     bg: "#f4f5f8",
@@ -68,6 +71,7 @@ export default function SalesByPeriodPage() {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [results, setResults] = useState<SaleGroup[]>([]);
+    const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
     const [errors, setErrors] = useState<{
@@ -80,6 +84,7 @@ export default function SalesByPeriodPage() {
         setErrors({});
         setLoading(true);
         setSearched(true);
+        setPage(1);
         try {
             const res = await api.get("/sales/period", {
                 params: {
@@ -104,9 +109,12 @@ export default function SalesByPeriodPage() {
             Nome: toTitleCase(r.nome),
             "Qtd Compras": r.quantidade,
             "Total (R$)": Number(r.total),
+            "Participação (%)": grandTotal > 0
+                ? Number(((Number(r.total) / grandTotal) * 100).toFixed(2))
+                : 0,
         }));
         const ws = XLSX.utils.json_to_sheet(dados);
-        ws["!cols"] = [{ wch: 16 }, { wch: 35 }, { wch: 14 }, { wch: 14 }];
+        ws["!cols"] = [{ wch: 16 }, { wch: 35 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Extrato por Período");
         XLSX.writeFile(wb, `compras_${startDate}_${endDate}.xlsx`);
@@ -126,6 +134,24 @@ export default function SalesByPeriodPage() {
     );
     const maiorComp = useMemo(() => results[0] ?? null, [results]);
     const maxTotal = useMemo(() => results[0]?.total ?? 1, [results]);
+
+    const paginationMeta = useMemo(() => ({
+        current_page: page,
+        last_page: Math.max(1, Math.ceil(results.length / PER_PAGE)),
+        total: results.length,
+        per_page: PER_PAGE,
+    }), [results.length, page]);
+
+    const paginatedResults = useMemo(() => {
+        const start = (page - 1) * PER_PAGE;
+        return results.slice(start, start + PER_PAGE);
+    }, [results, page]);
+
+    useEffect(() => {
+        if (page > paginationMeta.last_page) {
+            setPage(paginationMeta.last_page);
+        }
+    }, [page, paginationMeta.last_page]);
 
     const kpiCards = [
         {
@@ -328,7 +354,8 @@ export default function SalesByPeriodPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {results.map((r, idx) => {
+                                        {paginatedResults.map((r, idx) => {
+                                            const rank = (page - 1) * PER_PAGE + idx + 1;
                                             const pct = grandTotal > 0 ? (Number(r.total) / grandTotal) * 100 : 0;
                                             const barW = maxTotal > 0 ? (Number(r.total) / maxTotal) * 100 : 0;
                                             return (
@@ -339,8 +366,8 @@ export default function SalesByPeriodPage() {
                                                     onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = ""; }}
                                                 >
                                                     <td style={{ padding: "0.4rem 1.25rem" }}>
-                                                        <span style={{ fontSize: "0.7rem", fontWeight: 700, fontVariantNumeric: "tabular-nums", color: idx < 3 ? T.cyan : "#cbd5e1" }}>
-                                                            {String(idx + 1).padStart(2, "0")}
+                                                        <span style={{ fontSize: "0.7rem", fontWeight: 700, fontVariantNumeric: "tabular-nums", color: rank <= 3 ? T.cyan : "#cbd5e1" }}>
+                                                            {String(rank).padStart(2, "0")}
                                                         </span>
                                                     </td>
                                                     <td style={{ padding: "0.4rem 1.25rem" }}>
@@ -365,8 +392,8 @@ export default function SalesByPeriodPage() {
                                                                     style={{ height: "100%", width: `${barW}%`, background: T.cyan, borderRadius: 2, transition: "width 0.6s ease" }}
                                                                 />
                                                             </div>
-                                                            <span style={{ fontSize: "0.65rem", fontWeight: 700, color: "#94a3b8", fontVariantNumeric: "tabular-nums", minWidth: "2.5rem", textAlign: "right" }}>
-                                                                <CountUp value={pct} decimals={0} duration={1.5} />%
+                                                            <span style={{ fontSize: "0.65rem", fontWeight: 700, color: "#94a3b8", fontVariantNumeric: "tabular-nums", minWidth: "3.5rem", textAlign: "right" }}>
+                                                                <CountUp value={pct} decimals={2} duration={1.5} />%
                                                             </span>
                                                         </div>
                                                     </td>
@@ -390,7 +417,7 @@ export default function SalesByPeriodPage() {
                                             </td>
                                             <td style={{ padding: "0.65rem 1.25rem" }}>
                                                 <span style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#94a3b8" }}>
-                                                    100%
+                                                    100,00%
                                                 </span>
                                             </td>
                                             <td style={{ padding: "0.65rem 1.25rem", textAlign: "right" }}>
@@ -403,6 +430,9 @@ export default function SalesByPeriodPage() {
                                     </tfoot>
                                 </table>
                             </div>
+                        )}
+                        {results.length > 0 && (
+                            <PaginationBar meta={paginationMeta} page={page} onPageChange={setPage} />
                         )}
                     </motion.div>
                 </>

@@ -59,6 +59,13 @@ export function parseMoney(value: string): number {
     return Number.isNaN(n) ? 0 : n
 }
 
+export function formatPercent(value: number, decimals = 2): string {
+    return `${Number(value).toLocaleString('pt-BR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    })}%`
+}
+
 export function toTitleCase(str: string): string {
     return str
         .toLowerCase()
