@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
     Search, Plus, Upload, ChevronUp, ChevronDown,
     Pencil, ReceiptText, Users, ShieldOff, ShieldCheck,
-    CreditCard, Download, X,
+    CreditCard, Download, X, Loader2,
 } from "lucide-react";
 import { motion } from "motion/react";
 import * as XLSX from "xlsx";
@@ -51,44 +52,57 @@ const rise: any = { hidden:{ opacity:0, y:20, filter:"blur(8px)" }, visible:{ op
 export default function ListPage() {
     const navigate   = useNavigate();
     const { isAdmin } = useAuth();
-    const [partners,  setPartners]  = useState<Partner[]>([]);
-    const [meta,      setMeta]      = useState<Meta | null>(null);
     const [search,    setSearch]    = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState<StatusFilter[]>([]);
     const [empresaFilter, setEmpresaFilter] = useState<string[]>([]);
     const [sortBy,    setSortBy]    = useState<SortField>("nome");
     const [order,     setOrder]     = useState<"asc"|"desc">("asc");
     const [page,      setPage]      = useState(1);
-    const [loading,   setLoading]   = useState(true);
     const [exporting, setExporting] = useState(false);
-    const [summary,   setSummary]   = useState<Summary>({ total:0, ativos:0, bloqueados:0, lim_medio:0, lim_total:0 });
 
     const hasFilters = statusFilter.length > 0 || empresaFilter.length > 0;
 
-    const fetchPartners = useCallback(async () => {
-        setLoading(true);
-        try {
-            const res = await api.get("/partners", { params: listParams(search, sortBy, order, page, statusFilter, empresaFilter) });
-            setPartners(res.data.data);
-            setMeta(res.data);
-        } finally { setLoading(false); }
-    }, [search, sortBy, order, page, statusFilter, empresaFilter]);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+            setPage(1);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [search]);
 
-    const fetchSummary = useCallback(async () => {
-        try {
-            const res = await api.get("/partners/summary", { params: listParams(search, sortBy, order, 1, statusFilter, empresaFilter) });
-            setSummary(res.data);
-        } catch { /* ignore */ }
-    }, [search, statusFilter, empresaFilter, sortBy, order]);
+    const partnersQuery = useQuery({
+        queryKey: ["partners", debouncedSearch, sortBy, order, page, statusFilter, empresaFilter],
+        queryFn: async () => {
+            const res = await api.get("/partners", {
+                params: listParams(debouncedSearch, sortBy, order, page, statusFilter, empresaFilter),
+            });
+            return res.data as Meta & { data: Partner[] };
+        },
+        placeholderData: keepPreviousData,
+    });
 
-    useEffect(() => { fetchPartners(); }, [fetchPartners]);
-    useEffect(() => { fetchSummary(); }, [fetchSummary]);
-    useEffect(() => { setPage(1); }, [search, statusFilter, empresaFilter]);
+    const summaryQuery = useQuery({
+        queryKey: ["partners-summary", debouncedSearch, statusFilter, empresaFilter],
+        queryFn: async () => {
+            const res = await api.get("/partners/summary", {
+                params: listParams(debouncedSearch, sortBy, order, 1, statusFilter, empresaFilter),
+            });
+            return res.data as Summary;
+        },
+        placeholderData: keepPreviousData,
+    });
+
+    const partners = partnersQuery.data?.data ?? [];
+    const meta = partnersQuery.data ?? null;
+    const summary = summaryQuery.data ?? { total: 0, ativos: 0, bloqueados: 0, lim_medio: 0, lim_total: 0 };
+    const initialLoading = partnersQuery.isLoading && !partnersQuery.data;
+    const fetching = partnersQuery.isFetching;
 
     async function exportarExcel() {
         setExporting(true);
         try {
-            const res = await api.get("/partners", { params: listParams(search, sortBy, order, 1, statusFilter, empresaFilter, 99999) });
+            const res = await api.get("/partners", { params: listParams(debouncedSearch, sortBy, order, 1, statusFilter, empresaFilter, 99999) });
             const rows: Partner[] = res.data.data;
             const dados = rows.map(p => ({ Matrícula: p.matricula||"", Nome: toTitleCase(p.nome), CPF: formatCPF(p.cpf), "Lim. Mensal (R$)": Number(p.limcred), Status: p.bloqueado?"Bloqueado":"Ativo" }));
             const ws = XLSX.utils.json_to_sheet(dados);
@@ -106,9 +120,20 @@ export default function ListPage() {
     }
 
 
+    function applyStatusFilter(values: StatusFilter[]) {
+        setStatusFilter(values);
+        setPage(1);
+    }
+
+    function applyEmpresaFilter(values: string[]) {
+        setEmpresaFilter(values);
+        setPage(1);
+    }
+
     function clearFilters() {
         setStatusFilter([]);
         setEmpresaFilter([]);
+        setPage(1);
     }
 
     const statusOptions = [
@@ -201,15 +226,18 @@ export default function ListPage() {
                         title="Situação"
                         options={statusOptions}
                         selected={statusFilter}
-                        onChange={(v) => setStatusFilter(v as StatusFilter[])}
+                        onChange={(v) => applyStatusFilter(v as StatusFilter[])}
                     />
                     {isAdmin && empresaOptions.length > 0 && (
                         <FacetedFilter
                             title="Empresa"
                             options={empresaOptions}
                             selected={empresaFilter}
-                            onChange={setEmpresaFilter}
+                            onChange={applyEmpresaFilter}
                         />
+                    )}
+                    {fetching && (
+                        <Loader2 size={14} className="animate-spin text-muted-foreground shrink-0" aria-label="Atualizando lista" />
                     )}
                     {(hasFilters) && (
                         <Button
@@ -232,8 +260,15 @@ export default function ListPage() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-max border-collapse">
+                <div className="relative overflow-x-auto">
+                    {fetching && !initialLoading && (
+                        <div
+                            className="absolute inset-0 z-10 pointer-events-none transition-opacity"
+                            style={{ background: "rgba(255,255,255,0.55)" }}
+                            aria-hidden
+                        />
+                    )}
+                    <table className={`w-full min-w-max border-collapse transition-opacity duration-200 ${fetching && !initialLoading ? "opacity-50" : "opacity-100"}`}>
                         <thead>
                             <tr style={{ background:"#f9fafb", borderBottom:`1px solid ${T.border}` }}>
                                 {([["matricula","Matrícula"],["nome","Nome"],["cpf","CPF"],["limcred","Lim. Mensal"],["bloqueado","Status"]] as [SortField,string][])
@@ -258,11 +293,11 @@ export default function ListPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {loading ? (
+                            {initialLoading ? (
                                 <tr><td colSpan={isAdmin?7:6} className="text-center py-14 text-sm text-muted-foreground">Carregando…</td></tr>
                             ) : partners.length === 0 ? (
                                 <tr><td colSpan={isAdmin?7:6} className="text-center py-14 text-sm text-muted-foreground">
-                                    {search || hasFilters ? "Nenhum resultado para os filtros aplicados." : "Nenhum funcionário cadastrado."}
+                                    {debouncedSearch || hasFilters ? "Nenhum resultado para os filtros aplicados." : "Nenhum funcionário cadastrado."}
                                 </td></tr>
                             ) : partners.map(p => (
                                 <tr key={p.id} className="group transition-colors hover:bg-[#fafafa]"
