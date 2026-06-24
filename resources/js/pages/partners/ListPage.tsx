@@ -10,6 +10,7 @@ import * as XLSX from "xlsx";
 import api from "@/lib/axios";
 import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
+import PaginationBar from "@/components/PaginationBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -75,7 +76,6 @@ export default function ListPage() {
         setPage(1);
     }
 
-    const pages = meta ? Array.from({ length: meta.last_page }, (_, i) => i+1) : [];
 
     const kpis = [
         { label:"Total Cadastrados", value:summary.total,      icon:Users,       color:T.cyan,   money:false },
@@ -265,25 +265,7 @@ export default function ListPage() {
                     </table>
                 </div>
 
-                {/* Paginação */}
-                {meta && meta.last_page > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3" style={{ borderTop:`1px solid ${T.border}`, background:"#f9fafb" }}>
-                        <span className="text-xs text-muted-foreground">
-                            {(meta.current_page-1)*meta.per_page+1}–{Math.min(meta.current_page*meta.per_page, meta.total)} de {meta.total}
-                        </span>
-                        <div className="flex gap-1">
-                            {pages.slice(0, 7).map(p => (
-                                <button key={p} onClick={() => setPage(p)}
-                                        className="w-7 h-7 text-[0.6rem] font-black transition-all"
-                                        style={p===page
-                                            ? { background:`linear-gradient(135deg, ${T.cyan}, ${T.purple})`, color:"#fff", boxShadow:`0 2px 8px ${T.cyan}50` }
-                                            : { border:`1px solid ${T.border}`, color:"var(--muted-foreground)", background:"#fff" }}>
-                                    {p}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                {meta && <PaginationBar meta={meta} page={page} onPageChange={setPage} />}
             </motion.div>
         </motion.div>
     );

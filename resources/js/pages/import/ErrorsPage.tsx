@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import api from '@/lib/axios'
 import { formatCPF, toTitleCase } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import PaginationBar from '@/components/PaginationBar'
 
 interface PartnerError {
     id: number
@@ -89,7 +90,6 @@ export default function ErrorsPage() {
         }
     }
 
-    const pages = meta ? Array.from({ length: meta.last_page }, (_, i) => i + 1) : []
 
     const confirmMsg =
         confirm === 'all'
@@ -337,53 +337,7 @@ export default function ErrorsPage() {
                             </table>
                         </div>
 
-                        {/* Paginação */}
-                        {meta && meta.last_page > 1 && (
-                            <div
-                                className="flex items-center justify-between px-5 py-3"
-                                style={{ borderTop: `1px solid ${T.border}`, background: '#f9fafb' }}
-                            >
-                                <span className="text-[0.65rem] uppercase tracking-[0.18em] text-gray-400">
-                                    {((meta.current_page - 1) * meta.per_page) + 1}–{Math.min(meta.current_page * meta.per_page, meta.total)} de {meta.total}
-                                </span>
-                                <div className="flex gap-1">
-                                    {pages.slice(0, 7).map(p => (
-                                        <button
-                                            key={p}
-                                            onClick={() => setPage(p)}
-                                            className="w-7 h-7 rounded text-[0.62rem] font-bold transition-all"
-                                            style={
-                                                p === page
-                                                    ? {
-                                                          background: `linear-gradient(135deg, ${T.cyan}, ${T.purple})`,
-                                                          color: '#fff',
-                                                          border: 'none',
-                                                      }
-                                                    : {
-                                                          border: `1px solid ${T.border}`,
-                                                          color: '#9ca3af',
-                                                          background: 'transparent',
-                                                      }
-                                            }
-                                            onMouseEnter={e => {
-                                                if (p !== page) {
-                                                    e.currentTarget.style.borderColor = T.cyan
-                                                    e.currentTarget.style.color = T.cyan
-                                                }
-                                            }}
-                                            onMouseLeave={e => {
-                                                if (p !== page) {
-                                                    e.currentTarget.style.borderColor = T.border
-                                                    e.currentTarget.style.color = '#9ca3af'
-                                                }
-                                            }}
-                                        >
-                                            {p}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        {meta && <PaginationBar meta={meta} page={page} onPageChange={setPage} />}
                     </div>
                 </motion.div>
             )}
