@@ -37,7 +37,7 @@ class PartnerController extends Controller
     // ── Novo método para exibir resumo dos funcionários (total, ativos, bloqueados, limites) ─────
     public function summary(Request $request): JsonResponse
     {
-        $baseQuery = $this->filteredQuery($request, ignoreStatus: true, ignoreEmpresa: true);
+        $baseQuery = $this->filteredQuery($request);
 
         $payload = [
             'total'      => (clone $baseQuery)->count(),
@@ -66,7 +66,7 @@ class PartnerController extends Controller
         return response()->json($payload);
     }
 
-    private function filteredQuery(Request $request, bool $ignoreStatus = false, bool $ignoreEmpresa = false)
+    private function filteredQuery(Request $request)
     {
         $query = Partner::query();
 
@@ -78,11 +78,11 @@ class PartnerController extends Controller
             });
         }
 
-        if (! $ignoreStatus && ($status = $this->parseStatusFilter($request))) {
+        if ($status = $this->parseStatusFilter($request)) {
             $query->whereIn('bloqueado', $status);
         }
 
-        if (! $ignoreEmpresa && auth()->user()->isAdmin() && ($empresaIds = $this->parseEmpresaFilter($request))) {
+        if (auth()->user()->isAdmin() && ($empresaIds = $this->parseEmpresaFilter($request))) {
             $query->whereIn('empresa_id', $empresaIds);
         }
 

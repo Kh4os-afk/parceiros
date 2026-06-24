@@ -485,7 +485,7 @@ export default function SalesByPeriodPage() {
                                     </tbody>
                                     <tfoot>
                                         <tr style={{ borderTop: `2px solid ${T.border}`, background: "#f8fafc" }}>
-                                            <td colSpan={isAdmin ? 4 : 3} />
+                                            <td colSpan={3} />
                                             <td style={{ padding: "0.65rem 1.25rem", textAlign: "center" }}>
                                                 <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1e293b", fontVariantNumeric: "tabular-nums" }}>
                                                     <CountUp value={totalCompras} decimals={0} duration={1.5} />
