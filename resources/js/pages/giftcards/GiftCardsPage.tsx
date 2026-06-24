@@ -4,6 +4,7 @@ import { Gift, Search, Loader2 } from "lucide-react";
 import api from "@/lib/axios";
 import { formatMoney, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
+import { useAuth } from "@/contexts/AuthContext";
 
 const T = {
     bg: "#f4f5f8",
@@ -38,12 +39,14 @@ const stagger = {
 interface GiftCard {
     id: number;
     codcli: number;
+    codcliprinc: number | null;
     cliente: string;
     numgiftcard: string;
     dtvalidade: string | null;
     valor: number;
     saldo: number;
     utilizado: number;
+    empresa?: { id: number; nome: string; codcli: number | null };
 }
 
 function formatDateFull(iso: string) {
@@ -57,6 +60,7 @@ function isExpired(iso: string | null) {
 }
 
 export default function GiftCardsPage() {
+    const { isAdmin } = useAuth();
     const [cards, setCards] = useState<GiftCard[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -76,9 +80,11 @@ export default function GiftCardsPage() {
             (c) =>
                 c.cliente.toLowerCase().includes(term) ||
                 c.numgiftcard.toLowerCase().includes(term) ||
-                String(c.codcli).includes(term),
+                String(c.codcli).includes(term) ||
+                (isAdmin &&
+                    (c.empresa?.nome.toLowerCase().includes(term) ?? false)),
         );
-    }, [cards, search]);
+    }, [cards, search, isAdmin]);
 
     const totalValor = useMemo(
         () => filtered.reduce((s, c) => s + Number(c.valor), 0),
@@ -99,6 +105,12 @@ export default function GiftCardsPage() {
         { label: "Utilizado", value: totalUtilizado, money: true, color: T.amber },
         { label: "Saldo Disponível", value: totalSaldo, money: true, color: T.green },
     ];
+
+    const tableHeaders = isAdmin
+        ? ["Cliente", "Nº Gift Card", "Validade", "Empresa", "Valor", "Utilizado", "Saldo"]
+        : ["Cliente", "Nº Gift Card", "Validade", "Valor", "Utilizado", "Saldo"];
+
+    const moneyColStart = isAdmin ? 4 : 3;
 
     return (
         <motion.div
@@ -210,17 +222,15 @@ export default function GiftCardsPage() {
                         <table className="w-full min-w-max border-collapse">
                             <thead>
                                 <tr style={{ background: "#fafbfc", borderBottom: `1px solid ${T.border}` }}>
-                                    {["Cliente", "Nº Gift Card", "Validade", "Valor", "Utilizado", "Saldo"].map(
-                                        (h, i) => (
-                                            <th
-                                                key={h}
-                                                className={`px-5 py-3 text-[0.6rem] font-bold uppercase tracking-[0.16em] ${i >= 3 ? "text-right" : "text-left"}`}
-                                                style={{ color: "#9ca3af" }}
-                                            >
-                                                {h}
-                                            </th>
-                                        ),
-                                    )}
+                                    {tableHeaders.map((h, i) => (
+                                        <th
+                                            key={h}
+                                            className={`px-5 py-3 text-[0.6rem] font-bold uppercase tracking-[0.16em] ${i >= moneyColStart ? "text-right" : "text-left"}`}
+                                            style={{ color: "#9ca3af" }}
+                                        >
+                                            {h}
+                                        </th>
+                                    ))}
                                 </tr>
                             </thead>
                             <tbody>
@@ -275,6 +285,18 @@ export default function GiftCardsPage() {
                                                     </span>
                                                 )}
                                             </td>
+                                            {isAdmin && (
+                                                <td className="px-5 py-3.5">
+                                                    <span
+                                                        className="text-sm text-muted-foreground"
+                                                        style={{ color: "#6b7280" }}
+                                                    >
+                                                        {card.empresa?.nome
+                                                            ? toTitleCase(card.empresa.nome)
+                                                            : "—"}
+                                                    </span>
+                                                </td>
+                                            )}
                                             <td
                                                 className="px-5 py-3.5 text-right text-sm font-semibold tabular-nums"
                                                 style={{ color: T.cyan }}
@@ -306,7 +328,7 @@ export default function GiftCardsPage() {
                             </tbody>
                             <tfoot>
                                 <tr style={{ background: "#fafbfc" }}>
-                                    <td colSpan={3} className="px-5 py-3.5">
+                                    <td colSpan={moneyColStart} className="px-5 py-3.5">
                                         <span
                                             className="text-[0.6rem] font-bold uppercase tracking-[0.16em]"
                                             style={{ color: "#9ca3af" }}

@@ -9,11 +9,27 @@ use Illuminate\Http\JsonResponse;
 class GiftCardController extends Controller
 {
     /**
-     * Consulta pública de gift cards (sem autenticação).
+     * Lista gift cards da empresa do usuário autenticado.
+     * Filtra por codcliprinc = codcli da empresa. Admins veem todos.
      */
     public function index(): JsonResponse
     {
-        $giftCards = GiftCard::orderBy('cliente')
+        $user = auth()->user();
+        $query = GiftCard::query();
+
+        if (! $user->isAdmin()) {
+            $codcliprinc = $user->empresa?->codcli;
+
+            if ($codcliprinc === null) {
+                return response()->json([]);
+            }
+
+            $query->where('codcliprinc', $codcliprinc);
+        }
+
+        $giftCards = $query
+            ->when($user->isAdmin(), fn ($q) => $q->with('empresa:id,nome,codcli'))
+            ->orderBy('cliente')
             ->orderBy('numgiftcard')
             ->get();
 
