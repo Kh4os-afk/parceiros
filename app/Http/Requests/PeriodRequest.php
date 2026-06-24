@@ -16,6 +16,7 @@ class PeriodRequest extends FormRequest
         return [
             'start_date' => ['required', 'date_format:d/m/Y'],
             'end_date'   => ['required', 'date_format:d/m/Y', 'after_or_equal:start_date'],
+            'empresa_id' => ['nullable', 'integer', 'exists:empresas,id'],
         ];
     }
 
@@ -24,6 +25,7 @@ class PeriodRequest extends FormRequest
         return [
             'start_date' => 'data inicial',
             'end_date'   => 'data final',
+            'empresa_id' => 'empresa',
         ];
     }
 }

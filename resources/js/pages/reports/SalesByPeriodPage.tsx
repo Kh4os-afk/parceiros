@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "@/lib/axios";
-import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
+import { formatCPF, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
 import PaginationBar from "@/components/PaginationBar";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
 const PER_PAGE = 10;
@@ -49,6 +50,23 @@ interface SaleGroup {
     nome: string;
     total: number;
     quantidade: number;
+    empresa_id?: number;
+    empresa?: string;
+}
+
+interface Empresa {
+    id: number;
+    nome: string;
+}
+
+function firstDayOfMonthISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+}
+
+function todayISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function formatDateBR(iso: string) {
@@ -68,8 +86,11 @@ function formatDateLabel(iso: string) {
 }
 
 export default function SalesByPeriodPage() {
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const { isAdmin } = useAuth();
+    const [startDate, setStartDate] = useState(() => firstDayOfMonthISO());
+    const [endDate, setEndDate] = useState(() => todayISO());
+    const [empresaId, setEmpresaId] = useState("");
+    const [empresas, setEmpresas] = useState<Empresa[]>([]);
     const [results, setResults] = useState<SaleGroup[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -78,6 +99,13 @@ export default function SalesByPeriodPage() {
         start_date?: string[];
         end_date?: string[];
     }>({});
+
+    useEffect(() => {
+        if (!isAdmin) return;
+        api.get("/empresas")
+            .then((res) => setEmpresas(res.data ?? []))
+            .catch(() => {});
+    }, [isAdmin]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -90,6 +118,7 @@ export default function SalesByPeriodPage() {
                 params: {
                     start_date: formatDateBR(startDate),
                     end_date: formatDateBR(endDate),
+                    ...(isAdmin && empresaId ? { empresa_id: empresaId } : {}),
                 },
             });
             setResults(res.data);
@@ -104,17 +133,23 @@ export default function SalesByPeriodPage() {
 
     function exportarExcel() {
         if (results.length === 0) return;
-        const dados = results.map((r) => ({
-            CPF: formatCPF(r.cpf),
-            Nome: toTitleCase(r.nome),
-            "Qtd Compras": r.quantidade,
-            "Total (R$)": Number(r.total),
-            "Participação (%)": grandTotal > 0
+        const dados = results.map((r) => {
+            const row: Record<string, string | number> = {
+                CPF: formatCPF(r.cpf),
+                Nome: toTitleCase(r.nome),
+                "Qtd Compras": r.quantidade,
+            };
+            if (isAdmin) row.Empresa = toTitleCase(r.empresa ?? "—");
+            row["Total (R$)"] = Number(r.total);
+            row["Participação (%)"] = grandTotal > 0
                 ? Number(((Number(r.total) / grandTotal) * 100).toFixed(2))
-                : 0,
-        }));
+                : 0;
+            return row;
+        });
         const ws = XLSX.utils.json_to_sheet(dados);
-        ws["!cols"] = [{ wch: 16 }, { wch: 35 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
+        ws["!cols"] = isAdmin
+            ? [{ wch: 16 }, { wch: 35 }, { wch: 14 }, { wch: 28 }, { wch: 14 }, { wch: 16 }]
+            : [{ wch: 16 }, { wch: 35 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Extrato por Período");
         XLSX.writeFile(wb, `compras_${startDate}_${endDate}.xlsx`);
@@ -127,10 +162,6 @@ export default function SalesByPeriodPage() {
     const totalCompras = useMemo(
         () => results.reduce((s, r) => s + r.quantidade, 0),
         [results],
-    );
-    const mediaFunc = useMemo(
-        () => (results.length > 0 ? grandTotal / results.length : 0),
-        [grandTotal, results],
     );
     const maiorComp = useMemo(() => results[0] ?? null, [results]);
     const maxTotal = useMemo(() => results[0]?.total ?? 1, [results]);
@@ -152,6 +183,10 @@ export default function SalesByPeriodPage() {
             setPage(paginationMeta.last_page);
         }
     }, [page, paginationMeta.last_page]);
+
+    const tableHeaders = isAdmin
+        ? ["#", "Funcionário", "CPF", "Compras", "Empresa", "Participação", "Total"]
+        : ["#", "Funcionário", "CPF", "Compras", "Participação", "Total"];
 
     const kpiCards = [
         {
@@ -249,6 +284,35 @@ export default function SalesByPeriodPage() {
                             </div>
                         ))}
 
+                        {isAdmin && (
+                            <div className="flex flex-col gap-1.5">
+                                <label style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#64748b" }}>
+                                    Empresa
+                                </label>
+                                <select
+                                    value={empresaId}
+                                    onChange={(e) => setEmpresaId(e.target.value)}
+                                    style={{
+                                        border: `1px solid ${T.border}`,
+                                        padding: "0.5rem 0.75rem",
+                                        fontSize: "0.875rem",
+                                        background: "#f8fafc",
+                                        color: "#1e293b",
+                                        outline: "none",
+                                        width: "14rem",
+                                        borderRadius: 0,
+                                    }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = T.cyan; }}
+                                    onBlur={(e) => { e.currentTarget.style.borderColor = T.border; }}
+                                >
+                                    <option value="">Todas as empresas</option>
+                                    {empresas.map((e) => (
+                                        <option key={e.id} value={e.id}>{e.nome}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         <Button
                             type="submit"
                             disabled={loading}
@@ -343,14 +407,18 @@ export default function SalesByPeriodPage() {
                                 <table className="w-full min-w-max border-collapse">
                                     <thead>
                                         <tr style={{ background: "#f8fafc", borderBottom: `1px solid ${T.border}` }}>
-                                            {["#", "Funcionário", "CPF", "Compras", "Participação", "Total"].map((h, i) => (
+                                            {tableHeaders.map((h, i) => {
+                                                const isCenter = h === "Compras";
+                                                const isRight = h === "Total";
+                                                return (
                                                 <th
                                                     key={h}
-                                                    style={{ padding: "0.65rem 1.25rem", textAlign: i === 3 ? "center" : i === 5 ? "right" : "left", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#64748b" }}
+                                                    style={{ padding: "0.65rem 1.25rem", textAlign: isCenter ? "center" : isRight ? "right" : "left", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#64748b" }}
                                                 >
                                                     {h}
                                                 </th>
-                                            ))}
+                                                );
+                                            })}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -358,9 +426,10 @@ export default function SalesByPeriodPage() {
                                             const rank = (page - 1) * PER_PAGE + idx + 1;
                                             const pct = grandTotal > 0 ? (Number(r.total) / grandTotal) * 100 : 0;
                                             const barW = maxTotal > 0 ? (Number(r.total) / maxTotal) * 100 : 0;
+                                            const rowKey = isAdmin ? `${r.cpf}-${r.empresa_id ?? idx}` : r.cpf;
                                             return (
                                                 <tr
-                                                    key={r.cpf}
+                                                    key={rowKey}
                                                     style={{ borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}
                                                     onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = "#f1f5f9"; }}
                                                     onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = ""; }}
@@ -385,6 +454,13 @@ export default function SalesByPeriodPage() {
                                                             <CountUp value={r.quantidade} decimals={0} duration={1.5} />
                                                         </span>
                                                     </td>
+                                                    {isAdmin && (
+                                                        <td style={{ padding: "0.4rem 1.25rem" }}>
+                                                            <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#64748b" }}>
+                                                                {toTitleCase(r.empresa ?? "—")}
+                                                            </span>
+                                                        </td>
+                                                    )}
                                                     <td style={{ padding: "0.4rem 1.25rem", width: 160 }}>
                                                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                                                             <div style={{ flex: 1, height: 4, background: T.border, overflow: "hidden", borderRadius: 2 }}>
@@ -409,12 +485,13 @@ export default function SalesByPeriodPage() {
                                     </tbody>
                                     <tfoot>
                                         <tr style={{ borderTop: `2px solid ${T.border}`, background: "#f8fafc" }}>
-                                            <td colSpan={3} />
+                                            <td colSpan={isAdmin ? 4 : 3} />
                                             <td style={{ padding: "0.65rem 1.25rem", textAlign: "center" }}>
                                                 <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1e293b", fontVariantNumeric: "tabular-nums" }}>
                                                     <CountUp value={totalCompras} decimals={0} duration={1.5} />
                                                 </span>
                                             </td>
+                                            {isAdmin && <td />}
                                             <td style={{ padding: "0.65rem 1.25rem" }}>
                                                 <span style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#94a3b8" }}>
                                                     100,00%

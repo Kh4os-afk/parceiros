@@ -75,16 +75,29 @@ class SaleController extends Controller
         $start = Carbon::createFromFormat('d/m/Y', $request->start_date)->startOfDay();
         $end   = Carbon::createFromFormat('d/m/Y', $request->end_date)->endOfDay();
 
-        $vendas = Sale::selectRaw('cpf, COUNT(*) as quantidade, SUM(vltotal) as total')
-            ->whereBetween('dtsaida', [$start, $end])
-            ->groupBy('cpf')
+        $query = Sale::query()
+            ->selectRaw('cpf, empresa_id, COUNT(*) as quantidade, SUM(vltotal) as total')
+            ->whereBetween('dtsaida', [$start, $end]);
+
+        if (auth()->user()->isAdmin() && $request->filled('empresa_id')) {
+            $query->where('empresa_id', (int) $request->empresa_id);
+        }
+
+        $vendas = $query
+            ->groupBy('cpf', 'empresa_id')
             ->get()
             ->map(function ($v) {
-                $partner = Partner::where('cpf', $v->cpf)->first();
+                $partner = Partner::withoutGlobalScopes()
+                    ->where('cpf', $v->cpf)
+                    ->where('empresa_id', $v->empresa_id)
+                    ->with('empresa:id,nome')
+                    ->first();
 
                 return [
                     'cpf'        => $v->cpf,
                     'nome'       => $partner?->nome ?? $v->cpf,
+                    'empresa_id' => $v->empresa_id,
+                    'empresa'    => $partner?->empresa?->nome ?? '—',
                     'quantidade' => (int) $v->quantidade,
                     'total'      => (float) $v->total,
                 ];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\EmpresaScope;
 use App\Models\Scopes\VisivelNoFrontendScope;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,6 +28,7 @@ class Sale extends Model
 
     protected static function booted(): void
     {
+        static::addGlobalScope(new EmpresaScope());
         static::addGlobalScope(new VisivelNoFrontendScope());
     }
     public function funcionario()
