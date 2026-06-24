@@ -28,7 +28,6 @@ interface FacetedFilterProps {
 
 export default function FacetedFilter({ title, options, selected, onChange }: FacetedFilterProps) {
     const selectedSet = new Set(selected);
-    const visibleOptions = options.filter((o) => (o.count ?? 0) > 0 || selectedSet.has(o.value));
 
     return (
         <Popover>
@@ -74,7 +73,7 @@ export default function FacetedFilter({ title, options, selected, onChange }: Fa
                     <CommandList>
                         <CommandEmpty>Nenhum resultado.</CommandEmpty>
                         <CommandGroup>
-                            {visibleOptions.map((option) => {
+                            {options.map((option) => {
                                 const isSelected = selectedSet.has(option.value);
                                 return (
                                     <CommandItem

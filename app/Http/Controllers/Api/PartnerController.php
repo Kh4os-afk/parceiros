@@ -37,18 +37,25 @@ class PartnerController extends Controller
     // ── Novo método para exibir resumo dos funcionários (total, ativos, bloqueados, limites) ─────
     public function summary(Request $request): JsonResponse
     {
-        $baseQuery = $this->filteredQuery($request);
+        $filteredQuery = $this->filteredQuery($request);
 
         $payload = [
-            'total'      => (clone $baseQuery)->count(),
-            'ativos'     => (clone $baseQuery)->where('bloqueado', 0)->count(),
-            'bloqueados' => (clone $baseQuery)->where('bloqueado', 1)->count(),
-            'lim_medio'  => (float) ((clone $baseQuery)->avg('limcred') ?? 0),
-            'lim_total'  => (float) ((clone $baseQuery)->sum('limcred') ?? 0),
+            'total'      => (clone $filteredQuery)->count(),
+            'ativos'     => (clone $filteredQuery)->where('bloqueado', 0)->count(),
+            'bloqueados' => (clone $filteredQuery)->where('bloqueado', 1)->count(),
+            'lim_medio'  => (float) ((clone $filteredQuery)->avg('limcred') ?? 0),
+            'lim_total'  => (float) ((clone $filteredQuery)->sum('limcred') ?? 0),
+        ];
+
+        $statusFacetQuery = $this->filteredQuery($request, ignoreStatus: true);
+        $payload['facet_status'] = [
+            'ativo'     => (clone $statusFacetQuery)->where('bloqueado', 0)->count(),
+            'bloqueado' => (clone $statusFacetQuery)->where('bloqueado', 1)->count(),
         ];
 
         if (auth()->user()->isAdmin()) {
-            $rows = (clone $baseQuery)
+            $empresaFacetQuery = $this->filteredQuery($request, ignoreEmpresa: true);
+            $rows = (clone $empresaFacetQuery)
                 ->select('empresa_id', DB::raw('COUNT(*) as total'))
                 ->groupBy('empresa_id')
                 ->get();
@@ -66,7 +73,7 @@ class PartnerController extends Controller
         return response()->json($payload);
     }
 
-    private function filteredQuery(Request $request)
+    private function filteredQuery(Request $request, bool $ignoreStatus = false, bool $ignoreEmpresa = false)
     {
         $query = Partner::query();
 
@@ -78,11 +85,11 @@ class PartnerController extends Controller
             });
         }
 
-        if ($status = $this->parseStatusFilter($request)) {
+        if (! $ignoreStatus && ($status = $this->parseStatusFilter($request))) {
             $query->whereIn('bloqueado', $status);
         }
 
-        if (auth()->user()->isAdmin() && ($empresaIds = $this->parseEmpresaFilter($request))) {
+        if (! $ignoreEmpresa && auth()->user()->isAdmin() && ($empresaIds = $this->parseEmpresaFilter($request))) {
             $query->whereIn('empresa_id', $empresaIds);
         }
 

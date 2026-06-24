@@ -48,6 +48,7 @@ interface Summary {
     bloqueados: number;
     lim_medio: number;
     lim_total: number;
+    facet_status?: { ativo: number; bloqueado: number };
     por_empresa?: { empresa_id: number; nome: string; total: number }[];
 }
 type SortField = "nome" | "matricula" | "cpf" | "limcred" | "bloqueado";
@@ -252,8 +253,8 @@ export default function ListPage() {
     }
 
     const statusOptions = [
-        { value: "ativo", label: "Ativo", count: summary.ativos },
-        { value: "bloqueado", label: "Bloqueado", count: summary.bloqueados },
+        { value: "ativo",     label: "Ativo",     count: summary.facet_status?.ativo     ?? summary.ativos },
+        { value: "bloqueado", label: "Bloqueado", count: summary.facet_status?.bloqueado ?? summary.bloqueados },
     ];
 
     const empresaOptions = (summary.por_empresa ?? []).map((e) => ({
