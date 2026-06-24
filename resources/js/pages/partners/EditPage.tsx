@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import api from '@/lib/axios'
@@ -19,6 +20,7 @@ const rise: any = { hidden: { opacity: 0, y: 20, filter: 'blur(8px)' }, visible:
 export default function EditPage() {
     const { id } = useParams()
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [form, setForm] = useState({ nome: '', cpf: '', matricula: '', limcred: '', bloqueado: '0' })
     const [errors, setErrors] = useState<Errors>({})
     const [loading, setLoading] = useState(false)
@@ -55,6 +57,10 @@ export default function EditPage() {
                 limcred: parseMoney(form.limcred),
                 bloqueado: form.bloqueado,
             })
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['partners'] }),
+                queryClient.invalidateQueries({ queryKey: ['partners-summary'] }),
+            ])
             navigate('/funcionarios')
         } catch (err: any) {
             if (err.response?.status === 422) setErrors(err.response.data.errors ?? {})

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     Search,
     Plus,
@@ -24,6 +24,7 @@ import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
 import PaginationBar from "@/components/PaginationBar";
 import FacetedFilter from "@/components/FacetedFilter";
+import PartnerEditDialog, { type PartnerRow } from "@/components/PartnerEditDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -108,6 +109,7 @@ const rise: any = {
 
 export default function ListPage() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { isAdmin } = useAuth();
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -117,6 +119,7 @@ export default function ListPage() {
     const [order, setOrder] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(1);
     const [exporting, setExporting] = useState(false);
+    const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
 
     const hasFilters = statusFilter.length > 0 || empresaFilter.length > 0;
 
@@ -128,16 +131,25 @@ export default function ListPage() {
         return () => clearTimeout(timer);
     }, [search]);
 
+    const partnersQueryKey = [
+        "partners",
+        debouncedSearch,
+        sortBy,
+        order,
+        page,
+        statusFilter,
+        empresaFilter,
+    ] as const;
+
+    const summaryQueryKey = [
+        "partners-summary",
+        debouncedSearch,
+        statusFilter,
+        empresaFilter,
+    ] as const;
+
     const partnersQuery = useQuery({
-        queryKey: [
-            "partners",
-            debouncedSearch,
-            sortBy,
-            order,
-            page,
-            statusFilter,
-            empresaFilter,
-        ],
+        queryKey: partnersQueryKey,
         queryFn: async () => {
             const res = await api.get("/partners", {
                 params: listParams(
@@ -155,12 +167,7 @@ export default function ListPage() {
     });
 
     const summaryQuery = useQuery({
-        queryKey: [
-            "partners-summary",
-            debouncedSearch,
-            statusFilter,
-            empresaFilter,
-        ],
+        queryKey: summaryQueryKey,
         queryFn: async () => {
             const res = await api.get("/partners/summary", {
                 params: listParams(
@@ -250,6 +257,63 @@ export default function ListPage() {
         setStatusFilter([]);
         setEmpresaFilter([]);
         setPage(1);
+    }
+
+    function handlePartnerSaved(updated: PartnerRow, previous: PartnerRow) {
+        const matchesStatusFilter =
+            statusFilter.length === 0 ||
+            (statusFilter.includes("ativo") && !updated.bloqueado) ||
+            (statusFilter.includes("bloqueado") && updated.bloqueado);
+
+        queryClient.setQueryData<Meta & { data: Partner[] }>(
+            partnersQueryKey,
+            (old) => {
+                if (!old) return old;
+                if (!matchesStatusFilter) {
+                    return {
+                        ...old,
+                        data: old.data.filter((p) => p.id !== updated.id),
+                        total: Math.max(0, old.total - 1),
+                    };
+                }
+                return {
+                    ...old,
+                    data: old.data.map((p) =>
+                        p.id === updated.id ? { ...p, ...updated } : p,
+                    ),
+                };
+            },
+        );
+
+        queryClient.setQueryData<Summary>(summaryQueryKey, (old) => {
+            if (!old) return old;
+            const next = { ...old };
+            const limDelta = updated.limcred - previous.limcred;
+            if (limDelta !== 0 && old.total > 0) {
+                next.lim_total = old.lim_total + limDelta;
+                next.lim_medio = next.lim_total / old.total;
+            }
+            if (previous.bloqueado !== updated.bloqueado) {
+                if (updated.bloqueado) {
+                    next.ativos = Math.max(0, old.ativos - 1);
+                    next.bloqueados = old.bloqueados + 1;
+                } else {
+                    next.ativos = old.ativos + 1;
+                    next.bloqueados = Math.max(0, old.bloqueados - 1);
+                }
+                if (old.facet_status) {
+                    next.facet_status = {
+                        ativo: updated.bloqueado
+                            ? Math.max(0, old.facet_status.ativo - 1)
+                            : old.facet_status.ativo + 1,
+                        bloqueado: updated.bloqueado
+                            ? old.facet_status.bloqueado + 1
+                            : Math.max(0, old.facet_status.bloqueado - 1),
+                    };
+                }
+            }
+            return next;
+        });
     }
 
     const statusOptions = [
@@ -711,9 +775,7 @@ export default function ListPage() {
                                                 </button>
                                                 <button
                                                     onClick={() =>
-                                                        navigate(
-                                                            `/funcionarios/${p.id}/editar`,
-                                                        )
+                                                        setEditingPartner(p)
                                                     }
                                                     title="Editar"
                                                     className="w-7 h-7 flex items-center justify-center transition-colors"
@@ -760,6 +822,13 @@ export default function ListPage() {
                     />
                 )}
             </motion.div>
+
+            <PartnerEditDialog
+                partner={editingPartner}
+                open={editingPartner !== null}
+                onClose={() => setEditingPartner(null)}
+                onSaved={handlePartnerSaved}
+            />
         </motion.div>
     );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { Loader2, Users, ArrowLeft } from 'lucide-react'
 import { motion } from 'motion/react'
 import api from '@/lib/axios'
@@ -17,6 +18,7 @@ const rise: any = { hidden: { opacity: 0, y: 20, filter: "blur(8px)" }, visible:
 
 export default function CreatePage() {
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [form, setForm] = useState({ nome: '', cpf: '', matricula: '', limcred: '', bloqueado: '0' })
     const [errors, setErrors] = useState<Errors>({})
     const [loading, setLoading] = useState(false)
@@ -38,6 +40,10 @@ export default function CreatePage() {
                 limcred: parseMoney(form.limcred),
                 bloqueado: form.bloqueado,
             })
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['partners'] }),
+                queryClient.invalidateQueries({ queryKey: ['partners-summary'] }),
+            ])
             navigate('/funcionarios')
         } catch (err: any) {
             if (err.response?.status === 422) setErrors(err.response.data.errors ?? {})
