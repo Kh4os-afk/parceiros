@@ -7,6 +7,7 @@ use App\Http\Requests\ImportCsvRequest;
 use App\Http\Requests\StorePartnerRequest;
 use App\Http\Requests\UpdatePartnerRequest;
 use App\Models\ChangeLog;
+use App\Models\Empresa;
 use App\Models\Partner;
 use App\Models\PartnerError;
 use Illuminate\Http\JsonResponse;
@@ -19,15 +20,7 @@ class PartnerController extends Controller
     // ── Método para listagem de funcionários com filtros, ordenação e paginação ─────────────
     public function index(Request $request): JsonResponse
     {
-        $query = Partner::query();
-
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nome', 'like', "%{$search}%")
-                  ->orWhere('cpf', 'like', "%{$search}%")
-                  ->orWhere('matricula', 'like', $search);
-            });
-        }
+        $query = $this->filteredQuery($request);
 
         $sortBy = in_array($request->get('sort_by'), ['nome', 'matricula', 'cpf', 'limcred', 'bloqueado'])
             ? $request->get('sort_by')
@@ -35,13 +28,45 @@ class PartnerController extends Controller
 
         $order = $request->get('order') === 'desc' ? 'desc' : 'asc';
 
-        $partners = $query->with('empresa')->orderBy($sortBy, $order)->paginate(10);
+        $perPage = min(max((int) $request->get('per_page', 10), 1), 99999);
+        $partners = $query->with('empresa')->orderBy($sortBy, $order)->paginate($perPage);
 
         return response()->json($partners);
     }
 
     // ── Novo método para exibir resumo dos funcionários (total, ativos, bloqueados, limites) ─────
     public function summary(Request $request): JsonResponse
+    {
+        $baseQuery = $this->filteredQuery($request, ignoreStatus: true, ignoreEmpresa: true);
+
+        $payload = [
+            'total'      => (clone $baseQuery)->count(),
+            'ativos'     => (clone $baseQuery)->where('bloqueado', 0)->count(),
+            'bloqueados' => (clone $baseQuery)->where('bloqueado', 1)->count(),
+            'lim_medio'  => (float) ((clone $baseQuery)->avg('limcred') ?? 0),
+            'lim_total'  => (float) ((clone $baseQuery)->sum('limcred') ?? 0),
+        ];
+
+        if (auth()->user()->isAdmin()) {
+            $rows = (clone $baseQuery)
+                ->select('empresa_id', DB::raw('COUNT(*) as total'))
+                ->groupBy('empresa_id')
+                ->get();
+
+            $nomes = Empresa::whereIn('id', $rows->pluck('empresa_id'))
+                ->pluck('nome', 'id');
+
+            $payload['por_empresa'] = $rows->map(fn ($row) => [
+                'empresa_id' => $row->empresa_id,
+                'nome'       => $nomes[$row->empresa_id] ?? '—',
+                'total'      => (int) $row->total,
+            ])->values();
+        }
+
+        return response()->json($payload);
+    }
+
+    private function filteredQuery(Request $request, bool $ignoreStatus = false, bool $ignoreEmpresa = false)
     {
         $query = Partner::query();
 
@@ -53,13 +78,41 @@ class PartnerController extends Controller
             });
         }
 
-        return response()->json([
-            'total'      => (clone $query)->count(),
-            'ativos'     => (clone $query)->where('bloqueado', 0)->count(),
-            'bloqueados' => (clone $query)->where('bloqueado', 1)->count(),
-            'lim_medio'  => (float) ((clone $query)->avg('limcred') ?? 0),
-            'lim_total'  => (float) ((clone $query)->sum('limcred') ?? 0),
-        ]);
+        if (! $ignoreStatus && ($status = $this->parseStatusFilter($request))) {
+            $query->whereIn('bloqueado', $status);
+        }
+
+        if (! $ignoreEmpresa && auth()->user()->isAdmin() && ($empresaIds = $this->parseEmpresaFilter($request))) {
+            $query->whereIn('empresa_id', $empresaIds);
+        }
+
+        return $query;
+    }
+
+    /** @return list<int>|null */
+    private function parseStatusFilter(Request $request): ?array
+    {
+        $values = collect($request->input('status', []))
+            ->flatten()
+            ->filter(fn ($v) => in_array($v, ['ativo', 'bloqueado'], true))
+            ->map(fn ($v) => $v === 'bloqueado' ? 1 : 0)
+            ->unique()
+            ->values();
+
+        return $values->isEmpty() ? null : $values->all();
+    }
+
+    /** @return list<int>|null */
+    private function parseEmpresaFilter(Request $request): ?array
+    {
+        $values = collect($request->input('empresa_id', []))
+            ->flatten()
+            ->map(fn ($v) => (int) $v)
+            ->filter(fn ($v) => $v > 0)
+            ->unique()
+            ->values();
+
+        return $values->isEmpty() ? null : $values->all();
     }
 
     // ── Novo método para exibir detalhes de um funcionário ───────────────────────────────

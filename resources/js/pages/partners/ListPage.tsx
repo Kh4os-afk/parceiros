@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
     Search, Plus, Upload, ChevronUp, ChevronDown,
     Pencil, ReceiptText, Users, ShieldOff, ShieldCheck,
-    CreditCard, Download,
+    CreditCard, Download, X,
 } from "lucide-react";
 import { motion } from "motion/react";
 import * as XLSX from "xlsx";
@@ -11,6 +11,7 @@ import api from "@/lib/axios";
 import { formatCPF, formatMoney, toTitleCase } from "@/lib/utils";
 import CountUp from "@/components/CountUp";
 import PaginationBar from "@/components/PaginationBar";
+import FacetedFilter from "@/components/FacetedFilter";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -19,7 +20,24 @@ interface Partner {
     limcred: number; bloqueado: number; empresa?: { nome: string };
 }
 interface Meta { current_page: number; last_page: number; total: number; per_page: number; }
+interface Summary {
+    total: number; ativos: number; bloqueados: number; lim_medio: number; lim_total: number;
+    por_empresa?: { empresa_id: number; nome: string; total: number }[];
+}
 type SortField = "nome" | "matricula" | "cpf" | "limcred" | "bloqueado";
+type StatusFilter = "ativo" | "bloqueado";
+
+function listParams(search: string, sortBy: SortField, order: "asc"|"desc", page: number, status: StatusFilter[], empresaIds: string[], perPage = 10) {
+    return {
+        search: search || undefined,
+        sort_by: sortBy,
+        order,
+        page,
+        per_page: perPage,
+        status: status.length ? status : undefined,
+        empresa_id: empresaIds.length ? empresaIds : undefined,
+    };
+}
 
 // Design tokens
 const T = { bg:"#f4f5f8", border:"#e8eaef", cyan:"#0099cc", purple:"#7c3aed", green:"#059669", amber:"#d97706", red:"#dc2626" };
@@ -36,30 +54,41 @@ export default function ListPage() {
     const [partners,  setPartners]  = useState<Partner[]>([]);
     const [meta,      setMeta]      = useState<Meta | null>(null);
     const [search,    setSearch]    = useState("");
+    const [statusFilter, setStatusFilter] = useState<StatusFilter[]>([]);
+    const [empresaFilter, setEmpresaFilter] = useState<string[]>([]);
     const [sortBy,    setSortBy]    = useState<SortField>("nome");
     const [order,     setOrder]     = useState<"asc"|"desc">("asc");
     const [page,      setPage]      = useState(1);
     const [loading,   setLoading]   = useState(true);
     const [exporting, setExporting] = useState(false);
-    const [summary,   setSummary]   = useState({ total:0, ativos:0, bloqueados:0, lim_medio:0, lim_total:0 });
+    const [summary,   setSummary]   = useState<Summary>({ total:0, ativos:0, bloqueados:0, lim_medio:0, lim_total:0 });
+
+    const hasFilters = statusFilter.length > 0 || empresaFilter.length > 0;
 
     const fetchPartners = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await api.get("/partners", { params: { search, sort_by: sortBy, order, page } });
+            const res = await api.get("/partners", { params: listParams(search, sortBy, order, page, statusFilter, empresaFilter) });
             setPartners(res.data.data);
             setMeta(res.data);
         } finally { setLoading(false); }
-    }, [search, sortBy, order, page]);
+    }, [search, sortBy, order, page, statusFilter, empresaFilter]);
+
+    const fetchSummary = useCallback(async () => {
+        try {
+            const res = await api.get("/partners/summary", { params: listParams(search, sortBy, order, 1, statusFilter, empresaFilter) });
+            setSummary(res.data);
+        } catch { /* ignore */ }
+    }, [search, statusFilter, empresaFilter, sortBy, order]);
 
     useEffect(() => { fetchPartners(); }, [fetchPartners]);
-    useEffect(() => { setPage(1); }, [search]);
-    useEffect(() => { api.get("/partners/summary").then(r => setSummary(r.data)).catch(() => {}); }, []);
+    useEffect(() => { fetchSummary(); }, [fetchSummary]);
+    useEffect(() => { setPage(1); }, [search, statusFilter, empresaFilter]);
 
     async function exportarExcel() {
         setExporting(true);
         try {
-            const res = await api.get("/partners", { params: { search, sort_by: sortBy, order, per_page: 99999, page: 1 } });
+            const res = await api.get("/partners", { params: listParams(search, sortBy, order, 1, statusFilter, empresaFilter, 99999) });
             const rows: Partner[] = res.data.data;
             const dados = rows.map(p => ({ Matrícula: p.matricula||"", Nome: toTitleCase(p.nome), CPF: formatCPF(p.cpf), "Lim. Mensal (R$)": Number(p.limcred), Status: p.bloqueado?"Bloqueado":"Ativo" }));
             const ws = XLSX.utils.json_to_sheet(dados);
@@ -76,6 +105,22 @@ export default function ListPage() {
         setPage(1);
     }
 
+
+    function clearFilters() {
+        setStatusFilter([]);
+        setEmpresaFilter([]);
+    }
+
+    const statusOptions = [
+        { value: "ativo",     label: "Ativo",     count: summary.ativos },
+        { value: "bloqueado", label: "Bloqueado", count: summary.bloqueados },
+    ];
+
+    const empresaOptions = (summary.por_empresa ?? []).map((e) => ({
+        value: String(e.empresa_id),
+        label: toTitleCase(e.nome),
+        count: e.total,
+    }));
 
     const kpis = [
         { label:"Total Cadastrados", value:summary.total,      icon:Users,       color:T.cyan,   money:false },
@@ -142,7 +187,7 @@ export default function ListPage() {
             {/* ── Tabela ── */}
             <motion.div variants={rise} className="bg-white" style={cardStyle}>
                 {/* Barra de ferramentas */}
-                <div className="flex flex-wrap items-center gap-3 px-4 py-3.5" style={{ borderBottom:`1px solid ${T.border}` }}>
+                <div className="flex flex-wrap items-center gap-2 px-4 py-3.5" style={{ borderBottom:`1px solid ${T.border}` }}>
                     <div className="relative flex-1 min-w-[200px] max-w-sm">
                         <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
                         <input value={search} onChange={e => setSearch(e.target.value)}
@@ -152,6 +197,31 @@ export default function ListPage() {
                                onFocus={e => (e.currentTarget.style.borderColor = T.cyan)}
                                onBlur={e  => (e.currentTarget.style.borderColor = T.border)}/>
                     </div>
+                    <FacetedFilter
+                        title="Situação"
+                        options={statusOptions}
+                        selected={statusFilter}
+                        onChange={(v) => setStatusFilter(v as StatusFilter[])}
+                    />
+                    {isAdmin && empresaOptions.length > 0 && (
+                        <FacetedFilter
+                            title="Empresa"
+                            options={empresaOptions}
+                            selected={empresaFilter}
+                            onChange={setEmpresaFilter}
+                        />
+                    )}
+                    {(hasFilters) && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={clearFilters}
+                            className="h-8 rounded-none px-2 text-xs gap-1"
+                        >
+                            Limpar
+                            <X className="h-3.5 w-3.5" />
+                        </Button>
+                    )}
                     <button onClick={exportarExcel} disabled={exporting}
                             className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-[0.6rem] font-black uppercase tracking-wider transition-all disabled:opacity-40"
                             style={{ background:`${T.cyan}10`, border:`1px solid ${T.cyan}28`, color:T.cyan }}
@@ -192,7 +262,7 @@ export default function ListPage() {
                                 <tr><td colSpan={isAdmin?7:6} className="text-center py-14 text-sm text-muted-foreground">Carregando…</td></tr>
                             ) : partners.length === 0 ? (
                                 <tr><td colSpan={isAdmin?7:6} className="text-center py-14 text-sm text-muted-foreground">
-                                    {search ? `Nenhum resultado para "${search}"` : "Nenhum funcionário cadastrado."}
+                                    {search || hasFilters ? "Nenhum resultado para os filtros aplicados." : "Nenhum funcionário cadastrado."}
                                 </td></tr>
                             ) : partners.map(p => (
                                 <tr key={p.id} className="group transition-colors hover:bg-[#fafafa]"
